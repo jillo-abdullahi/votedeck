@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import type { User, VoteValue } from '../types';
 import { UserPlusIcon, type UserPlusHandle } from './icons/UserPlusIcon';
+import { UserAvatar } from './UserAvatar';
 
 interface ParticipantsProps {
     users: User[];
@@ -31,10 +32,10 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
             `}>
                             {revealed && hasVoted ? (
                                 <span className="text-2xl font-bold text-slate-900">{voteValue}</span>
+                            ) : hasVoted ? (
+                                <span className="text-white text-3xl font-bold">✓</span>
                             ) : (
-                                hasVoted && (
-                                    <span className="text-white text-3xl font-bold">✓</span>
-                                )
+                                <UserAvatar name={user.name} />
                             )}
                         </div>
 
