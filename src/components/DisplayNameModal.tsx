@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { Button } from "./ui/button";
+import { ModalHeader } from "@/components/ModalHeader";
+import { UserIcon } from "lucide-react";
 
 interface DisplayNameModalProps {
   isOpen: boolean;
@@ -25,12 +28,12 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-slate-800 border-2 border-slate-700 rounded-2xl p-8 w-full max-w-lg shadow-2xl transform transition-all animate-in zoom-in-95 duration-200">
-        <h2 className="text-3xl font-bold text-white mb-2 text-left">
-          Enter your name
-        </h2>
-        <p className="text-slate-400 mb-8 text-lg text-left">
-          How should you appear to other players?
-        </p>
+        <ModalHeader
+          title="Enter your name"
+          subtitle="How should you appear to other players?"
+          className="mb-8"
+          icon={<UserIcon className="w-12 h-12 text-blue-500" />}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="space-y-2">
@@ -48,20 +51,22 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
           </div>
 
           <div className="flex gap-4 pt-2">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="lg"
               onClick={onClose}
-              className="flex-1 py-4 text-slate-400 hover:text-white font-bold text-lg transition-colors hover:bg-slate-700/50 rounded-xl"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              size="lg"
               disabled={!name.trim()}
-              className="flex-[2] py-4 bg-blue-600 hover:bg-blue-500 text-white text-lg rounded-xl font-bold transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0"
+              className="flex-2 text-lg"
             >
               Continue
-            </button>
+            </Button>
           </div>
         </form>
       </div>
