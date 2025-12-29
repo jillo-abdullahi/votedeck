@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { DisplayNameModal } from "../components/DisplayNameModal";
 import { Header } from "../components/Header";
+import { Button } from "@/components/ui/button";
+import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/MoveRightIcon";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -23,6 +25,8 @@ export const CreateGamePage: React.FC = () => {
   const [votingSystem, setVotingSystem] = useState(VOTING_SYSTEMS[0].id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const moveRightIconRef = useRef<MoveRightIconHandle>(null);
 
   // Triggered when form is valid and user clicks "Create Game"
   const handleInitialSubmit = (e: React.FormEvent) => {
@@ -120,9 +124,8 @@ export const CreateGamePage: React.FC = () => {
                 >
                   <span className="truncate pr-8">{selectedSystemLabel}</span>
                   <div
-                    className={`text-slate-500 transition-transform duration-200 group-hover:text-slate-400 ${
-                      isDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`text-slate-500 transition-transform duration-200 group-hover:text-slate-400 ${isDropdownOpen ? "rotate-180" : ""
+                      }`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -151,11 +154,10 @@ export const CreateGamePage: React.FC = () => {
                           setVotingSystem(sys.id);
                           setIsDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-6 py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${
-                          votingSystem === sys.id
-                            ? "bg-blue-600/10 text-blue-400 font-medium"
-                            : "text-slate-300"
-                        }`}
+                        className={`w-full text-left px-6 py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${votingSystem === sys.id
+                          ? "bg-blue-600/10 text-blue-400 font-medium"
+                          : "text-slate-300"
+                          }`}
                       >
                         {sys.label}
                         {votingSystem === sys.id && (
@@ -194,26 +196,16 @@ export const CreateGamePage: React.FC = () => {
 
           {/* CTA Button - Relocated closer to inputs */}
           <div className="pt-4">
-            <button
+            <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xl font-bold py-4 px-8 rounded-xl shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1 active:translate-y-0 active:scale-95 flex items-center justify-center gap-3"
+              size="lg"
+              className="w-full"
+              onMouseEnter={() => moveRightIconRef.current?.startAnimation()}
+              onMouseLeave={() => moveRightIconRef.current?.stopAnimation()}
             >
               <span>Create Game</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
+              <MoveRightIcon ref={moveRightIconRef} />
+            </Button>
           </div>
         </form>
       </main>

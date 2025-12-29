@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import type { User, VoteValue } from '../types';
+import { UserPlusIcon, type UserPlusHandle } from './icons/UserPlusIcon';
 
 interface ParticipantsProps {
     users: User[];
     votes: Record<string, VoteValue | null>;
     revealed: boolean;
+    onInvite?: () => void;
 }
 
-export const Participants: React.FC<ParticipantsProps> = ({ users, votes, revealed }) => {
+export const Participants: React.FC<ParticipantsProps> = ({ users, votes, revealed, onInvite }) => {
+    const userPlusRef = useRef<UserPlusHandle>(null);
+
     return (
         <div className="flex flex-wrap justify-center gap-8 py-8">
             {users.map((user) => {
@@ -40,6 +44,24 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
                     </div>
                 );
             })}
+
+            {/* Invite Placeholder */}
+            {onInvite && (
+                <button
+                    onClick={onInvite}
+                    onMouseEnter={() => userPlusRef.current?.startAnimation()}
+                    onMouseLeave={() => userPlusRef.current?.stopAnimation()}
+                    className="flex flex-col items-center gap-3 group cursor-pointer"
+                >
+                    <div className="flex items-center justify-center w-16 h-20 rounded-xl border-2 border-dashed border-slate-700 bg-transparent hover:bg-slate-800/50 hover:border-slate-600 transition-all duration-300">
+                        <UserPlusIcon
+                            className="text-slate-600 group-hover:text-slate-400 transition-colors"
+                            size={24}
+                            ref={userPlusRef}
+                        />
+                    </div>
+                </button>
+            )}
         </div>
     );
 };

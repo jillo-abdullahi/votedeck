@@ -187,6 +187,7 @@ export const RoomPage: React.FC = () => {
                         users={room.users}
                         votes={room.votes}
                         revealed={room.revealed}
+                        onInvite={handleInvite}
                     />
                 </section>
 

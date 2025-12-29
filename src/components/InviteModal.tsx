@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X, UserPlusIcon } from "lucide-react";
+import { UserPlusIcon } from "lucide-react";
 import { QrCodeIcon, type QrCodeIconHandle } from "./icons/QrCodeIcon";
 import { ClipboardIcon, type ClipboardIconHandle } from "./icons/ClipboardIcon";
 import { ModalHeader } from "@/components/ModalHeader";
