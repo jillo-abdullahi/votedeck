@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router';
 import { LandingPage } from './pages/LandingPage';
 import { RoomPage } from './pages/RoomPage';
+import { CreateGamePage } from './pages/CreateGamePage';
 
 // Create a root route
 const rootRoute = createRootRoute({
@@ -20,14 +21,27 @@ const indexRoute = createRoute({
 });
 
 // Create room route
+// Create room route
 const roomRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: 'room/$roomId',
     component: RoomPage,
+    validateSearch: (search: Record<string, unknown>): { name?: string } => {
+        return {
+            name: (search.name as string) || undefined,
+        };
+    },
+});
+
+// Create Create Game route
+const createGameRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/create',
+    component: CreateGamePage,
 });
 
 // Create the route tree
-const routeTree = rootRoute.addChildren([indexRoute, roomRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, createGameRoute, roomRoute]);
 
 // Create the router
 export const router = createRouter({ routeTree });

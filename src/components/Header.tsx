@@ -1,20 +1,25 @@
-import React from 'react';
-import { Link } from '@tanstack/react-router';
+import React, { type PropsWithChildren } from "react";
+import { Link } from "@tanstack/react-router";
 
-interface HeaderProps {
-    roomId: string;
-}
+export const Header: React.FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <header className="w-full border-b border-transparent">
+      <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full border-b-2 border-blue-500/30">
+        <Link
+          to="/"
+          className="flex items-center gap-2 hover:opacity-90 transition-opacity"
+        >
+          {/* Simple Logo Icon */}
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center transform rotate-3">
+            <span className="font-bold text-lg text-white">V</span>
+          </div>
+          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+            VoteDeck
+          </span>
+        </Link>
 
-export const Header: React.FC<HeaderProps> = ({ roomId }) => {
-    return (
-        <header className="w-full flex justify-between items-center p-6 lg:px-12 border-b border-slate-800">
-            <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-                VoteDeck
-            </Link>
-            <div className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-                <span className="text-slate-400 text-sm font-medium">Room</span>
-                <code className="text-white font-mono font-bold tracking-wider">{roomId}</code>
-            </div>
-        </header>
-    );
+        <div className="flex items-center gap-4">{children}</div>
+      </nav>
+    </header>
+  );
 };

@@ -1,123 +1,94 @@
-import React from 'react';
-import { Link } from '@tanstack/react-router';
+import React from "react";
+import { Link } from "@tanstack/react-router";
+import { Header } from "../components/Header";
 
 export const LandingPage: React.FC = () => {
-    return (
-        <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30">
+  return (
+    <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30">
+      <Header>
+        <button className="hidden sm:block text-slate-300 hover:text-white font-medium text-sm transition-colors">
+          Login
+        </button>
+        <Link
+          to="/create"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+        >
+          Start new game
+        </Link>
+      </Header>
 
-            {/* Navigation */}
-            <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
-                <div className="flex items-center gap-2">
-                    {/* Simple Logo Icon */}
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center transform rotate-3">
-                        <span className="font-bold text-lg">V</span>
-                    </div>
-                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                        VoteDeck
-                    </span>
-                </div>
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
+        {/* Left Content */}
+        <div className="flex flex-col gap-8 max-w-xl">
+          <div className="space-y-4">
+            <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight text-left">
+              Scrum Poker for <br />
+              <span className="text-blue-500">agile teams</span>
+            </h1>
+            <p className="text-lg text-slate-400 max-w-md text-left">
+              Streamline your estimation process with a tool capable of running
+              your synchronous and asynchronous planning poker sessions.
+            </p>
+          </div>
 
-                {/* <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-                    <a href="#" className="hover:text-white transition-colors">Features</a>
-                    <a href="#" className="hover:text-white transition-colors">Pricing</a>
-                </div> */}
-
-                <div className="flex items-center gap-4">
-                    <button className="hidden sm:block text-slate-300 hover:text-white font-medium text-sm transition-colors">
-                        Login
-                    </button>
-                    <Link
-                        to="/room/$roomId"
-                        params={{ roomId: 'ABC123' }}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95"
-                    >
-                        Start new game
-                    </Link>
-                </div>
-            </nav>
-
-            {/* Hero Section */}
-            <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
-
-                {/* Left Content */}
-                <div className="flex flex-col gap-8 max-w-xl">
-                    <div className="space-y-4">
-                        <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight">
-                            Scrum Poker for <br />
-                            <span className="text-blue-500">agile teams</span>
-                        </h1>
-                        <p className="text-lg text-slate-400 max-w-md">
-                            Streamline your estimation process with a tool capable of running your synchronous and asynchronous planning poker sessions.
-                        </p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <Link
-                            to="/room/$roomId"
-                            params={{ roomId: 'ABC123' }}
-                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 transform hover:-translate-y-1 block text-center"
-                        >
-                            Start new game
-                        </Link>
-                    </div>
-
-                    <div className="pt-8">
-                        <p className="text-xs font-bold tracking-wider text-slate-500 mb-4 uppercase">Trusted by teams at</p>
-                        <div className="flex flex-wrap gap-6 filter grayscale opacity-50 hover:opacity-80 transition-opacity">
-                            {/* CSS-only generic logos for demo purposes */}
-                            <span className="font-serif italic font-bold text-xl">Microsoft</span>
-                            <span className="font-sans font-bold text-xl">Google</span>
-                            <span className="font-mono font-bold text-xl">Figma</span>
-                            <span className="font-serif font-bold text-xl tracking-tighter">Uber</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Content - Visual */}
-                <div className="relative">
-                    {/* Decorative Elements */}
-                    <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl rounded-full pointer-events-none" />
-                    <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl rounded-full pointer-events-none" />
-
-                    {/* Card Component Mock Application UI */}
-                    <div className="relative bg-slate-800 rounded-2xl border border-slate-700 p-8 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                        {/* Window Controls */}
-                        <div className="flex gap-2 mb-6">
-                            <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                            <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                        </div>
-
-                        {/* Content Mock */}
-                        <div className="flex flex-col gap-8 items-center">
-                            {/* Mock Participants */}
-                            <div className="flex gap-4">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="flex flex-col items-center gap-2">
-                                        <div className="w-12 h-16 rounded bg-slate-700 animate-pulse" />
-                                        <div className="w-8 h-2 rounded bg-slate-600" />
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Mock Table/Deck */}
-                            <div className="w-full h-32 bg-slate-700/30 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-700 text-slate-500 text-sm">
-                                VoteDeck Active Area
-                            </div>
-
-                            {/* Mock Cards Hand */}
-                            <div className="flex gap-2">
-                                {[1, 2, 3, 5, 8].map(n => (
-                                    <div key={n} className="w-10 h-14 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm">
-                                        {n}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </main>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              to="/create"
+              className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-500/30 transform hover:-translate-y-1 block text-center"
+            >
+              Start new game
+            </Link>
+          </div>
         </div>
-    );
+
+        {/* Right Content - Visual */}
+        <div className="relative">
+          {/* Decorative Elements */}
+          <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl rounded-full pointer-events-none" />
+
+          {/* Card Component Mock Application UI */}
+          <div className="relative bg-slate-800 rounded-2xl border border-slate-700 p-8 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+            {/* Window Controls */}
+            <div className="flex gap-2 mb-6">
+              <div className="w-3 h-3 rounded-full bg-red-500/80" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+              <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            </div>
+
+            {/* Content Mock */}
+            <div className="flex flex-col gap-8 items-center">
+              {/* Mock Participants */}
+              <div className="flex gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-16 rounded bg-slate-700 animate-pulse" />
+                    <div className="w-8 h-2 rounded bg-slate-600" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Mock Table/Deck */}
+              <div className="w-full h-32 bg-slate-700/30 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-700 text-slate-500 text-sm">
+                VoteDeck Active Area
+              </div>
+
+              {/* Mock Cards Hand */}
+              <div className="flex gap-2">
+                {[1, 2, 3, 5, 8].map((n) => (
+                  <div
+                    key={n}
+                    className="w-10 h-14 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm"
+                  >
+                    {n}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
