@@ -21,22 +21,65 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
 
                 return (
                     <div key={user.id} className="flex flex-col items-center gap-3">
-                        <div className={`
-              flex items-center justify-center w-16 h-20 rounded-xl border-2 transition-all duration-300
-              ${revealed && hasVoted
-                                ? 'bg-white border-white -translate-y-2'
-                                : hasVoted
-                                    ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20'
-                                    : 'bg-slate-800 border-slate-700'
-                            }
-            `}>
-                            {revealed && hasVoted ? (
-                                <span className="text-2xl font-bold text-slate-900">{voteValue}</span>
-                            ) : hasVoted ? (
-                                <span className="text-white text-3xl font-bold">✓</span>
-                            ) : (
-                                <UserAvatar name={user.name} />
-                            )}
+                        <div className="relative w-16 h-20" style={{ perspective: '1000px' }}>
+                            <div
+                                className={`
+                                    relative w-full h-full transition-all duration-700
+                                    ${revealed && hasVoted ? '-translate-y-2' : ''}
+                                `}
+                                style={{
+                                    transformStyle: 'preserve-3d',
+                                    transform: revealed && hasVoted ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                                }}
+                            >
+                                {/* Card Back (voted state) */}
+                                <div
+                                    className={`
+                                        absolute inset-0 flex items-center justify-center rounded-xl border-2 transition-all duration-300
+                                        ${hasVoted
+                                            ? 'border-slate-600 shadow-lg shadow-slate-900/40'
+                                            : 'bg-slate-800 border-slate-700'
+                                        }
+                                    `}
+                                    style={{
+                                        backfaceVisibility: 'hidden',
+                                        ...(hasVoted ? {
+                                            background: `
+                                                repeating-linear-gradient(
+                                                    45deg,
+                                                    #1e3a8a 0px,
+                                                    #1e3a8a 10px,
+                                                    #2563eb 10px,
+                                                    #2563eb 20px
+                                                ),
+                                                repeating-linear-gradient(
+                                                    -45deg,
+                                                    #1e3a8a 0px,
+                                                    #1e3a8a 10px,
+                                                    #2563eb 10px,
+                                                    #2563eb 20px
+                                                )
+                                            `,
+                                            backgroundBlendMode: 'multiply'
+                                        } : {})
+                                    }}
+                                >
+                                    {!hasVoted && <UserAvatar name={user.name} />}
+                                </div>
+
+                                {/* Card Front (revealed state) */}
+                                {hasVoted && (
+                                    <div
+                                        className="absolute inset-0 flex items-center justify-center rounded-xl border-2 bg-white border-white"
+                                        style={{
+                                            backfaceVisibility: 'hidden',
+                                            transform: 'rotateY(180deg)',
+                                        }}
+                                    >
+                                        <span className="text-2xl font-bold text-slate-900">{voteValue}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <span className={`text-sm font-medium ${hasVoted ? 'text-white' : 'text-slate-500'}`}>

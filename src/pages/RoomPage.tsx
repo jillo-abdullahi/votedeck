@@ -196,12 +196,6 @@ export const RoomPage: React.FC = () => {
                     aria-label="Active Area"
                     className="w-full h-48 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-700 bg-slate-800/30 relative animate-in zoom-in-95 duration-700 delay-100"
                 >
-                    {/* Watermark Label */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                        <span className="text-slate-700/50 font-bold text-xl sm:text-2xl uppercase tracking-[0.2em]">
-                            VoteDeck Active Area
-                        </span>
-                    </div>
 
                     {/* Controls (Centered) */}
                     <div className="relative z-10">
