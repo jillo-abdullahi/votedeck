@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from '@tanstack/react-router';
 import { Header } from '../components/Header';
 import { Participants } from '../components/Participants';
 import { VotingDeck } from '../components/VotingDeck';
@@ -10,7 +11,8 @@ import type { RoomState, VoteValue } from '../types';
 const MY_USER_ID = "1";
 
 export const RoomPage: React.FC = () => {
-    const [room, setRoom] = useState<RoomState>(mockRoom);
+    const { roomId } = useParams({ from: '/room/$roomId' });
+    const [room, setRoom] = useState<RoomState>({ ...mockRoom, roomId });
     const [myVote, setMyVote] = useState<VoteValue | null>(room.votes[MY_USER_ID] || null);
 
     const handleVote = (value: VoteValue) => {

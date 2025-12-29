@@ -1,10 +1,12 @@
-import { RoomPage } from './pages/RoomPage'
-import './App.css'
+
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './routeTree';
+import './App.css';
 
 function App() {
   return (
-    <RoomPage />
-  )
+    <RouterProvider router={router} />
+  );
 }
 
-export default App
+export default App;
