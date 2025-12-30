@@ -82,7 +82,7 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
                             </div>
                         </div>
 
-                        <span className={`text-sm font-medium ${hasVoted ? 'text-white' : 'text-slate-500'}`}>
+                        <span className={`text-sm font-medium truncate max-w-[80px] text-center ${hasVoted ? 'text-white' : 'text-slate-500'}`}>
                             {user.name}
                         </span>
                     </div>

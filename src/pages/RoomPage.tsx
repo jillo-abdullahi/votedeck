@@ -131,7 +131,7 @@ export const RoomPage: React.FC = () => {
                         >
                             <UserAvatar name={name || "Guest"} size={28} />
                             <div className="flex items-center gap-2">
-                                <span className="text-white font-bold hidden sm:block text-lg">
+                                <span className="text-white font-bold hidden sm:block text-lg truncate max-w-[120px]">
                                     {name || "Guest"}
                                 </span>
                                 <ChevronDown
@@ -161,12 +161,12 @@ export const RoomPage: React.FC = () => {
                                                     setIsDisplayNameModalOpen(true);
                                                     setIsUserMenuOpen(false);
                                                 }}
-                                                className="flex items-center gap-2 group/name cursor-pointer hover:opacity-80 transition-opacity"
+                                                className="flex items-center gap-2 group/name cursor-pointer hover:opacity-80 transition-opacity min-w-0"
                                             >
-                                                <span className="text-white font-bold text-lg">
+                                                <span className="text-white font-bold text-lg truncate max-w-[150px]">
                                                     {name || "Guest"}
                                                 </span>
-                                                <Pencil className="w-3.5 h-3.5 text-white/50 group-hover/name:text-white transition-colors" />
+                                                <Pencil className="w-3.5 h-3.5 text-white/50 group-hover/name:text-white transition-colors shrink-0" />
                                             </div>
                                             <div className="text-slate-400 text-sm font-medium">
                                                 Guest user
