@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { ModalHeader } from "@/components/ModalHeader";
 import { Settings, ChevronDown, Check } from "lucide-react";
 import type { VotingSystemId, RevealPolicy } from "@/types";

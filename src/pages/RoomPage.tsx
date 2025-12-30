@@ -17,8 +17,8 @@ import {
 } from "@/components/icons/LogoutIcon";
 
 import { InviteModal } from "@/components/InviteModal";
-import { DisplayNameModal } from "@/components/DisplayNameModal";
-import { RoomSettingsModal } from "@/components/RoomSettingsModal";
+import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
+import { RoomSettingsModal } from "@/components/modals/RoomSettingsModal";
 import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
 import { motion, AnimatePresence } from "framer-motion";
@@ -198,10 +198,10 @@ export const RoomPage: React.FC = () => {
                                                 }}
                                                 onMouseEnter={() => settingsRef.current?.startAnimation()}
                                                 onMouseLeave={() => settingsRef.current?.stopAnimation()}
-                                                className="w-full justify-start text-left px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white font-medium h-auto rounded-none border-b border-slate-700/50"
+                                                className="w-full justify-start text-left px-4 py-4 text-slate-300 bg-transparent hover:bg-slate-700 hover:text-white font-medium h-auto rounded-none border-b border-slate-700/50"
                                             >
-                                                <SettingsIcon ref={settingsRef} className="w-4 h-4 mr-3 text-slate-400" />
-                                                <span>Room settings</span>
+                                                <SettingsIcon ref={settingsRef} className="w-6 h-6 mr-3 text-slate-400" />
+                                                <span className="text-[16px]">Room settings</span>
                                             </Button>
                                         )}
                                         <Button
@@ -209,10 +209,10 @@ export const RoomPage: React.FC = () => {
                                             onClick={handleLeaveRoom}
                                             onMouseEnter={() => logoutRef.current?.startAnimation()}
                                             onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                                            className="w-full justify-start text-left px-4 py-3 text-red-400 hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
+                                            className="w-full justify-start text-left px-4 py-3 text-red-400 bg-transparent hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
                                         >
-                                            <LogoutIcon size={16} ref={logoutRef} />
-                                            <span className="ml-3">Leave room</span>
+                                            <LogoutIcon ref={logoutRef} className="w-6 h-6 mr-3" />
+                                            <span className="text-[16px]">Leave room</span>
                                         </Button>
                                     </>
                                 </div>

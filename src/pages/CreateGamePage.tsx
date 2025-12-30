@@ -1,12 +1,13 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { DisplayNameModal } from "../components/DisplayNameModal";
+import { DisplayNameModal } from "../components/modals/DisplayNameModal";
 import { Header } from "../components/Header";
 import { Button } from "@/components/ui/button";
 import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/MoveRightIcon";
 import { roomsApi } from "../lib/api";
 import type { VotingSystemId } from "../types";
 import { userManager } from "../lib/user";
+import { ChevronDownIcon, UserIcon } from "lucide-react";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -94,25 +95,12 @@ export const CreateGamePage: React.FC = () => {
                   placeholder="e.g. Sprint 32 Planning"
                   value={gameName}
                   onChange={(e) => setGameName(e.target.value)}
-                  className="w-full bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg"
+                  className="w-full bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg pr-14"
                   required
                   autoFocus
                 />
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors pointer-events-none">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                  <UserIcon size={24} />
                 </div>
               </div>
             </div>
@@ -129,26 +117,14 @@ export const CreateGamePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-left text-lg text-white hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg flex items-center justify-between group"
+                  className="w-full cursor-pointer bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-left text-lg text-white hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg flex items-center justify-between group"
                 >
                   <span className="truncate pr-8">{selectedSystemLabel}</span>
                   <div
                     className={`text-slate-500 transition-transform duration-200 group-hover:text-slate-400 ${isDropdownOpen ? "rotate-180" : ""
                       }`}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
+                    <ChevronDownIcon size={24} />
                   </div>
                 </button>
 
@@ -163,7 +139,7 @@ export const CreateGamePage: React.FC = () => {
                           setVotingSystem(sys.id);
                           setIsDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-6 py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${votingSystem === sys.id
+                        className={`cursor-pointer w-full text-left px-6 py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${votingSystem === sys.id
                           ? "bg-blue-600/10 text-blue-400 font-medium"
                           : "text-slate-300"
                           }`}
