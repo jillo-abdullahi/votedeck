@@ -128,13 +128,7 @@ export const RoomPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col">
-            <Header>
-                <div className="flex-1 flex items-center justify-center">
-                    <h1 className="text-slate-400 font-medium text-lg truncate max-w-[200px] sm:max-w-xs px-4 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                        {roomState.name}
-                    </h1>
-                </div>
-
+            <Header subtitle={roomState.name}>
                 <div className="flex items-center gap-6">
                     {/* User Profile Dropdown */}
                     <div className="relative">
@@ -294,9 +288,16 @@ export const RoomPage: React.FC = () => {
             {/* 3. Voting Deck Section (Sticky Bottom) */}
             <section
                 aria-label="Voting Deck"
-                className="sticky bottom-0 z-50 w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-800 pb-4 pt-2 animate-in slide-in-from-bottom-full duration-700 delay-200"
+                className="sticky bottom-0 z-50 w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-800 pb-4 pt-4 animate-in slide-in-from-bottom-full duration-700 delay-200"
             >
                 <div className="max-w-5xl mx-auto px-4">
+                    {!roomState.revealed && (
+                        <div className="flex justify-center mb-4">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">
+                                Choose your card here
+                            </span>
+                        </div>
+                    )}
                     <VotingDeck
                         selectedValue={myVote}
                         onVote={handleVote}
