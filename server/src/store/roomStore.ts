@@ -55,6 +55,20 @@ export const roomStore = {
     },
 
     /**
+     * Update user information
+     */
+    updateUser(roomId: string, userId: string, updates: Partial<User>): boolean {
+        const room = rooms.get(roomId);
+        if (!room) return false;
+
+        const user = room.users.get(userId);
+        if (!user) return false;
+
+        room.users.set(userId, { ...user, ...updates });
+        return true;
+    },
+
+    /**
      * Get user by socket ID
      */
     getUserBySocketId(socketId: string): { user: User; roomId: string } | undefined {

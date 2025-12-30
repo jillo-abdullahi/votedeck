@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "./ui/button";
 import { ModalHeader } from "@/components/ModalHeader";
 import { UserIcon } from "lucide-react";
@@ -7,14 +7,22 @@ interface DisplayNameModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
+  initialValue?: string;
 }
 
 export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  initialValue = "",
 }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = React.useState(initialValue);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setName(initialValue);
+    }
+  }, [isOpen, initialValue]);
 
   if (!isOpen) return null;
 

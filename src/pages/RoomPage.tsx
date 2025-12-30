@@ -42,6 +42,7 @@ export const RoomPage: React.FC = () => {
         revealVotes,
         resetVotes,
         leaveRoom,
+        updateName,
         error: socketError
     } = useSocket(roomId, name);
 
@@ -64,6 +65,11 @@ export const RoomPage: React.FC = () => {
             search: { name: newName },
             replace: true
         });
+
+        // Also update the name on the server if already connected
+        if (roomState) {
+            updateName(newName);
+        }
     };
 
     const myVote = roomState?.votes[userId] || null;
@@ -150,7 +156,13 @@ export const RoomPage: React.FC = () => {
                                         </div>
                                         {/* User Info */}
                                         <div className="flex-1 flex flex-col justify-center items-start">
-                                            <div className="flex items-center gap-2 group/name cursor-pointer hover:opacity-80 transition-opacity">
+                                            <div
+                                                onClick={() => {
+                                                    setIsDisplayNameModalOpen(true);
+                                                    setIsUserMenuOpen(false);
+                                                }}
+                                                className="flex items-center gap-2 group/name cursor-pointer hover:opacity-80 transition-opacity"
+                                            >
                                                 <span className="text-white font-bold text-lg">
                                                     {name || "Guest"}
                                                 </span>
@@ -268,6 +280,13 @@ export const RoomPage: React.FC = () => {
                 onClose={() => setIsInviteModalOpen(false)}
                 roomUrl={`${window.location.origin}/room/${roomId}`}
             />
-        </div >
+
+            <DisplayNameModal
+                isOpen={isDisplayNameModalOpen}
+                onClose={() => setIsDisplayNameModalOpen(false)}
+                onSubmit={handleNameSubmit}
+                initialValue={name || ""}
+            />
+        </div>
     );
 };

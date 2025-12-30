@@ -1,5 +1,5 @@
 import type { Server as SocketIOServer, Socket } from 'socket.io';
-import type { JoinRoomPayload, CastVotePayload } from '../types/index.js';
+import type { JoinRoomPayload, CastVotePayload, UpdateNamePayload } from '../types/index.js';
 import { roomStore } from '../store/roomStore.js';
 
 /**
@@ -129,6 +129,32 @@ export function setupSocketHandlers(io: SocketIOServer) {
             broadcastRoomState(io, roomId);
 
             console.log(`Votes reset in room ${roomId}`);
+        });
+
+        /**
+         * UPDATE_NAME
+         * Update a user's display name
+         */
+        socket.on('UPDATE_NAME', (payload: UpdateNamePayload) => {
+            const userInfo = roomStore.getUserBySocketId(socket.id);
+            if (!userInfo) {
+                socket.emit('ERROR', { message: 'User not found' });
+                return;
+            }
+
+            const { user, roomId } = userInfo;
+            const { name } = payload;
+
+            const success = roomStore.updateUser(roomId, user.id, { name });
+            if (!success) {
+                socket.emit('ERROR', { message: 'Failed to update name' });
+                return;
+            }
+
+            // Broadcast updated room state
+            broadcastRoomState(io, roomId);
+
+            console.log(`User ${user.id} renamed to ${name} in room ${roomId}`);
         });
 
         /**

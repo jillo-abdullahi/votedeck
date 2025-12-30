@@ -42,6 +42,10 @@ export interface CastVotePayload {
     value: string;
 }
 
+export interface UpdateNamePayload {
+    name: string;
+}
+
 export interface CreateRoomRequest {
     name: string;
     votingSystem: VotingSystemId;
