@@ -51,8 +51,24 @@ export const roomStore = {
         const room = rooms.get(roomId);
         if (!room) return false;
 
+        const wasAdmin = room.adminId === userId;
+
         room.users.delete(userId);
         room.votes.delete(userId);
+
+        // If the admin left, promote the next user and reset reveal policy
+        if (wasAdmin && room.users.size > 0) {
+            const nextAdmin = room.users.values().next().value as User;
+            room.adminId = nextAdmin.id;
+
+            // Automatically revert reveal policy to 'everyone' to prevent locking
+            // especially in large rooms where the new admin might be unknown.
+            room.revealPolicy = 'everyone';
+
+            console.log(`User ${userId} (admin) left room ${roomId}. Promoted user ${nextAdmin.id} (${nextAdmin.name}) to admin and reset policy to 'everyone'.`);
+        }
+
+        // If the room is empty, we could delete it, but for now we'll keep it simple.
         return true;
     },
 
