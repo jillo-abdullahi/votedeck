@@ -5,8 +5,8 @@ import { Header } from "@/components/Header";
 import { Participants } from "@/components/Participants";
 import { VotingDeck } from "@/components/VotingDeck";
 import { Controls } from "@/components/Controls";
-import type { VoteValue } from "@/types";
-import { Camera, Pencil, ChevronDown } from "lucide-react";
+import type { VoteValue, VotingSystemId, RevealPolicy } from "@/types";
+import { Pencil, ChevronDown } from "lucide-react";
 import {
     UserPlusIcon,
     type UserPlusHandle,
@@ -18,21 +18,25 @@ import {
 
 import { InviteModal } from "@/components/InviteModal";
 import { DisplayNameModal } from "@/components/DisplayNameModal";
+import { RoomSettingsModal } from "@/components/RoomSettingsModal";
 import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserAvatar } from "@/components/UserAvatar";
+import { SettingsIcon, type SettingsIconHandle } from "@/components/icons/SettingsIcon";
 
 export const RoomPage: React.FC = () => {
     const { roomId } = useParams({ from: "/room/$roomId" });
     const { name } = useSearch({ from: "/room/$roomId" });
     const userPlusRef = useRef<UserPlusHandle>(null);
     const logoutRef = useRef<LogoutIconHandle>(null);
+    const settingsRef = useRef<SettingsIconHandle>(null);
     const navigate = useNavigate();
 
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(!name);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
     // Real-time room state management via socket
     const {
@@ -43,8 +47,11 @@ export const RoomPage: React.FC = () => {
         resetVotes,
         leaveRoom,
         updateName,
+        updateSettings,
         error: socketError
     } = useSocket(roomId, name);
+
+    const isAdmin = roomState?.adminId === userId;
 
     const handleLeaveRoom = () => {
         // Remove user from room and navigate to landing page
@@ -72,6 +79,11 @@ export const RoomPage: React.FC = () => {
         }
     };
 
+    const handleSettingsSubmit = (settings: { name: string; votingSystem: VotingSystemId; revealPolicy: RevealPolicy }) => {
+        updateSettings(settings);
+        setIsSettingsModalOpen(false);
+    };
+
     const myVote = roomState?.votes[userId] || null;
 
     const handleVote = (value: VoteValue) => {
@@ -81,10 +93,12 @@ export const RoomPage: React.FC = () => {
     };
 
     const handleReveal = () => {
+        if (roomState?.revealPolicy === 'admin' && !isAdmin) return;
         revealVotes();
     };
 
     const handleReset = () => {
+        if (roomState?.revealPolicy === 'admin' && !isAdmin) return;
         resetVotes();
     };
 
@@ -110,6 +124,7 @@ export const RoomPage: React.FC = () => {
     }
 
     const canReveal = roomState.users.some((u) => u.hasVoted);
+    const hasVotes = roomState.users.some((u) => u.hasVoted);
 
     return (
         <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col">
@@ -121,8 +136,6 @@ export const RoomPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-6">
-                    {/* Separator for desktop */}
-                    <div className="hidden sm:block w-px h-8 bg-slate-800" />
                     {/* User Profile Dropdown */}
                     <div className="relative">
                         <button
@@ -173,16 +186,35 @@ export const RoomPage: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={handleLeaveRoom}
-                                        onMouseEnter={() => logoutRef.current?.startAnimation()}
-                                        onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                                        className="w-full justify-start text-left px-4 py-4 text-red-400 hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
-                                    >
-                                        <LogoutIcon size={16} ref={logoutRef} />
-                                        <span>Leave room</span>
-                                    </Button>
+
+                                    {/* Menu Actions */}
+                                    <>
+                                        {isAdmin && (
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setIsSettingsModalOpen(true);
+                                                    setIsUserMenuOpen(false);
+                                                }}
+                                                onMouseEnter={() => settingsRef.current?.startAnimation()}
+                                                onMouseLeave={() => settingsRef.current?.stopAnimation()}
+                                                className="w-full justify-start text-left px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white font-medium h-auto rounded-none border-b border-slate-700/50"
+                                            >
+                                                <SettingsIcon ref={settingsRef} className="w-4 h-4 mr-3 text-slate-400" />
+                                                <span>Room settings</span>
+                                            </Button>
+                                        )}
+                                        <Button
+                                            variant="ghost"
+                                            onClick={handleLeaveRoom}
+                                            onMouseEnter={() => logoutRef.current?.startAnimation()}
+                                            onMouseLeave={() => logoutRef.current?.stopAnimation()}
+                                            className="w-full justify-start text-left px-4 py-3 text-red-400 hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
+                                        >
+                                            <LogoutIcon size={16} ref={logoutRef} />
+                                            <span className="ml-3">Leave room</span>
+                                        </Button>
+                                    </>
                                 </div>
                             </>
                         )}
@@ -251,7 +283,7 @@ export const RoomPage: React.FC = () => {
                                     revealed={roomState.revealed}
                                     onReveal={handleReveal}
                                     onReset={handleReset}
-                                    canReveal={canReveal}
+                                    canReveal={canReveal && (roomState.revealPolicy === 'everyone' || isAdmin)}
                                 />
                             </motion.div>
                         )}
@@ -271,6 +303,7 @@ export const RoomPage: React.FC = () => {
                         revealed={roomState.revealed}
                         votingSystem={roomState.votingSystem}
                         onReset={handleReset}
+                        canReset={roomState.revealPolicy === 'everyone' || isAdmin}
                     />
                 </div>
             </section>
@@ -287,6 +320,20 @@ export const RoomPage: React.FC = () => {
                 onSubmit={handleNameSubmit}
                 initialValue={name || ""}
             />
+
+            {roomState && (
+                <RoomSettingsModal
+                    isOpen={isSettingsModalOpen}
+                    onClose={() => setIsSettingsModalOpen(false)}
+                    onSubmit={handleSettingsSubmit}
+                    initialSettings={{
+                        name: roomState.name,
+                        votingSystem: roomState.votingSystem,
+                        revealPolicy: roomState.revealPolicy,
+                    }}
+                    canChangeVotingSystem={!hasVotes}
+                />
+            )}
         </div>
     );
 };

@@ -76,6 +76,10 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         socket.emit('UPDATE_NAME', { name: newName });
     }, []);
 
+    const updateSettings = useCallback((settings: { name?: string; votingSystem?: string; revealPolicy?: string }) => {
+        socket.emit('UPDATE_SETTINGS', settings);
+    }, []);
+
     return {
         roomState,
         isConnected,
@@ -86,5 +90,6 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         resetVotes,
         leaveRoom,
         updateName,
+        updateSettings,
     };
 };

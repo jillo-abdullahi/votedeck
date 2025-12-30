@@ -1,6 +1,7 @@
 // Domain types for VoteDeck backend
 
 export type VotingSystemId = 'fibonacci' | 'modified_fibonacci' | 'tshirts' | 'powers_2';
+export type RevealPolicy = 'admin' | 'everyone';
 
 export interface User {
     id: string;
@@ -11,7 +12,9 @@ export interface User {
 export interface Room {
     id: string;
     name: string;
+    adminId: string;
     votingSystem: VotingSystemId;
+    revealPolicy: RevealPolicy;
     users: Map<string, User>;
     votes: Map<string, string | null>;
     revealed: boolean;
@@ -21,7 +24,9 @@ export interface Room {
 export interface RoomState {
     id: string;
     name: string;
+    adminId: string;
     votingSystem: VotingSystemId;
+    revealPolicy: RevealPolicy;
     users: Array<{
         id: string;
         name: string;
@@ -46,9 +51,16 @@ export interface UpdateNamePayload {
     name: string;
 }
 
+export interface UpdateSettingsPayload {
+    name?: string;
+    votingSystem?: VotingSystemId;
+    revealPolicy?: RevealPolicy;
+}
+
 export interface CreateRoomRequest {
     name: string;
     votingSystem: VotingSystemId;
+    adminId: string;
 }
 
 export interface CreateRoomResponse {

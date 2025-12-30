@@ -8,11 +8,13 @@ export const roomStore = {
     /**
      * Create a new room
      */
-    createRoom(name: string, votingSystem: VotingSystemId): Room {
+    createRoom(name: string, votingSystem: VotingSystemId, adminId: string): Room {
         const room: Room = {
             id: generateRoomId(),
             name,
+            adminId,
             votingSystem,
+            revealPolicy: 'everyone', // Default policy
             users: new Map(),
             votes: new Map(),
             revealed: false,
@@ -69,6 +71,20 @@ export const roomStore = {
     },
 
     /**
+     * Update room settings
+     */
+    updateSettings(roomId: string, updates: Partial<Pick<Room, 'name' | 'votingSystem' | 'revealPolicy'>>): boolean {
+        const room = rooms.get(roomId);
+        if (!room) return false;
+
+        if (updates.name !== undefined) room.name = updates.name;
+        if (updates.votingSystem !== undefined) room.votingSystem = updates.votingSystem;
+        if (updates.revealPolicy !== undefined) room.revealPolicy = updates.revealPolicy;
+
+        return true;
+    },
+
+    /**
      * Get user by socket ID
      */
     getUserBySocketId(socketId: string): { user: User; roomId: string } | undefined {
@@ -89,7 +105,9 @@ export const roomStore = {
         const room = rooms.get(roomId);
         if (!room || room.revealed) return false;
 
-        room.votes.set(userId, value);
+        // Allow unvoting by sending null or empty string
+        const voteValue = (value === null || value === "") ? null : value;
+        room.votes.set(userId, voteValue);
         return true;
     },
 
@@ -148,7 +166,9 @@ export const roomStore = {
         return {
             id: room.id,
             name: room.name,
+            adminId: room.adminId,
             votingSystem: room.votingSystem,
+            revealPolicy: room.revealPolicy,
             users,
             votes,
             revealed: room.revealed,

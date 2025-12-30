@@ -13,8 +13,8 @@ export interface CreateRoomResponse {
 }
 
 export const roomsApi = {
-    createRoom: async (name: string, votingSystem: VotingSystemId): Promise<CreateRoomResponse> => {
-        const response = await api.post<CreateRoomResponse>('/rooms', { name, votingSystem });
+    createRoom: async (name: string, votingSystem: VotingSystemId, adminId: string): Promise<CreateRoomResponse> => {
+        const response = await api.post<CreateRoomResponse>('/rooms', { name, votingSystem, adminId });
         return response.data;
     },
 

@@ -3,7 +3,9 @@ import type { RoomState } from "../types";
 export const mockRoom: RoomState = {
   id: "ABC123",
   name: "Mock room",
+  adminId: "1",
   votingSystem: "fibonacci",
+  revealPolicy: "everyone",
   revealed: false,
   users: [
     { id: "1", name: "Jay", hasVoted: false },

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/MoveRightIcon";
 import { roomsApi } from "../lib/api";
 import type { VotingSystemId } from "../types";
+import { userManager } from "../lib/user";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -41,8 +42,9 @@ export const CreateGamePage: React.FC = () => {
   // Triggered when user submits name in modal
   const handleFinalSubmit = async (displayName: string) => {
     try {
+      const adminId = userManager.getUserId();
       // Create the room via backend API
-      const { roomId } = await roomsApi.createRoom(gameName, votingSystem as VotingSystemId);
+      const { roomId } = await roomsApi.createRoom(gameName, votingSystem as VotingSystemId, adminId);
 
       // Interact with router to navigate
       navigate({

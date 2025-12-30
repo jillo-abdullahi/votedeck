@@ -13,21 +13,22 @@ export async function roomRoutes(fastify: FastifyInstance) {
             schema: {
                 body: {
                     type: 'object',
-                    required: ['name', 'votingSystem'],
+                    required: ['name', 'votingSystem', 'adminId'],
                     properties: {
                         name: { type: 'string' },
                         votingSystem: {
                             type: 'string',
                             enum: ['fibonacci', 'modified_fibonacci', 'tshirts', 'powers_2'],
                         },
+                        adminId: { type: 'string' },
                     },
                 },
             },
         },
         async (request, reply) => {
-            const { name, votingSystem } = request.body;
+            const { name, votingSystem, adminId } = request.body;
 
-            const room = roomStore.createRoom(name, votingSystem);
+            const room = roomStore.createRoom(name, votingSystem, adminId);
 
             const joinUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/room/${room.id}`;
 

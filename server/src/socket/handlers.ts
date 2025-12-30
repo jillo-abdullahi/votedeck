@@ -1,5 +1,5 @@
 import type { Server as SocketIOServer, Socket } from 'socket.io';
-import type { JoinRoomPayload, CastVotePayload, UpdateNamePayload } from '../types/index.js';
+import type { JoinRoomPayload, CastVotePayload, UpdateNamePayload, UpdateSettingsPayload } from '../types/index.js';
 import { roomStore } from '../store/roomStore.js';
 
 /**
@@ -78,7 +78,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             // Broadcast updated room state
             broadcastRoomState(io, roomId);
 
-            console.log(`User ${user.name} voted: ${value} in room ${roomId}`);
+            console.log(`User ${user.name} voted: ${value} (or cleared) in room ${roomId}`);
         });
 
         /**
@@ -88,11 +88,23 @@ export function setupSocketHandlers(io: SocketIOServer) {
         socket.on('REVEAL', () => {
             const userInfo = roomStore.getUserBySocketId(socket.id);
             if (!userInfo) {
-                socket.emit('ERROR', { message: 'User not found in any room' });
+                socket.emit('ERROR', { message: 'User not found' });
                 return;
             }
 
-            const { roomId } = userInfo;
+            const { roomId, user } = userInfo;
+            const room = roomStore.getRoom(roomId);
+
+            if (!room) {
+                socket.emit('ERROR', { message: 'Room not found' });
+                return;
+            }
+
+            // Check reveal policy
+            if (room.revealPolicy === 'admin' && room.adminId !== user.id) {
+                socket.emit('ERROR', { message: 'Only the administrator can reveal votes' });
+                return;
+            }
 
             const success = roomStore.revealVotes(roomId);
             if (!success) {
@@ -103,7 +115,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             // Broadcast updated room state
             broadcastRoomState(io, roomId);
 
-            console.log(`Votes revealed in room ${roomId}`);
+            console.log(`Votes revealed in room ${roomId} by ${user.name}`);
         });
 
         /**
@@ -113,11 +125,26 @@ export function setupSocketHandlers(io: SocketIOServer) {
         socket.on('RESET', () => {
             const userInfo = roomStore.getUserBySocketId(socket.id);
             if (!userInfo) {
-                socket.emit('ERROR', { message: 'User not found in any room' });
+                socket.emit('ERROR', { message: 'User not found' });
                 return;
             }
 
-            const { roomId } = userInfo;
+            const { roomId, user } = userInfo;
+            const room = roomStore.getRoom(roomId);
+
+            if (!room) {
+                socket.emit('ERROR', { message: 'Room not found' });
+                return;
+            }
+
+            // Resetting is also typically an admin-ish action, 
+            // but we'll stay flexible unless specifically asked.
+            // For now, let's keep it consistent with reveal if it's admin-only?
+            // Actually, the user asked for reveal policy specifically.
+            if (room.revealPolicy === 'admin' && room.adminId !== user.id) {
+                socket.emit('ERROR', { message: 'Only the administrator can reset the vote' });
+                return;
+            }
 
             const success = roomStore.resetVotes(roomId);
             if (!success) {
@@ -128,7 +155,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             // Broadcast updated room state
             broadcastRoomState(io, roomId);
 
-            console.log(`Votes reset in room ${roomId}`);
+            console.log(`Votes reset in room ${roomId} by ${user.name}`);
         });
 
         /**
@@ -155,6 +182,43 @@ export function setupSocketHandlers(io: SocketIOServer) {
             broadcastRoomState(io, roomId);
 
             console.log(`User ${user.id} renamed to ${name} in room ${roomId}`);
+        });
+
+        /**
+         * UPDATE_SETTINGS
+         * Update room settings (Admin only)
+         */
+        socket.on('UPDATE_SETTINGS', (payload: UpdateSettingsPayload) => {
+            const userInfo = roomStore.getUserBySocketId(socket.id);
+            if (!userInfo) {
+                socket.emit('ERROR', { message: 'User not found' });
+                return;
+            }
+
+            const { user, roomId } = userInfo;
+            const room = roomStore.getRoom(roomId);
+
+            if (!room) {
+                socket.emit('ERROR', { message: 'Room not found' });
+                return;
+            }
+
+            // Admin check
+            if (room.adminId !== user.id) {
+                socket.emit('ERROR', { message: 'Only the administrator can change room settings' });
+                return;
+            }
+
+            const success = roomStore.updateSettings(roomId, payload);
+            if (!success) {
+                socket.emit('ERROR', { message: 'Failed to update settings' });
+                return;
+            }
+
+            // Broadcast updated room state
+            broadcastRoomState(io, roomId);
+
+            console.log(`Room ${roomId} settings updated by admin ${user.name}`);
         });
 
         /**

@@ -9,6 +9,7 @@ interface VotingDeckProps {
     revealed: boolean;
     votingSystem: VotingSystemId;
     onReset?: () => void;
+    canReset?: boolean;
 }
 
 const SYSTEM_CARDS: Record<VotingSystemId, VoteValue[]> = {
@@ -24,18 +25,25 @@ export const VotingDeck: React.FC<VotingDeckProps> = ({
     revealed,
     votingSystem,
     onReset,
+    canReset = true,
 }) => {
     if (revealed) {
         return (
             <div className="flex flex-col items-center justify-center py-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <Button
                     onClick={onReset}
+                    disabled={!canReset}
                     size={'lg'}
-                    className="group"
+                    className="group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <RefreshCcw className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" />
                     Start New Vote
                 </Button>
+                {!canReset && (
+                    <p className="text-slate-500 text-xs mt-2 italic">
+                        Only the administrator can start a new vote
+                    </p>
+                )}
             </div>
         );
     }
