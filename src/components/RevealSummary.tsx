@@ -18,7 +18,7 @@ interface SummaryBoxProps {
 }
 
 const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "" }) => (
-    <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
+    <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
         <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 text-slate-500 font-bold text-[10px] uppercase tracking-widest">
                 <div className="p-1 px-1.5 bg-slate-900/50 rounded-md border border-slate-700/50">
@@ -99,7 +99,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="w-full flex flex-col md:flex-row items-stretch justify-center gap-4 py-4 px-6 h-full"
+                    className="w-full flex flex-col md:flex-row items-stretch justify-center gap-4 p-4 h-full"
                 >
                     {/* Average Box - Takes less space */}
                     <SummaryBox
@@ -128,7 +128,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                                     key={val}
                                     className="bg-slate-900/40 border border-slate-700/50 px-2.5 py-1 rounded-lg flex items-center gap-2 shadow-sm"
                                 >
-                                    <span className="font-bold text-blue-400 text-sm">{val}</span>
+                                    <span className="font-bold text-blue-400 text-md border-r border-slate-700/50 pr-2">{val}</span>
                                     <span className="text-[10px] font-bold text-slate-500 uppercase">{count} {count === 1 ? 'vote' : 'votes'}</span>
                                 </div>
                             ))}

@@ -64,7 +64,7 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
                                         } : {})
                                     }}
                                 >
-                                    {!hasVoted && <UserAvatar name={user.name} />}
+                                    {!hasVoted && <UserAvatar name={user.name} size={36} />}
                                 </div>
 
                                 {/* Card Front (revealed state) */}

@@ -123,7 +123,7 @@ export const RoomPage: React.FC = () => {
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="flex cursor-pointer items-center gap-3 hover:opacity-80 transition-opacity group"
                         >
-                            <UserAvatar name={name || "Guest"} />
+                            <UserAvatar name={name || "Guest"} size={28} />
                             <div className="flex items-center gap-2">
                                 <span className="text-white font-bold hidden sm:block text-lg">
                                     {name || "Guest"}
@@ -146,12 +146,7 @@ export const RoomPage: React.FC = () => {
                                     <div className="p-4 border-b border-slate-700 flex items-center gap-4">
                                         {/* Avatar */}
                                         <div className="relative group/avatar cursor-pointer">
-                                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl border-2 border-transparent group-hover/avatar:border-blue-200 transition-all">
-                                                {name ? name[0].toUpperCase() : "G"}
-                                            </div>
-                                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                                <Camera className="w-3 h-3 text-blue-600" />
-                                            </div>
+                                            <UserAvatar name={name || "Guest"} size={48} />
                                         </div>
                                         {/* User Info */}
                                         <div className="flex-1 flex flex-col justify-center items-start">
