@@ -2,6 +2,21 @@ import type { Server as SocketIOServer, Socket } from 'socket.io';
 import type { JoinRoomPayload, CastVotePayload } from '../types/index.js';
 import { roomStore } from '../store/roomStore.js';
 
+/**
+ * Helper to broadcast personalized room states to all users in a room
+ */
+function broadcastRoomState(io: SocketIOServer, roomId: string) {
+    const room = roomStore.getRoom(roomId);
+    if (!room) return;
+
+    room.users.forEach((user) => {
+        const roomState = roomStore.getRoomState(roomId, user.id);
+        if (roomState) {
+            io.to(user.socketId).emit('ROOM_STATE', roomState);
+        }
+    });
+}
+
 export function setupSocketHandlers(io: SocketIOServer) {
     io.on('connection', (socket: Socket) => {
         console.log(`Socket connected: ${socket.id}`);
@@ -35,10 +50,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             socket.join(roomId);
 
             // Broadcast updated room state
-            const roomState = roomStore.getRoomState(roomId);
-            if (roomState) {
-                io.to(roomId).emit('ROOM_STATE', roomState);
-            }
+            broadcastRoomState(io, roomId);
 
             console.log(`User ${name} (${userId}) joined room ${roomId}`);
         });
@@ -64,10 +76,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             }
 
             // Broadcast updated room state
-            const roomState = roomStore.getRoomState(roomId);
-            if (roomState) {
-                io.to(roomId).emit('ROOM_STATE', roomState);
-            }
+            broadcastRoomState(io, roomId);
 
             console.log(`User ${user.name} voted: ${value} in room ${roomId}`);
         });
@@ -92,10 +101,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             }
 
             // Broadcast updated room state
-            const roomState = roomStore.getRoomState(roomId);
-            if (roomState) {
-                io.to(roomId).emit('ROOM_STATE', roomState);
-            }
+            broadcastRoomState(io, roomId);
 
             console.log(`Votes revealed in room ${roomId}`);
         });
@@ -120,10 +126,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             }
 
             // Broadcast updated room state
-            const roomState = roomStore.getRoomState(roomId);
-            if (roomState) {
-                io.to(roomId).emit('ROOM_STATE', roomState);
-            }
+            broadcastRoomState(io, roomId);
 
             console.log(`Votes reset in room ${roomId}`);
         });
@@ -144,10 +147,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
             socket.leave(roomId);
 
             // Broadcast updated room state
-            const roomState = roomStore.getRoomState(roomId);
-            if (roomState) {
-                io.to(roomId).emit('ROOM_STATE', roomState);
-            }
+            broadcastRoomState(io, roomId);
 
             console.log(`User ${user.name} left room ${roomId}`);
         });
@@ -164,10 +164,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
                 roomStore.removeUser(roomId, user.id);
 
                 // Broadcast updated room state
-                const roomState = roomStore.getRoomState(roomId);
-                if (roomState) {
-                    io.to(roomId).emit('ROOM_STATE', roomState);
-                }
+                broadcastRoomState(io, roomId);
 
                 console.log(`User ${user.name} disconnected from room ${roomId}`);
             }

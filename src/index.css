@@ -6,7 +6,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #0f172a; /* matches bg-slate-900 */
+  background-color: #0f172a;
+  /* matches bg-slate-900 */
 }
 
 @theme inline {
@@ -119,10 +120,32 @@ body {
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    /* slate-700 */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+    /* slate-600 */
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

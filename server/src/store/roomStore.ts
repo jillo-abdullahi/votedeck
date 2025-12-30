@@ -105,9 +105,9 @@ export const roomStore = {
     },
 
     /**
-     * Get room state for broadcasting
+     * Get room state for broadcasting (optionally personalized for a user)
      */
-    getRoomState(roomId: string): RoomState | undefined {
+    getRoomState(roomId: string, forUserId?: string): RoomState | undefined {
         const room = rooms.get(roomId);
         if (!room) return undefined;
 
@@ -119,8 +119,15 @@ export const roomStore = {
 
         const votes: Record<string, string | null> = {};
         if (room.revealed) {
+            // Everyone sees everything
             for (const [userId, vote] of room.votes.entries()) {
                 votes[userId] = vote;
+            }
+        } else if (forUserId) {
+            // User sees only their own vote
+            const myVote = room.votes.get(forUserId);
+            if (myVote) {
+                votes[forUserId] = myVote;
             }
         }
 

@@ -19,6 +19,9 @@ import {
 import { InviteModal } from "@/components/InviteModal";
 import { DisplayNameModal } from "@/components/DisplayNameModal";
 import { useSocket } from "@/hooks/useSocket";
+import { RevealSummary } from "@/components/RevealSummary";
+import { motion, AnimatePresence } from "framer-motion";
+import { UserAvatar } from "@/components/UserAvatar";
 
 export const RoomPage: React.FC = () => {
     const { roomId } = useParams({ from: "/room/$roomId" });
@@ -118,9 +121,7 @@ export const RoomPage: React.FC = () => {
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="flex cursor-pointer items-center gap-3 hover:opacity-80 transition-opacity group"
                         >
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg border-2 border-transparent group-hover:border-blue-200 transition-all">
-                                {name ? name[0].toUpperCase() : "G"}
-                            </div>
+                            <UserAvatar name={name || "Guest"} />
                             <div className="flex items-center gap-2">
                                 <span className="text-white font-bold hidden sm:block text-lg">
                                     {name || "Guest"}
@@ -210,18 +211,42 @@ export const RoomPage: React.FC = () => {
                 {/* 2. Active Area (Middle) - Fixed Height */}
                 <section
                     aria-label="Active Area"
-                    className="w-full h-48 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-700 bg-slate-800/30 relative animate-in zoom-in-95 duration-700 delay-100"
+                    className="w-full min-h-[12rem] flex items-center justify-center rounded-3xl border-2 border-dashed border-slate-700 bg-slate-800/30 relative animate-in zoom-in-95 duration-700 delay-100 overflow-hidden"
                 >
-
-                    {/* Controls (Centered) */}
-                    <div className="relative z-10">
-                        <Controls
-                            revealed={roomState.revealed}
-                            onReveal={handleReveal}
-                            onReset={handleReset}
-                            canReveal={canReveal}
-                        />
-                    </div>
+                    <AnimatePresence mode="wait">
+                        {roomState.revealed ? (
+                            <motion.div
+                                key="summary"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                className="w-full h-full relative"
+                            >
+                                <RevealSummary
+                                    votes={roomState.votes}
+                                    votingSystem={roomState.votingSystem}
+                                    isVisible={roomState.revealed}
+                                />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="controls"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                className="relative z-10"
+                            >
+                                <Controls
+                                    revealed={roomState.revealed}
+                                    onReveal={handleReveal}
+                                    onReset={handleReset}
+                                    canReveal={canReveal}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </section>
             </main>
 
@@ -235,6 +260,7 @@ export const RoomPage: React.FC = () => {
                         selectedValue={myVote}
                         onVote={handleVote}
                         revealed={roomState.revealed}
+                        onReset={handleReset}
                     />
                 </div>
             </section>
