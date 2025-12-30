@@ -1,5 +1,5 @@
 import React from "react";
-import type { VoteValue } from "../types";
+import type { VoteValue, VotingSystemId } from "../types";
 import { RefreshCcw } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -7,15 +7,22 @@ interface VotingDeckProps {
     selectedValue: VoteValue | null;
     onVote: (val: VoteValue) => void;
     revealed: boolean;
+    votingSystem: VotingSystemId;
     onReset?: () => void;
 }
 
-const CARDS: VoteValue[] = ["1", "2", "3", "5", "8", "13", "?"];
+const SYSTEM_CARDS: Record<VotingSystemId, VoteValue[]> = {
+    fibonacci: ["0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "?", "☕"],
+    modified_fibonacci: ["0", "½", "1", "2", "3", "5", "8", "13", "20", "40", "100", "?", "☕"],
+    powers_2: ["0", "1", "2", "4", "8", "16", "32", "64", "?", "☕"],
+    tshirts: ["XS", "S", "M", "L", "XL", "XXL", "?", "☕"],
+};
 
 export const VotingDeck: React.FC<VotingDeckProps> = ({
     selectedValue,
     onVote,
     revealed,
+    votingSystem,
     onReset,
 }) => {
     if (revealed) {
@@ -33,9 +40,11 @@ export const VotingDeck: React.FC<VotingDeckProps> = ({
         );
     }
 
+    const cards = SYSTEM_CARDS[votingSystem] || SYSTEM_CARDS.fibonacci;
+
     return (
         <div className="flex flex-wrap justify-center gap-3 py-2">
-            {CARDS.map((value) => {
+            {cards.map((value) => {
                 const isSelected = selectedValue === value;
                 const isDisabled = revealed;
 

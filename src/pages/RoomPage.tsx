@@ -262,6 +262,7 @@ export const RoomPage: React.FC = () => {
                         selectedValue={myVote}
                         onVote={handleVote}
                         revealed={roomState.revealed}
+                        votingSystem={roomState.votingSystem}
                         onReset={handleReset}
                     />
                 </div>
