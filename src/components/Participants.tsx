@@ -14,7 +14,7 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
     const userPlusRef = useRef<UserPlusHandle>(null);
 
     return (
-        <div className="flex flex-wrap justify-center gap-8 py-8">
+        <div className="flex flex-wrap justify-center gap-8 py-6">
             {users.map((user) => {
                 const hasVoted = user.hasVoted;
                 const voteValue = votes[user.id];

@@ -34,13 +34,14 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-slate-800 border-2 border-slate-700 rounded-2xl p-8 w-full max-w-lg shadow-2xl transform transition-all animate-in zoom-in-95 duration-200">
         <ModalHeader
-          title="Enter your name"
+          title={initialValue ? "Change your name" : "Enter your name"}
           subtitle="How should you appear to other players?"
           className="mb-8"
           icon={<UserIcon className="w-12 h-12 text-blue-500" />}
+          onClose={onClose}
         />
 
         <form onSubmit={handleSubmit} className="space-y-8">

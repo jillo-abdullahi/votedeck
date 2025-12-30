@@ -6,7 +6,7 @@ import { Participants } from "@/components/Participants";
 import { VotingDeck } from "@/components/VotingDeck";
 import { Controls } from "@/components/Controls";
 import type { VoteValue, VotingSystemId, RevealPolicy } from "@/types";
-import { Pencil, ChevronDown } from "lucide-react";
+import { Pencil, ChevronDown, Users } from "lucide-react";
 import {
     UserPlusIcon,
     type UserPlusHandle,
@@ -16,7 +16,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 
-import { InviteModal } from "@/components/InviteModal";
+import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
 import { RoomSettingsModal } from "@/components/modals/RoomSettingsModal";
 import { useSocket } from "@/hooks/useSocket";
@@ -233,8 +233,14 @@ export const RoomPage: React.FC = () => {
                 {/* 1. Participants Section (Top) */}
                 <section
                     aria-label="Participants"
-                    className="w-full flex justify-center animate-in fade-in slide-in-from-top-4 duration-700"
+                    className="w-full flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700"
                 >
+                    <div className="flex items-center gap-2 mb-2 text-slate-500">
+                        <Users size={16} className="text-slate-500" />
+                        <span className="text-xs font-bold uppercase tracking-[0.2em]">
+                            Players
+                        </span>
+                    </div>
                     <Participants
                         users={roomState.users}
                         votes={roomState.votes}

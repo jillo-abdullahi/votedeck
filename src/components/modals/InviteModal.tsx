@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserPlusIcon } from "lucide-react";
-import { QrCodeIcon, type QrCodeIconHandle } from "./icons/QrCodeIcon";
-import { ClipboardIcon, type ClipboardIconHandle } from "./icons/ClipboardIcon";
+import { QrCodeIcon, type QrCodeIconHandle } from "../icons/QrCodeIcon";
+import { ClipboardIcon, type ClipboardIconHandle } from "../icons/ClipboardIcon";
 import { ModalHeader } from "@/components/ModalHeader";
-import { CheckIcon, type CheckIconHandle } from "./icons/CheckIcon";
+import { CheckIcon, type CheckIconHandle } from "../icons/CheckIcon";
 
 
 interface InviteModalProps {
@@ -38,7 +38,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300"
+                className="absolute inset-0 bg-black/10 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={onClose}
             />
 
@@ -55,7 +55,6 @@ export const InviteModal: React.FC<InviteModalProps> = ({
 
                 {/* Content */}
                 <div className="space-y-6">
-
                     <div className="space-y-2 group">
                         <div className="flex items-center justify-start gap-2 text-slate-400 mb-1">
                             <label className="text-md font-medium text-slate-400 ml-1">

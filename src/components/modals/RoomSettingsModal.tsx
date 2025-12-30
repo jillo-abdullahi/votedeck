@@ -64,13 +64,14 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-md animate-in fade-in duration-200 p-4" onClick={onClose}>
             <div className="bg-slate-800 border-2 border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
                 <div className="p-8 pb-4">
                     <ModalHeader
                         title="Room Settings"
                         subtitle="Configure your planning session"
                         icon={<Settings className="w-10 h-10 text-blue-500" />}
+                        onClose={onClose}
                     />
                 </div>
 
@@ -100,7 +101,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                     type="button"
                                     disabled={!canChangeVotingSystem}
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className={`w-full bg-slate-900 border-2 border-slate-700 rounded-xl py-3 px-4 text-left text-white flex items-center justify-between group transition-all shadow-inner ${!canChangeVotingSystem ? "opacity-60 cursor-not-allowed" : "hover:border-slate-600 focus:border-blue-500"
+                                    className={`w-full cursor-pointer bg-slate-900 border-2 border-slate-700 rounded-xl py-3 px-4 text-left text-white flex items-center justify-between group transition-all shadow-inner ${!canChangeVotingSystem ? "opacity-60 cursor-not-allowed" : "hover:border-slate-600 focus:border-blue-500"
                                         }`}
                                 >
                                     <span className="truncate pr-4">
@@ -160,9 +161,9 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                             <span className={`font-bold ${revealPolicy === policy.id ? "text-blue-400" : "text-white"}`}>
                                                 {policy.label}
                                             </span>
-                                            {revealPolicy === policy.id && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />}
+                                            {revealPolicy === policy.id && <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50" />}
                                         </div>
-                                        <span className="text-xs text-slate-500 leading-relaxed">{policy.description}</span>
+                                        <span className="text-sm text-slate-500 leading-relaxed">{policy.description}</span>
                                     </button>
                                 ))}
                             </div>
