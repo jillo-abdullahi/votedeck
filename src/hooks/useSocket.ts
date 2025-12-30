@@ -67,6 +67,11 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         socket.emit('RESET');
     }, []);
 
+    const leaveRoom = useCallback(() => {
+        socket.emit('LEAVE_ROOM');
+        socket.disconnect();
+    }, []);
+
     return {
         roomState,
         isConnected,
@@ -75,5 +80,6 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         castVote,
         revealVotes,
         resetVotes,
+        leaveRoom,
     };
 };

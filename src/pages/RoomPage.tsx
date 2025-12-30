@@ -41,11 +41,13 @@ export const RoomPage: React.FC = () => {
         castVote,
         revealVotes,
         resetVotes,
+        leaveRoom,
         error: socketError
     } = useSocket(roomId, name);
 
-    const handleSignOut = () => {
-        // Navigate to landing page (simulating sign out)
+    const handleLeaveRoom = () => {
+        // Remove user from room and navigate to landing page
+        leaveRoom();
         navigate({ to: "/" });
     };
 
@@ -166,13 +168,13 @@ export const RoomPage: React.FC = () => {
                                     </div>
                                     <Button
                                         variant="ghost"
-                                        onClick={handleSignOut}
+                                        onClick={handleLeaveRoom}
                                         onMouseEnter={() => logoutRef.current?.startAnimation()}
                                         onMouseLeave={() => logoutRef.current?.stopAnimation()}
                                         className="w-full justify-start text-left px-4 py-4 text-red-400 hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
                                     >
                                         <LogoutIcon size={16} ref={logoutRef} />
-                                        <span>Sign out</span>
+                                        <span>Leave room</span>
                                     </Button>
                                 </div>
                             </>
