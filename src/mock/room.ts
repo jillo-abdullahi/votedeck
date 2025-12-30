@@ -1,7 +1,9 @@
 import type { RoomState } from "../types";
 
 export const mockRoom: RoomState = {
-  roomId: "ABC123",
+  id: "ABC123",
+  name: "Mock room",
+  votingSystem: "fibonacci",
   revealed: false,
   users: [
     { id: "1", name: "Jay", hasVoted: false },

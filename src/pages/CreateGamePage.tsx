@@ -4,6 +4,8 @@ import { DisplayNameModal } from "../components/DisplayNameModal";
 import { Header } from "../components/Header";
 import { Button } from "@/components/ui/button";
 import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/MoveRightIcon";
+import { roomsApi } from "../lib/api";
+import type { VotingSystemId } from "../types";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -37,16 +39,21 @@ export const CreateGamePage: React.FC = () => {
   };
 
   // Triggered when user submits name in modal
-  const handleFinalSubmit = (displayName: string) => {
-    // Generate a random 6-character room ID
-    const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const handleFinalSubmit = async (displayName: string) => {
+    try {
+      // Create the room via backend API
+      const { roomId } = await roomsApi.createRoom(gameName, votingSystem as VotingSystemId);
 
-    // Interact with router to navigate
-    navigate({
-      to: "/room/$roomId",
-      params: { roomId: newRoomId },
-      search: { name: displayName },
-    });
+      // Interact with router to navigate
+      navigate({
+        to: "/room/$roomId",
+        params: { roomId },
+        search: { name: displayName },
+      });
+    } catch (error) {
+      console.error("Failed to create room:", error);
+      // In a real app, we would show a toast error here
+    }
   };
 
   const selectedSystemLabel = VOTING_SYSTEMS.find(

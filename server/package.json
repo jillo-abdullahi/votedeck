@@ -1,0 +1,32 @@
+{
+    "name": "votedeck-server",
+    "version": "1.0.0",
+    "description": "VoteDeck backend - Real-time planning poker estimation",
+    "main": "dist/server.js",
+    "type": "module",
+    "scripts": {
+        "dev": "nodemon --exec tsx src/server.ts",
+        "build": "tsc",
+        "start": "node dist/server.js"
+    },
+    "keywords": [
+        "planning-poker",
+        "scrum",
+        "estimation",
+        "real-time"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "fastify": "^5.2.0",
+        "@fastify/cors": "^10.0.1",
+        "socket.io": "^4.8.1",
+        "nanoid": "^5.0.9"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.5",
+        "typescript": "^5.7.3",
+        "tsx": "^4.21.0",
+        "nodemon": "^3.1.9"
+    }
+}

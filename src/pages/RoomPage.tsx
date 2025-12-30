@@ -5,8 +5,8 @@ import { Header } from "@/components/Header";
 import { Participants } from "@/components/Participants";
 import { VotingDeck } from "@/components/VotingDeck";
 import { Controls } from "@/components/Controls";
-import { mockRoom } from "@/mock/room";
-import type { RoomState, VoteValue } from "@/types";
+import type { VoteValue } from "@/types";
+import { Camera, Pencil, ChevronDown } from "lucide-react";
 import {
     UserPlusIcon,
     type UserPlusHandle,
@@ -16,11 +16,9 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 
-import { Camera, Pencil, ChevronDown } from "lucide-react";
 import { InviteModal } from "@/components/InviteModal";
-
-// Simulating "Me" as user 1 for this demo
-const MY_USER_ID = "1";
+import { DisplayNameModal } from "@/components/DisplayNameModal";
+import { useSocket } from "@/hooks/useSocket";
 
 export const RoomPage: React.FC = () => {
     const { roomId } = useParams({ from: "/room/$roomId" });
@@ -31,6 +29,17 @@ export const RoomPage: React.FC = () => {
 
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(!name);
+
+    // Real-time room state management via socket
+    const {
+        roomState,
+        userId,
+        castVote,
+        revealVotes,
+        resetVotes,
+        error: socketError
+    } = useSocket(roomId, name);
 
     const handleSignOut = () => {
         // Navigate to landing page (simulating sign out)
@@ -41,61 +50,68 @@ export const RoomPage: React.FC = () => {
         setIsInviteModalOpen(true);
     };
 
+    const handleNameSubmit = (newName: string) => {
+        setIsDisplayNameModalOpen(false);
+        // Update URL search params with the new name
+        navigate({
+            to: "/room/$roomId",
+            params: { roomId },
+            search: { name: newName },
+            replace: true
+        });
+    };
 
-
-    // Initialize room with the provided user name if available
-    const [room, setRoom] = useState<RoomState>(() => {
-        const initialState = { ...mockRoom, roomId };
-        if (name) {
-            initialState.users = initialState.users.map((u) =>
-                u.id === MY_USER_ID ? { ...u, name: name } : u
-            );
-        }
-        return initialState;
-    });
-
-    const [myVote, setMyVote] = useState<VoteValue | null>(
-        room.votes[MY_USER_ID] || null
-    );
+    const myVote = roomState?.votes[userId] || null;
 
     const handleVote = (value: VoteValue) => {
-        // Determine if we are toggling off
-        const newValue = myVote === value ? null : value;
-        setMyVote(newValue);
-
-        // Update local optimistic state for UI responsiveness
-        setRoom((prev) => ({
-            ...prev,
-            votes: {
-                ...prev.votes,
-                [MY_USER_ID]: newValue,
-            },
-            users: prev.users.map((u) =>
-                u.id === MY_USER_ID ? { ...u, hasVoted: newValue !== null } : u
-            ),
-        }));
+        // Toggle vote: if clicking same value, clear it (send null or empty string)
+        const newValue = myVote === value ? "" : value;
+        castVote(newValue);
     };
 
     const handleReveal = () => {
-        setRoom((prev) => ({ ...prev, revealed: true }));
+        revealVotes();
     };
 
     const handleReset = () => {
-        setRoom((prev) => ({
-            ...prev,
-            revealed: false,
-            votes: {}, // Clear all votes in this mock
-            users: prev.users.map((u) => ({ ...u, hasVoted: false })),
-        }));
-        setMyVote(null);
+        resetVotes();
     };
 
-    const canReveal = room.users.some((u) => u.hasVoted);
+    // If room is not loaded yet
+    if (!roomState) {
+        return (
+            <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center justify-center p-6">
+                <DisplayNameModal
+                    isOpen={isDisplayNameModalOpen}
+                    onClose={() => navigate({ to: "/" })}
+                    onSubmit={handleNameSubmit}
+                />
+                {!isDisplayNameModalOpen && (
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="text-xl font-medium text-slate-400">
+                            {socketError ? `Error: ${socketError}` : "Joining room..."}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    const canReveal = roomState.users.some((u) => u.hasVoted);
 
     return (
         <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col">
             <Header>
+                <div className="flex-1 flex items-center justify-center">
+                    <h1 className="text-slate-400 font-medium text-lg truncate max-w-[200px] sm:max-w-xs px-4 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        {roomState.name}
+                    </h1>
+                </div>
+
                 <div className="flex items-center gap-6">
+                    {/* Separator for desktop */}
+                    <div className="hidden sm:block w-px h-8 bg-slate-800" />
                     {/* User Profile Dropdown */}
                     <div className="relative">
                         <button
@@ -152,10 +168,10 @@ export const RoomPage: React.FC = () => {
                                         onClick={handleSignOut}
                                         onMouseEnter={() => logoutRef.current?.startAnimation()}
                                         onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                                        className="w-full justify-start text-left px-4 py-6 text-red-400 hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
+                                        className="w-full justify-start text-left px-4 py-4 text-red-400 hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
                                     >
                                         <LogoutIcon size={16} ref={logoutRef} />
-                                        <span className="ml-2">Sign out</span>
+                                        <span>Sign out</span>
                                     </Button>
                                 </div>
                             </>
@@ -184,9 +200,9 @@ export const RoomPage: React.FC = () => {
                     className="w-full flex justify-center animate-in fade-in slide-in-from-top-4 duration-700"
                 >
                     <Participants
-                        users={room.users}
-                        votes={room.votes}
-                        revealed={room.revealed}
+                        users={roomState.users}
+                        votes={roomState.votes}
+                        revealed={roomState.revealed}
                         onInvite={handleInvite}
                     />
                 </section>
@@ -200,7 +216,7 @@ export const RoomPage: React.FC = () => {
                     {/* Controls (Centered) */}
                     <div className="relative z-10">
                         <Controls
-                            revealed={room.revealed}
+                            revealed={roomState.revealed}
                             onReveal={handleReveal}
                             onReset={handleReset}
                             canReveal={canReveal}
@@ -218,7 +234,7 @@ export const RoomPage: React.FC = () => {
                     <VotingDeck
                         selectedValue={myVote}
                         onVote={handleVote}
-                        revealed={room.revealed}
+                        revealed={roomState.revealed}
                     />
                 </div>
             </section>
@@ -226,7 +242,7 @@ export const RoomPage: React.FC = () => {
             <InviteModal
                 isOpen={isInviteModalOpen}
                 onClose={() => setIsInviteModalOpen(false)}
-                roomUrl={window.location.href}
+                roomUrl={`${window.location.origin}/room/${roomId}`}
             />
         </div >
     );
