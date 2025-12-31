@@ -31,7 +31,7 @@ const VOTING_SYSTEMS = [
 
 const REVEAL_POLICIES = [
     { id: "everyone", label: "Everyone", description: "Anyone in the room can reveal votes and start new rounds." },
-    { id: "admin", label: "Admin Only", description: "Only you can reveal votes and start new rounds." },
+    { id: "admin", label: "Only Me", description: "Only you can reveal votes and start new rounds." },
 ];
 
 export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
@@ -65,7 +65,10 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-md animate-in fade-in duration-200 p-4" onClick={onClose}>
-            <div className="bg-slate-800 border-2 border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <div
+                className="bg-slate-800 border-2 border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="p-8 pb-4">
                     <ModalHeader
                         title="Room Settings"
@@ -136,7 +139,13 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                     </div>
                                 )}
                                 {isDropdownOpen && (
-                                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsDropdownOpen(false);
+                                        }}
+                                    />
                                 )}
                             </div>
                         </div>

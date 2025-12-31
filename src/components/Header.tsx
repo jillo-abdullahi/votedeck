@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ children, subtitle }) => {
                     className="flex items-center gap-3 hover:opacity-90 transition-opacity group"
                 >
                     {/* Brand Logo Icon */}
-                    <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center transform rotate-3 shadow-lg shadow-blue-500/20 group-hover:rotate-0 transition-transform duration-300">
+                    <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center transform rotate-3 group-hover:rotate-0 transition-transform duration-300">
                         <span className="font-bold text-2xl text-white">V</span>
                     </div>
 

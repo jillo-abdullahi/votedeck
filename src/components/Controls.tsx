@@ -1,36 +1,42 @@
-import React from "react";
+import React, { useRef } from "react";
+import { Button } from "./ui/button";
+import { EyeIcon, type EyeIconHandle } from "./icons/EyeIcon";
+import { InfoText } from "./InfoText";
 
 interface ControlsProps {
-  revealed: boolean;
-  onReveal: () => void;
-  onReset: () => void;
-  canReveal: boolean;
+    onReveal: () => void;
+    canReveal: boolean;
+    disabledReason?: string;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
-  revealed,
-  onReveal,
-  onReset,
-  canReveal,
+    onReveal,
+    canReveal,
+    disabledReason,
 }) => {
-  return (
-    <div className="flex justify-center p-6">
-      <button
-        onClick={revealed ? onReset : onReveal}
-        disabled={!revealed && !canReveal}
-        className={`
-          px-8 py-3 rounded-full font-bold text-lg transition-all duration-200 outline-none focus:ring-4 focus:ring-blue-500/20
-          ${
-            revealed
-              ? "bg-slate-700 text-white hover:bg-slate-600"
-              : canReveal
-              ? "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 translate-y-0 active:translate-y-0.5"
-              : "bg-slate-800 text-slate-600 cursor-not-allowed"
-          }
+    const eyeRef = useRef<EyeIconHandle>(null);
+    return (
+        <div className="flex flex-col items-center gap-4 p-6">
+            <Button
+                onClick={onReveal}
+                disabled={!canReveal}
+                size="lg"
+                onMouseEnter={() => eyeRef.current?.startAnimation()}
+                onMouseLeave={() => eyeRef.current?.stopAnimation()}
+                className={`
+          ${canReveal
+                        ? ""
+                        : "bg-slate-800 text-slate-600 cursor-not-allowed"
+                    }
         `}
-      >
-        {revealed ? "Start New Vote" : "Reveal Votes"}
-      </button>
-    </div>
-  );
+            >
+                <EyeIcon ref={eyeRef} />
+                Reveal Votes
+            </Button>
+
+            {!canReveal && disabledReason && (
+                <InfoText text={disabledReason} />
+            )}
+        </div>
+    );
 };

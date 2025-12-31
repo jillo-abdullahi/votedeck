@@ -23,10 +23,7 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
                     <div key={user.id} className="flex flex-col items-center gap-3">
                         <div className="relative w-16 h-20" style={{ perspective: '1000px' }}>
                             <div
-                                className={`
-                                    relative w-full h-full transition-all duration-700
-                                    ${revealed && hasVoted ? '-translate-y-2' : ''}
-                                `}
+                                className="relative w-full h-full transition-all duration-700"
                                 style={{
                                     transformStyle: 'preserve-3d',
                                     transform: revealed && hasVoted ? 'rotateY(180deg)' : 'rotateY(0deg)',
@@ -37,7 +34,7 @@ export const Participants: React.FC<ParticipantsProps> = ({ users, votes, reveal
                                     className={`
                                         absolute inset-0 flex items-center justify-center rounded-xl border-2 transition-all duration-300
                                         ${hasVoted
-                                            ? 'border-slate-600 shadow-lg shadow-slate-900/40'
+                                            ? 'border-slate-600'
                                             : 'bg-slate-800 border-slate-700'
                                         }
                                     `}

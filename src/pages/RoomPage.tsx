@@ -279,12 +279,26 @@ export const RoomPage: React.FC = () => {
                                 transition={{ duration: 0.4, ease: "easeOut" }}
                                 className="relative z-10"
                             >
-                                <Controls
-                                    revealed={roomState.revealed}
-                                    onReveal={handleReveal}
-                                    onReset={handleReset}
-                                    canReveal={canReveal && (roomState.revealPolicy === 'everyone' || isAdmin)}
-                                />
+                                {(() => {
+                                    const hasAnyVotes = roomState.users.some((u) => u.hasVoted);
+                                    const canIReveal = roomState.revealPolicy === 'everyone' || isAdmin;
+                                    const currentAdmin = roomState.users.find(u => u.id === roomState.adminId);
+
+                                    let disabledReason = "";
+                                    if (!hasAnyVotes) {
+                                        disabledReason = "Waiting for first player to pick a card...";
+                                    } else if (!canIReveal) {
+                                        disabledReason = `Only ${currentAdmin?.name || 'the administrator'} can reveal votes.`;
+                                    }
+
+                                    return (
+                                        <Controls
+                                            onReveal={handleReveal}
+                                            canReveal={canReveal && canIReveal}
+                                            disabledReason={disabledReason}
+                                        />
+                                    );
+                                })()}
                             </motion.div>
                         )}
                     </AnimatePresence>
