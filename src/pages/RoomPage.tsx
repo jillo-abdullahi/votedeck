@@ -235,7 +235,7 @@ export const RoomPage: React.FC = () => {
                     aria-label="Participants"
                     className="w-full flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700"
                 >
-                    <div className="flex items-center gap-2 mb-2 text-slate-500">
+                    <div className="flex items-center gap-2 mb-2 text-slate-400">
                         <Users size={16} className="text-slate-500" />
                         <span className="text-xs font-bold uppercase tracking-[0.2em]">
                             Players
@@ -299,7 +299,7 @@ export const RoomPage: React.FC = () => {
                 <div className="max-w-5xl mx-auto px-4">
                     {!roomState.revealed && (
                         <div className="flex justify-center mb-4">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
                                 Choose your card here
                             </span>
                         </div>

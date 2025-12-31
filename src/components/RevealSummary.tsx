@@ -18,7 +18,7 @@ interface SummaryBoxProps {
 }
 
 const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "" }) => (
-    <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
+    <div className={`min-w-0 bg-slate-800/40 border-none rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
         <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 text-slate-500 font-bold text-[10px] uppercase tracking-widest">
                 <div className="p-1 px-1.5 bg-slate-900/50 rounded-md border border-slate-700/50">
@@ -71,21 +71,11 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
             agreement = 100;
         }
 
-        // 4. Agreement Emoji
-        const getAgreementEmoji = (pct: number) => {
-            if (pct >= 100) return "🥳";
-            if (pct >= 80) return "😊";
-            if (pct >= 50) return "🤔";
-            if (pct >= 30) return "🤨";
-            return "😱";
-        };
-
         return {
             average: average !== null ? (average % 1 === 0 ? average.toString() : Math.round(average)) : null,
             sortedCounts,
             agreement: Math.round(agreement),
-            totalVoters: allCastedVotes.length,
-            emoji: getAgreementEmoji(Math.round(agreement))
+            totalVoters: allCastedVotes.length
         };
     }, [votes, votingSystem]);
 
@@ -139,45 +129,43 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                     <SummaryBox
                         title="Agreement"
                         icon={<Users className="w-3 h-3 text-emerald-500" />}
-                        className="flex-[1.2]"
-                        headerExtra={
-                            <div className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                                {stats.agreement}%
-                            </div>
-                        }
+                        className="flex-[1.5]"
                     >
-                        <div className="relative w-24 h-24 flex items-center justify-center">
-                            {/* SVG Ring */}
-                            <svg className="w-full h-full transform -rotate-90">
-                                <circle
-                                    cx="48"
-                                    cy="48"
-                                    r="40"
-                                    stroke="currentColor"
-                                    strokeWidth="6"
-                                    fill="transparent"
-                                    className="text-slate-900/50"
-                                />
-                                <motion.circle
-                                    initial={{ strokeDashoffset: 251.2 }}
-                                    animate={{ strokeDashoffset: 251.2 - (251.2 * stats.agreement) / 100 }}
-                                    transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-                                    cx="48"
-                                    cy="48"
-                                    r="40"
-                                    stroke="currentColor"
-                                    strokeWidth="6"
-                                    strokeDasharray="251.2"
-                                    fill="transparent"
-                                    strokeLinecap="round"
-                                    className="text-emerald-500"
-                                />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <div className="text-3xl">
-                                    {stats.emoji}
+                        <div className="w-full flex flex-col gap-3 py-2">
+                            <div className="relative h-12 w-full bg-slate-900/50 rounded-xl border border-blue-500/50 overflow-hidden group">
+                                {/* Fill Bar */}
+                                {stats.agreement > 0 && (
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${stats.agreement}%` }}
+                                        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                                        className={`absolute left-0 top-0 h-full bg-blue-500/20  ${stats.agreement === 100 ? 'w-full' : 'border-r border-blue-500/50'}`}
+                                    />
+                                )}
+
+                                {/* Labels Layer */}
+                                <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
+                                    {stats.agreement > 0 && (
+                                        <div className={`flex items-center gap-3 ${stats.agreement === 100 ? 'w-full justify-center' : ''}`}>
+                                            <span className="text-sm font-semibold text-blue-400 tracking-wide uppercase">Agreed</span>
+                                            <span className="text-sm font-semibold text-blue-400/80">{stats.agreement}%</span>
+                                        </div>
+                                    )}
+                                    {stats.agreement < 100 && (
+                                        <div className={`flex items-center gap-3 ${stats.agreement === 0 ? 'w-full justify-center' : ''}`}>
+                                            <span className="text-sm font-semibold text-slate-500/80">{100 - stats.agreement}%</span>
+                                            <span className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Disagreed</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+
+                            <p className="text-[10px] text-slate-600 font-medium px-1 flex justify-between italic">
+                                <span>Based on {stats.totalVoters} {stats.totalVoters === 1 ? 'player' : 'players'}</span>
+                                {stats.agreement === 100 && (
+                                    <span className="text-blue-500/70 font-bold not-italic">Full Consensus! 🎉</span>
+                                )}
+                            </p>
                         </div>
                     </SummaryBox>
                 </motion.div>

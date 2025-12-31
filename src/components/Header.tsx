@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ children, subtitle }) => {
                             VoteDeck
                         </span>
                         {subtitle && (
-                            <span className="text-xs font-medium text-slate-500 truncate max-w-[180px] sm:max-w-xs">
+                            <span className="text-sm font-medium text-slate-500 truncate max-w-[180px] sm:max-w-xs">
                                 {subtitle}
                             </span>
                         )}
