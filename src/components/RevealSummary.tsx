@@ -71,10 +71,18 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
             agreement = 100;
         }
 
+        // 4. Agreement Image
+        let agreementImg = "/agree-15.png";
+        if (agreement > 75) agreementImg = "/agree-95.png";
+        else if (agreement > 50) agreementImg = "/agree-75.png";
+        else if (agreement > 35) agreementImg = "/agree-50.png";
+        else if (agreement > 15) agreementImg = "/agree-35.png";
+
         return {
             average: average !== null ? (average % 1 === 0 ? average.toString() : Math.round(average)) : null,
             sortedCounts,
             agreement: Math.round(agreement),
+            agreementImg,
             totalVoters: allCastedVotes.length
         };
     }, [votes, votingSystem]);
@@ -131,41 +139,55 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                         icon={<Users className="w-3 h-3 text-emerald-500" />}
                         className="flex-[1.5]"
                     >
-                        <div className="w-full flex flex-col gap-3 py-2">
-                            <div className="relative h-12 w-full bg-slate-900/50 rounded-xl border border-blue-500/50 overflow-hidden group">
-                                {/* Fill Bar */}
-                                {stats.agreement > 0 && (
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${stats.agreement}%` }}
-                                        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-                                        className={`absolute left-0 top-0 h-full bg-blue-500/20  ${stats.agreement === 100 ? 'w-full' : 'border-r border-blue-500/50'}`}
-                                    />
-                                )}
-
-                                {/* Labels Layer */}
-                                <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
-                                    {stats.agreement > 0 && (
-                                        <div className={`flex items-center gap-3 ${stats.agreement === 100 ? 'w-full justify-center' : ''}`}>
-                                            <span className="text-sm font-semibold text-blue-400 tracking-wide uppercase">Agreed</span>
-                                            <span className="text-sm font-semibold text-blue-400/80">{stats.agreement}%</span>
-                                        </div>
-                                    )}
-                                    {stats.agreement < 100 && (
-                                        <div className={`flex items-center gap-3 ${stats.agreement === 0 ? 'w-full justify-center' : ''}`}>
-                                            <span className="text-sm font-semibold text-slate-500/80">{100 - stats.agreement}%</span>
-                                            <span className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Disagreed</span>
-                                        </div>
-                                    )}
-                                </div>
+                        <div className="w-full flex items-center gap-4 py-2 px-1">
+                            {/* Agreement Status Image */}
+                            <div className="w-12 h-12 rounded-full bg-slate-900/50 border border-blue-500/50 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                <motion.img
+                                    key={stats.agreementImg}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    src={stats.agreementImg}
+                                    alt="Agreement Status"
+                                    className="w-full h-full object-contain rounded-full"
+                                />
                             </div>
 
-                            <p className="text-[10px] text-slate-600 font-medium px-1 flex justify-between italic">
-                                <span>Based on {stats.totalVoters} {stats.totalVoters === 1 ? 'player' : 'players'}</span>
-                                {stats.agreement === 100 && (
-                                    <span className="text-blue-500/70 font-bold not-italic">Full Consensus! 🎉</span>
-                                )}
-                            </p>
+                            <div className="flex-1 flex flex-col gap-2">
+                                <div className="relative h-12 w-full bg-slate-900/50 rounded-xl border border-blue-500/50 overflow-hidden group">
+                                    {/* Fill Bar */}
+                                    {stats.agreement > 0 && (
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${stats.agreement}%` }}
+                                            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                                            className={`absolute left-0 top-0 h-full bg-blue-500/20  ${stats.agreement === 100 ? 'w-full' : 'border-r border-blue-500/50'}`}
+                                        />
+                                    )}
+
+                                    {/* Labels Layer */}
+                                    <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
+                                        {stats.agreement > 0 && (
+                                            <div className={`flex items-center gap-3 ${stats.agreement === 100 ? 'w-full justify-center' : ''}`}>
+                                                <span className="text-sm font-semibold text-blue-400 tracking-wide uppercase">Agreed</span>
+                                                <span className="text-sm font-semibold text-blue-400/80">{stats.agreement}%</span>
+                                            </div>
+                                        )}
+                                        {stats.agreement < 100 && (
+                                            <div className={`flex items-center gap-3 ${stats.agreement === 0 ? 'w-full justify-center' : ''}`}>
+                                                <span className="text-sm font-semibold text-slate-500/80">{100 - stats.agreement}%</span>
+                                                <span className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Disagreed</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* <p className="text-[10px] text-slate-600 font-medium px-1 flex justify-between italic">
+                                    <span>Based on {stats.totalVoters} {stats.totalVoters === 1 ? 'player' : 'players'}</span>
+                                    {stats.agreement === 100 && (
+                                        <span className="text-blue-500/70 font-bold not-italic">Full Consensus! 🎉</span>
+                                    )}
+                                </p> */}
+                            </div>
                         </div>
                     </SummaryBox>
                 </motion.div>

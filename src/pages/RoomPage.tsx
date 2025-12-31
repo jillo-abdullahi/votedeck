@@ -206,7 +206,7 @@ export const RoomPage: React.FC = () => {
                                             className="w-full justify-start text-left px-4 py-3 text-red-400 bg-transparent hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
                                         >
                                             <LogoutIcon ref={logoutRef} className="w-6 h-6 mr-3" />
-                                            <span className="text-[16px]">Leave room</span>
+                                            <span className="text-[16px]">Leave game</span>
                                         </Button>
                                     </>
                                 </div>
