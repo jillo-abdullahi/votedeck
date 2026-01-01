@@ -8,7 +8,6 @@ const rootRoute = createRootRoute({
     component: () => (
         <>
             <Outlet />
-            {/* Add DevTools here if needed in future */}
         </>
     ),
 });
@@ -20,7 +19,6 @@ const indexRoute = createRoute({
     component: LandingPage,
 });
 
-// Create room route
 // Create room route
 const roomRoute = createRoute({
     getParentRoute: () => rootRoute,
