@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Target, BarChart3 } from 'lucide-react';
 import type { VotingSystemId } from '../types';
+import { calculateAgreement } from '../lib/utils';
 
 interface RevealSummaryProps {
     votes: Record<string, string | null>;
@@ -20,7 +21,7 @@ interface SummaryBoxProps {
 const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "" }) => (
     <div className={`min-w-0 bg-slate-800/40 border-none rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
         <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2 text-slate-500 font-bold text-[10px] uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                 <div className="p-1 px-1.5 bg-slate-900/50 rounded-md border border-slate-700/50">
                     {icon}
                 </div>
@@ -60,16 +61,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
         const sortedCounts = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
         // 3. Agreement Level
-        const mostCommonCount = sortedCounts[0]?.[1] || 0;
-        // We use (max - 1) / (total - 1) so that:
-        // - All unique votes = 0% agreement
-        // - All same votes = 100% agreement
-        let agreement = 0;
-        if (allCastedVotes.length > 1) {
-            agreement = ((mostCommonCount - 1) / (allCastedVotes.length - 1)) * 100;
-        } else if (allCastedVotes.length === 1) {
-            agreement = 100;
-        }
+        const agreement = calculateAgreement(Object.values(counts), allCastedVotes.length);
 
         // 4. Agreement Image
         let agreementImg = "/agree-15.png";
@@ -81,7 +73,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
         return {
             average: average !== null ? (average % 1 === 0 ? average.toString() : Math.round(average)) : null,
             sortedCounts,
-            agreement: Math.round(agreement),
+            agreement,
             agreementImg,
             totalVoters: allCastedVotes.length
         };
@@ -116,7 +108,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
 
                     {/* Distribution Box - Takes more space */}
                     <SummaryBox
-                        title="Votes"
+                        title={`${stats.totalVoters} ${stats.totalVoters === 1 ? 'Vote' : 'Votes'}`}
                         icon={<BarChart3 className="w-3 h-3 text-purple-500" />}
                         className="flex-[1.2]"
                     >
@@ -165,28 +157,13 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                                     )}
 
                                     {/* Labels Layer */}
-                                    <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
-                                        {stats.agreement > 0 && (
-                                            <div className={`flex items-center gap-3 ${stats.agreement === 100 ? 'w-full justify-center' : ''}`}>
-                                                <span className="text-sm font-semibold text-blue-400 tracking-wide uppercase">Agreed</span>
-                                                <span className="text-sm font-semibold text-blue-400/80">{stats.agreement}%</span>
-                                            </div>
-                                        )}
-                                        {stats.agreement < 100 && (
-                                            <div className={`flex items-center gap-3 ${stats.agreement === 0 ? 'w-full justify-center' : ''}`}>
-                                                <span className="text-sm font-semibold text-slate-500/80">{100 - stats.agreement}%</span>
-                                                <span className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Disagreed</span>
-                                            </div>
-                                        )}
+                                    <div className="absolute inset-0 flex items-center justify-center px-6 pointer-events-none">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-semibold text-blue-400 tracking-wide uppercase">Agreed</span>
+                                            <span className="text-sm font-semibold text-blue-400/80">{stats.agreement}%</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* <p className="text-[10px] text-slate-600 font-medium px-1 flex justify-between italic">
-                                    <span>Based on {stats.totalVoters} {stats.totalVoters === 1 ? 'player' : 'players'}</span>
-                                    {stats.agreement === 100 && (
-                                        <span className="text-blue-500/70 font-bold not-italic">Full Consensus! 🎉</span>
-                                    )}
-                                </p> */}
                             </div>
                         </div>
                     </SummaryBox>
