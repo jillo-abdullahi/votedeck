@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/re
 import { LandingPage } from './pages/LandingPage';
 import { RoomPage } from './pages/RoomPage';
 import { CreateGamePage } from './pages/CreateGamePage';
+import { NotFoundView } from './components/NotFoundView';
 
 // Create a root route
 const rootRoute = createRootRoute({
@@ -10,6 +11,7 @@ const rootRoute = createRootRoute({
             <Outlet />
         </>
     ),
+    notFoundComponent: () => <NotFoundView />
 });
 
 // Create index route (Landing Page)

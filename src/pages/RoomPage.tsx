@@ -25,6 +25,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserAvatar } from "@/components/UserAvatar";
 import { SettingsIcon, type SettingsIconHandle } from "@/components/icons/SettingsIcon";
 
+import { NotFoundView } from "@/components/NotFoundView";
+
 export const RoomPage: React.FC = () => {
     const { roomId } = useParams({ from: "/room/$roomId" });
     const { name } = useSearch({ from: "/room/$roomId" });
@@ -38,7 +40,6 @@ export const RoomPage: React.FC = () => {
     const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(!name);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-    // Real-time room state management via socket
     const {
         roomState,
         userId,
@@ -101,6 +102,11 @@ export const RoomPage: React.FC = () => {
         if (roomState?.revealPolicy === 'admin' && !isAdmin) return;
         resetVotes();
     };
+
+    // If room is not found
+    if (socketError === "Room not found") {
+        return <NotFoundView />;
+    }
 
     // If room is not loaded yet
     if (!roomState) {
