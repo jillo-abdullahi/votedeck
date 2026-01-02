@@ -1,101 +1,191 @@
 import type { Room, RoomState, User, VotingSystemId } from '../types/index.js';
 import { generateRoomId } from '../utils/roomId.js';
+import { redis } from '../db/redis.js';
+import { prisma } from '../db/prisma.js';
 
-// In-memory storage for rooms
-const rooms = new Map<string, Room>();
+const ROOM_TTL = 24 * 60 * 60; // 24 hours
 
 export const roomStore = {
     /**
      * Create a new room
      */
-    createRoom(name: string, votingSystem: VotingSystemId, adminId: string): Room {
-        const room: Room = {
-            id: generateRoomId(),
+    async createRoom(name: string, votingSystem: VotingSystemId, adminId: string): Promise<Room> {
+        const roomId = generateRoomId();
+
+        // Persist in Postgres
+        const pgRoom = await (prisma.room as any).create({
+            data: {
+                id: roomId,
+                name,
+                adminId,
+                votingSystem,
+                revealed: false,
+            }
+        });
+
+        // Persist in Redis
+        const roomMeta = {
+            id: roomId,
             name,
             adminId,
             votingSystem,
-            revealPolicy: 'everyone', // Default policy
-            users: new Map(),
-            votes: new Map(),
-            revealed: false,
-            createdAt: new Date(),
+            revealPolicy: 'everyone',
+            revealed: 'false',
+            createdAt: pgRoom.createdAt.toISOString(),
         };
 
-        rooms.set(room.id, room);
-        return room;
+        await redis.hset(`room:${roomId}:meta`, roomMeta);
+        await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
+
+        return {
+            ...roomMeta,
+            revealed: false,
+            createdAt: pgRoom.createdAt,
+            users: new Map(),
+            votes: new Map(),
+        } as any;
     },
 
     /**
      * Get room by ID
      */
-    getRoom(roomId: string): Room | undefined {
-        return rooms.get(roomId);
+    async getRoom(roomId: string): Promise<any | undefined> {
+        let meta = await redis.hgetall(`room:${roomId}:meta`);
+
+        // Fallback to Postgres if not in Redis
+        if (!meta || Object.keys(meta).length === 0) {
+            const pgRoom = await prisma.room.findUnique({
+                where: { id: roomId }
+            });
+
+            if (!pgRoom) return undefined;
+
+            // Re-populate Redis
+            meta = {
+                id: pgRoom.id,
+                name: pgRoom.name,
+                adminId: pgRoom.adminId,
+                votingSystem: pgRoom.votingSystem,
+                revealPolicy: 'everyone', // Default
+                revealed: String((pgRoom as any).revealed),
+                createdAt: pgRoom.createdAt.toISOString(),
+            };
+
+            await redis.hset(`room:${roomId}:meta`, meta);
+            await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
+        }
+
+        return {
+            ...meta,
+            revealed: meta.revealed === 'true',
+            createdAt: new Date(meta.createdAt),
+        };
     },
 
     /**
      * Add user to room
      */
-    addUser(roomId: string, user: User): boolean {
-        const room = rooms.get(roomId);
-        if (!room) return false;
+    async addUser(roomId: string, user: User): Promise<boolean> {
+        const exists = await redis.exists(`room:${roomId}:meta`);
+        if (!exists) {
+            // If room doesn't exist in Redis, try to restore it first
+            const room = await this.getRoom(roomId);
+            if (!room) return false;
+        }
 
-        room.users.set(user.id, user);
-        room.votes.set(user.id, null);
+        // Persist in Postgres
+        await prisma.user.upsert({
+            where: { id: user.id },
+            update: { name: user.name },
+            create: { id: user.id, name: user.name },
+        });
+
+        const multi = redis.pipeline();
+        multi.sadd(`room:${roomId}:users`, user.id);
+        multi.hset(`room:${roomId}:user_data`, user.id, JSON.stringify(user));
+
+        // Track participation in Postgres
+        await (prisma as any).participant.upsert({
+            where: { roomId_userId: { roomId, userId: user.id } },
+            update: { joinedAt: new Date() }, // Update joinedAt on re-join
+            create: { roomId, userId: user.id }
+        });
+
+        // REMOVED: multi.hdel(`room:${roomId}:votes`, user.id); -- Keep votes for reloads
+
+        multi.expire(`room:${roomId}:users`, ROOM_TTL);
+        multi.expire(`room:${roomId}:user_data`, ROOM_TTL);
+        multi.expire(`room:${roomId}:votes`, ROOM_TTL);
+
+        await multi.exec();
         return true;
     },
 
     /**
      * Remove user from room
      */
-    removeUser(roomId: string, userId: string): boolean {
-        const room = rooms.get(roomId);
-        if (!room) return false;
+    async removeUser(roomId: string, userId: string): Promise<boolean> {
+        const meta = await this.getRoom(roomId);
+        if (!meta) return false;
 
-        const wasAdmin = room.adminId === userId;
+        const multi = redis.pipeline();
+        multi.srem(`room:${roomId}:users`, userId);
+        // multi.hdel(`room:${roomId}:user_data`, userId); -- Keep data for reloads
+        // multi.hdel(`room:${roomId}:votes`, userId); -- Keep votes for reloads
+        await multi.exec();
 
-        room.users.delete(userId);
-        room.votes.delete(userId);
+        // REMOVED immediate admin promotion. 
+        // We trust the adminId persisted in Postgres/Redis meta.
 
-        // If the admin left, promote the next user and reset reveal policy
-        if (wasAdmin && room.users.size > 0) {
-            const nextAdmin = room.users.values().next().value as User;
-            room.adminId = nextAdmin.id;
-
-            // Automatically revert reveal policy to 'everyone' to prevent locking
-            // especially in large rooms where the new admin might be unknown.
-            room.revealPolicy = 'everyone';
-
-            console.log(`User ${userId} (admin) left room ${roomId}. Promoted user ${nextAdmin.id} (${nextAdmin.name}) to admin and reset policy to 'everyone'.`);
-        }
-
-        // If the room is empty, we could delete it, but for now we'll keep it simple.
         return true;
     },
 
     /**
      * Update user information
      */
-    updateUser(roomId: string, userId: string, updates: Partial<User>): boolean {
-        const room = rooms.get(roomId);
-        if (!room) return false;
+    async updateUser(roomId: string, userId: string, updates: Partial<User>): Promise<boolean> {
+        const userData = await redis.hget(`room:${roomId}:user_data`, userId);
+        if (!userData) return false;
 
-        const user = room.users.get(userId);
-        if (!user) return false;
+        const user = JSON.parse(userData);
+        const updatedUser = { ...user, ...updates };
 
-        room.users.set(userId, { ...user, ...updates });
+        // Update Postgres
+        if (updates.name) {
+            await prisma.user.update({
+                where: { id: userId },
+                data: { name: updates.name },
+            });
+        }
+
+        await redis.hset(`room:${roomId}:user_data`, userId, JSON.stringify(updatedUser));
         return true;
     },
 
     /**
      * Update room settings
      */
-    updateSettings(roomId: string, updates: Partial<Pick<Room, 'name' | 'votingSystem' | 'revealPolicy'>>): boolean {
-        const room = rooms.get(roomId);
-        if (!room) return false;
+    async updateSettings(roomId: string, updates: Partial<Pick<Room, 'name' | 'votingSystem' | 'revealPolicy'>>): Promise<boolean> {
+        const exists = await redis.exists(`room:${roomId}:meta`);
+        if (!exists) return false;
 
-        if (updates.name !== undefined) room.name = updates.name;
-        if (updates.votingSystem !== undefined) room.votingSystem = updates.votingSystem;
-        if (updates.revealPolicy !== undefined) room.revealPolicy = updates.revealPolicy;
+        if (updates.name !== undefined) {
+            await redis.hset(`room:${roomId}:meta`, 'name', updates.name);
+            await (prisma.room as any).update({
+                where: { id: roomId },
+                data: { name: updates.name },
+            });
+        }
+        if (updates.votingSystem !== undefined) {
+            await redis.hset(`room:${roomId}:meta`, 'votingSystem', updates.votingSystem);
+            await (prisma.room as any).update({
+                where: { id: roomId },
+                data: { votingSystem: updates.votingSystem },
+            });
+        }
+        if (updates.revealPolicy !== undefined) {
+            await redis.hset(`room:${roomId}:meta`, 'revealPolicy', updates.revealPolicy);
+        }
 
         return true;
     },
@@ -103,91 +193,232 @@ export const roomStore = {
     /**
      * Get user by socket ID
      */
-    getUserBySocketId(socketId: string): { user: User; roomId: string } | undefined {
-        for (const [roomId, room] of rooms.entries()) {
-            for (const user of room.users.values()) {
-                if (user.socketId === socketId) {
-                    return { user, roomId };
-                }
-            }
-        }
-        return undefined;
+    async getUserBySocketId(socketId: string): Promise<{ user: User; roomId: string } | undefined> {
+        const mapping = await redis.get(`socket:${socketId}`);
+        if (!mapping) return undefined;
+
+        const { userId, roomId } = JSON.parse(mapping);
+        const userData = await redis.hget(`room:${roomId}:user_data`, userId);
+        if (!userData) return undefined;
+
+        return { user: JSON.parse(userData), roomId };
+    },
+
+    /**
+     * Map socket ID to user and room
+     */
+    async mapSocket(socketId: string, userId: string, roomId: string) {
+        await redis.set(`socket:${socketId}`, JSON.stringify({ userId, roomId }), 'EX', ROOM_TTL);
+    },
+
+    /**
+     * Unmap socket ID
+     */
+    async unmapSocket(socketId: string) {
+        await redis.del(`socket:${socketId}`);
     },
 
     /**
      * Cast a vote
      */
-    castVote(roomId: string, userId: string, value: string): boolean {
-        const room = rooms.get(roomId);
-        if (!room || room.revealed) return false;
+    async castVote(roomId: string, userId: string, value: string): Promise<boolean> {
+        const meta = await this.getRoom(roomId);
+        if (!meta || meta.revealed) return false;
 
-        // Allow unvoting by sending null or empty string
-        const voteValue = (value === null || value === "") ? null : value;
-        room.votes.set(userId, voteValue);
+        const voteValue = (value === null || value === "") ? "" : value;
+
+        if (voteValue === "") {
+            await redis.hdel(`room:${roomId}:votes`, userId);
+            await (prisma as any).vote.deleteMany({
+                where: { roomId, userId }
+            });
+        } else {
+            await redis.hset(`room:${roomId}:votes`, userId, voteValue);
+            await (prisma as any).vote.upsert({
+                where: { roomId_userId: { roomId, userId } },
+                update: { value: voteValue },
+                create: { roomId, userId, value: voteValue }
+            });
+        }
         return true;
     },
 
     /**
      * Reveal all votes
      */
-    revealVotes(roomId: string): boolean {
-        const room = rooms.get(roomId);
-        if (!room) return false;
+    async revealVotes(roomId: string): Promise<boolean> {
+        const exists = await redis.exists(`room:${roomId}:meta`);
+        if (!exists) return false;
 
-        room.revealed = true;
+        await redis.hset(`room:${roomId}:meta`, 'revealed', 'true');
+        await (prisma.room as any).update({
+            where: { id: roomId },
+            data: { revealed: true }
+        });
         return true;
     },
 
     /**
      * Reset votes
      */
-    resetVotes(roomId: string): boolean {
-        const room = rooms.get(roomId);
-        if (!room) return false;
+    async resetVotes(roomId: string): Promise<boolean> {
+        const exists = await redis.exists(`room:${roomId}:meta`);
+        if (!exists) return false;
 
-        room.revealed = false;
-        for (const userId of room.users.keys()) {
-            room.votes.set(userId, null);
-        }
+        const multi = redis.pipeline();
+        multi.hset(`room:${roomId}:meta`, 'revealed', 'false');
+        multi.del(`room:${roomId}:votes`);
+        await multi.exec();
+
+        await (prisma.room as any).update({
+            where: { id: roomId },
+            data: { revealed: false }
+        });
+        await (prisma as any).vote.deleteMany({
+            where: { roomId }
+        });
+
         return true;
     },
 
     /**
-     * Get room state for broadcasting (optionally personalized for a user)
+     * Get room state for broadcasting
      */
-    getRoomState(roomId: string, forUserId?: string): RoomState | undefined {
-        const room = rooms.get(roomId);
-        if (!room) return undefined;
+    async getRoomState(roomId: string, forUserId?: string): Promise<RoomState | undefined> {
+        const meta = await this.getRoom(roomId);
+        if (!meta) return undefined;
 
-        const users = Array.from(room.users.values()).map(user => ({
-            id: user.id,
-            name: user.name,
-            hasVoted: room.votes.get(user.id) !== null,
-        }));
+        let userIds = await redis.smembers(`room:${roomId}:users`);
+        let userDataMap = await redis.hgetall(`room:${roomId}:user_data`);
+        let voteMap = await redis.hgetall(`room:${roomId}:votes`);
+
+        // RESTORE FROM POSTGRES if Redis is empty but metadata exists
+        // This handles cases where room expired from Redis but we want to view history
+        if (userIds.length === 0) {
+            const participants = await (prisma as any).participant.findMany({ where: { roomId } });
+            if (participants.length > 0) {
+                const pUserIds = participants.map((p: any) => p.userId);
+
+                // Fetch users details
+                const users = await prisma.user.findMany({ where: { id: { in: pUserIds } } });
+
+                // Fetch votes
+                const votes = await (prisma as any).vote.findMany({ where: { roomId } });
+
+                if (users.length > 0) {
+                    const multi = redis.pipeline();
+
+                    // Repopulate Users
+                    users.forEach((u: any) => {
+                        multi.sadd(`room:${roomId}:users`, u.id);
+                        multi.hset(`room:${roomId}:user_data`, u.id, JSON.stringify({ id: u.id, name: u.name }));
+                        // Update local vars for this response
+                        userIds.push(u.id);
+                        userDataMap[u.id] = JSON.stringify({ id: u.id, name: u.name });
+                    });
+
+                    // Repopulate Votes
+                    votes.forEach((v: any) => {
+                        multi.hset(`room:${roomId}:votes`, v.userId, v.value);
+                        voteMap[v.userId] = v.value;
+                    });
+
+                    // Set expiry
+                    multi.expire(`room:${roomId}:users`, ROOM_TTL);
+                    multi.expire(`room:${roomId}:user_data`, ROOM_TTL);
+                    multi.expire(`room:${roomId}:votes`, ROOM_TTL);
+
+                    await multi.exec();
+                }
+            }
+        } else {
+            // Fallback for missing votes if users exist (existing logic)
+            const missingVotes = userIds.some(id => !voteMap[id]);
+            if (missingVotes) {
+                const pgVotes = await (prisma as any).vote.findMany({ where: { roomId } });
+                if (pgVotes.length > 0) {
+                    const multi = redis.pipeline();
+                    pgVotes.forEach((v: any) => {
+                        multi.hset(`room:${roomId}:votes`, v.userId, v.value);
+                        voteMap[v.userId] = v.value;
+                    });
+                    await multi.exec();
+                }
+            }
+        }
+
+        const users = userIds.map((id: string) => {
+            const data = JSON.parse(userDataMap[id] || '{}');
+            return {
+                id,
+                name: data.name || 'Unknown',
+                hasVoted: !!voteMap[id],
+            };
+        });
 
         const votes: Record<string, string | null> = {};
-        if (room.revealed) {
-            // Everyone sees everything
-            for (const [userId, vote] of room.votes.entries()) {
-                votes[userId] = vote;
+        if (meta.revealed) {
+            for (const id of userIds) {
+                votes[id] = voteMap[id] || null;
             }
         } else if (forUserId) {
-            // User sees only their own vote
-            const myVote = room.votes.get(forUserId);
+            const myVote = voteMap[forUserId];
             if (myVote) {
                 votes[forUserId] = myVote;
             }
         }
 
         return {
-            id: room.id,
-            name: room.name,
-            adminId: room.adminId,
-            votingSystem: room.votingSystem,
-            revealPolicy: room.revealPolicy,
+            id: meta.id,
+            name: meta.name,
+            adminId: meta.adminId,
+            votingSystem: meta.votingSystem,
+            revealPolicy: meta.revealPolicy,
             users,
             votes,
-            revealed: room.revealed,
+            revealed: meta.revealed,
         };
     },
+
+    /**
+     * Get all rooms for a user (created or joined)
+     */
+    async getUserRooms(userId: string, limit: number = 20, offset: number = 0): Promise<{ rooms: any[], total: number }> {
+        // 1. Get rooms where user is admin
+        const adminRooms = await prisma.room.findMany({
+            where: { adminId: userId },
+            orderBy: { createdAt: 'desc' },
+            select: { id: true, name: true, createdAt: true, adminId: true }
+        });
+
+        // 2. Get rooms where user is a participant
+        const participated = await (prisma as any).participant.findMany({
+            where: { userId },
+            orderBy: { joinedAt: 'desc' },
+        });
+
+        const participantRoomIds = participated.map((p: any) => p.roomId);
+
+        // Fetch room details for joined rooms, excluding ones where user is admin (deduplication)
+        const participantRooms = await prisma.room.findMany({
+            where: {
+                id: { in: participantRoomIds },
+                adminId: { not: userId }
+            },
+            orderBy: { createdAt: 'desc' },
+            select: { id: true, name: true, createdAt: true, adminId: true }
+        });
+
+        // Combine and sort
+        const allRooms = [...adminRooms, ...participantRooms];
+        allRooms.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        // Apply pagination in memory (since we combined two lists)
+        const paginated = allRooms.slice(offset, offset + limit);
+
+        return {
+            rooms: paginated,
+            total: allRooms.length
+        };
+    }
 };

@@ -6,7 +6,6 @@ import { Participants } from "@/components/Participants";
 import { VotingDeck } from "@/components/VotingDeck";
 import { Controls } from "@/components/Controls";
 import type { VoteValue, VotingSystemId, RevealPolicy } from "@/types";
-import { Pencil, ChevronDown, Users } from "lucide-react";
 import {
     UserPlusIcon,
     type UserPlusHandle,
@@ -15,30 +14,61 @@ import {
     LogoutIcon,
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
+import { Tooltip } from "@/components/ui/tooltip";
+import { SpadeIcon } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
 import { RoomSettingsModal } from "@/components/modals/RoomSettingsModal";
+import { RecoveryCodeModal } from "@/components/modals/RecoveryCodeModal";
 import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserAvatar } from "@/components/UserAvatar";
 import { SettingsIcon, type SettingsIconHandle } from "@/components/icons/SettingsIcon";
+import { UserMenu } from "@/components/UserMenu";
 
 import { NotFoundView } from "@/components/NotFoundView";
 
+import { authApi } from "@/lib/api";
+import { userManager } from "@/lib/user";
+
 export const RoomPage: React.FC = () => {
     const { roomId } = useParams({ from: "/room/$roomId" });
-    const { name } = useSearch({ from: "/room/$roomId" });
+    const { name: searchName } = useSearch({ from: "/room/$roomId" });
     const userPlusRef = useRef<UserPlusHandle>(null);
     const logoutRef = useRef<LogoutIconHandle>(null);
     const settingsRef = useRef<SettingsIconHandle>(null);
     const navigate = useNavigate();
 
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    // Use stored name as fallback if not in URL
+    const name = searchName || userManager.getUserName();
+
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(!name);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
+    const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
+    const [newRecoveryCode, setNewRecoveryCode] = useState("");
+
+    // Handle anonymous login if we have a name but no token
+    React.useEffect(() => {
+        const checkAuth = async () => {
+            const currentToken = userManager.getAccessToken();
+            if (name && !currentToken && !isAuthenticating) {
+                setIsAuthenticating(true);
+                try {
+                    const { accessToken, userId } = await authApi.loginAnonymous();
+                    userManager.setAccessToken(accessToken);
+                    userManager.setUserId(userId);
+                } catch (err) {
+                    console.error("Failed to login anonymously:", err);
+                } finally {
+                    setIsAuthenticating(false);
+                }
+            }
+        };
+        checkAuth();
+    }, [name, isAuthenticating]);
 
     const {
         roomState,
@@ -54,8 +84,8 @@ export const RoomPage: React.FC = () => {
 
     const isAdmin = roomState?.adminId === userId;
 
-    const handleLeaveRoom = () => {
-        // Remove user from room and navigate to landing page
+    const handleExitGame = () => {
+        // Just leave the room context, do not logout
         leaveRoom();
         navigate({ to: "/" });
     };
@@ -64,8 +94,29 @@ export const RoomPage: React.FC = () => {
         setIsInviteModalOpen(true);
     };
 
-    const handleNameSubmit = (newName: string) => {
+    const handleNameSubmit = async (newName: string) => {
         setIsDisplayNameModalOpen(false);
+
+        // If we don't have a token yet, performing an anonymous login
+        if (!userManager.getAccessToken()) {
+            setIsAuthenticating(true);
+            try {
+                const { accessToken, userId, recoveryCode } = await authApi.loginAnonymous();
+                userManager.setAccessToken(accessToken);
+                userManager.setUserId(userId);
+                userManager.setUserName(newName);
+                if (recoveryCode) {
+                    userManager.setRecoveryCode(recoveryCode);
+                    setNewRecoveryCode(recoveryCode);
+                    setIsRecoveryModalOpen(true);
+                }
+            } catch (err) {
+                console.error("Failed to login anonymously during name submission:", err);
+            } finally {
+                setIsAuthenticating(false);
+            }
+        }
+
         // Update URL search params with the new name
         navigate({
             to: "/room/$roomId",
@@ -134,91 +185,19 @@ export const RoomPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col">
-            <Header subtitle={roomState.name}>
+            <Header>
                 <div className="flex items-center gap-6">
                     {/* User Profile Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                            className="flex cursor-pointer items-center gap-3 hover:opacity-80 transition-opacity group"
-                        >
-                            <UserAvatar name={name || "Guest"} size={28} />
-                            <div className="flex items-center gap-2">
-                                <span className="text-white font-bold hidden sm:block text-lg truncate max-w-[120px]">
-                                    {name || "Guest"}
-                                </span>
-                                <ChevronDown
-                                    className={`text-slate-400 transition-transform duration-200 ${isUserMenuOpen ? "rotate-180" : ""
-                                        }`}
-                                />
-                            </div>
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {isUserMenuOpen && (
-                            <>
-                                <div
-                                    className="fixed inset-0 z-40"
-                                    onClick={() => setIsUserMenuOpen(false)}
-                                />
-                                <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
-                                    <div className="p-4 border-b border-slate-700 flex items-center gap-4">
-                                        {/* Avatar */}
-                                        <div className="relative group/avatar cursor-pointer">
-                                            <UserAvatar name={name || "Guest"} size={48} />
-                                        </div>
-                                        {/* User Info */}
-                                        <div className="flex-1 flex flex-col justify-center items-start">
-                                            <div
-                                                onClick={() => {
-                                                    setIsDisplayNameModalOpen(true);
-                                                    setIsUserMenuOpen(false);
-                                                }}
-                                                className="flex items-center gap-2 group/name cursor-pointer hover:opacity-80 transition-opacity min-w-0"
-                                            >
-                                                <span className="text-white font-bold text-lg truncate max-w-[150px]">
-                                                    {name || "Guest"}
-                                                </span>
-                                                <Pencil className="w-3.5 h-3.5 text-white/50 group-hover/name:text-white transition-colors shrink-0" />
-                                            </div>
-                                            <div className="text-slate-400 text-sm font-medium">
-                                                Guest user
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Menu Actions */}
-                                    <>
-                                        {isAdmin && (
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => {
-                                                    setIsSettingsModalOpen(true);
-                                                    setIsUserMenuOpen(false);
-                                                }}
-                                                onMouseEnter={() => settingsRef.current?.startAnimation()}
-                                                onMouseLeave={() => settingsRef.current?.stopAnimation()}
-                                                className="w-full justify-start text-left px-4 py-4 text-slate-300 bg-transparent hover:bg-slate-700 hover:text-white font-medium h-auto rounded-none border-b border-slate-700/50"
-                                            >
-                                                <SettingsIcon ref={settingsRef} className="w-6 h-6 mr-3 text-slate-400" />
-                                                <span className="text-[16px]">Room settings</span>
-                                            </Button>
-                                        )}
-                                        <Button
-                                            variant="ghost"
-                                            onClick={handleLeaveRoom}
-                                            onMouseEnter={() => logoutRef.current?.startAnimation()}
-                                            onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                                            className="w-full justify-start text-left px-4 py-3 text-red-400 bg-transparent hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
-                                        >
-                                            <LogoutIcon ref={logoutRef} className="w-6 h-6 mr-3" />
-                                            <span className="text-[16px]">Leave game</span>
-                                        </Button>
-                                    </>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    <UserMenu
+                        name={name || "Guest"}
+                        role={isAdmin ? "Game Host" : "Guest user"}
+                        onNameChange={() => {
+                            setIsDisplayNameModalOpen(true);
+                        }}
+                        onLogout={() => {
+                            leaveRoom();
+                        }}
+                    />
 
                     {/* Invite Button */}
                     <Button
@@ -235,18 +214,54 @@ export const RoomPage: React.FC = () => {
                 </div>
             </Header>
 
+            {/* Game Top Bar */}
+            <div className="w-full bg-blue-500/3 border-b border-blue-500/20 py-2 px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-700">
+                <div className="w-full mx-auto flex items-center justify-between space-x-4">
+                    <div className="flex items-center gap-2">
+                        <SpadeIcon size={24} className="text-blue-500/60" />
+                        <h2 className="text-lg font-semibold text-slate-200">
+                            {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
+                        </h2>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {isAdmin && (
+                            <Tooltip content="Game settings">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsSettingsModalOpen(true)}
+                                    onMouseEnter={() => settingsRef.current?.startAnimation()}
+                                    onMouseLeave={() => settingsRef.current?.stopAnimation()}
+                                    className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-full w-10 h-10"
+                                >
+                                    <SettingsIcon ref={settingsRef} className="w-6 h-6" />
+                                </Button>
+                            </Tooltip>
+                        )}
+
+                        <Tooltip content="Leave game">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleExitGame}
+                                onMouseEnter={() => logoutRef.current?.startAnimation()}
+                                onMouseLeave={() => logoutRef.current?.stopAnimation()}
+                                className="text-red-400 hover:bg-slate-700/50 hover:text-red-300 rounded-full w-10 h-10"
+                            >
+                                <LogoutIcon ref={logoutRef} className="w-5 h-5" />
+                            </Button>
+                        </Tooltip>
+                    </div>
+                </div>
+            </div>
+
             <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
                 {/* 1. Participants Section (Top) */}
                 <section
                     aria-label="Participants"
                     className="w-full flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700"
                 >
-                    <div className="flex items-center gap-2 mb-2 text-slate-400">
-                        <Users size={16} className="text-slate-500" />
-                        <span className="text-xs font-bold uppercase tracking-[0.2em]">
-                            Players
-                        </span>
-                    </div>
                     <Participants
                         users={roomState.users}
                         votes={roomState.votes}
@@ -314,7 +329,7 @@ export const RoomPage: React.FC = () => {
             {/* 3. Voting Deck Section (Sticky Bottom) */}
             <section
                 aria-label="Voting Deck"
-                className="sticky bottom-0 z-50 w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-800 pb-4 pt-4 animate-in slide-in-from-bottom-full duration-700 delay-200"
+                className="sticky bottom-0 z-40 w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-800 pb-4 pt-4 animate-in slide-in-from-bottom-full duration-700 delay-200"
             >
                 <div className="max-w-5xl mx-auto px-4">
                     {!roomState.revealed && (
@@ -361,6 +376,12 @@ export const RoomPage: React.FC = () => {
                     canChangeVotingSystem={!hasVotes}
                 />
             )}
+
+            <RecoveryCodeModal
+                isOpen={isRecoveryModalOpen}
+                onClose={() => setIsRecoveryModalOpen(false)}
+                recoveryCode={newRecoveryCode}
+            />
         </div>
     );
 };

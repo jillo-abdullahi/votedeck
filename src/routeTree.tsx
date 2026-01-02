@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/re
 import { LandingPage } from './pages/LandingPage';
 import { RoomPage } from './pages/RoomPage';
 import { CreateGamePage } from './pages/CreateGamePage';
+import { MyRoomsPage } from './pages/MyRoomsPage';
 import { NotFoundView } from './components/NotFoundView';
 
 // Create a root route
@@ -40,8 +41,15 @@ const createGameRoute = createRoute({
     component: CreateGamePage,
 });
 
+// Create My Rooms route
+const myRoomsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/my',
+    component: MyRoomsPage,
+});
+
 // Create the route tree
-const routeTree = rootRoute.addChildren([indexRoute, createGameRoute, roomRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, createGameRoute, roomRoute, myRoomsRoute]);
 
 // Create the router
 export const router = createRouter({ routeTree });

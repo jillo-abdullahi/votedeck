@@ -31,7 +31,7 @@ const VOTING_SYSTEMS = [
 ];
 
 const REVEAL_POLICIES = [
-    { id: "everyone", label: "Everyone", description: "Anyone in the room can reveal votes and start new rounds." },
+    { id: "everyone", label: "Everyone", description: "Anyone in the game can reveal votes and start new rounds." },
     { id: "admin", label: "Only Me", description: "Only you can reveal votes and start new rounds." },
 ];
 
@@ -86,7 +86,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                     >
                         <div className="p-8 pb-4">
                             <ModalHeader
-                                title="Room Settings"
+                                title="Game Settings"
                                 subtitle="Configure your planning session"
                                 icon={<Settings className="w-10 h-10 text-blue-500" />}
                                 onClose={onClose}
@@ -98,7 +98,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                 {/* Room Name */}
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-start">
-                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Room Name</label>
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Game Name</label>
                                     </div>
                                     <input
                                         type="text"
@@ -207,7 +207,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                             <Button variant="ghost" size="lg" onClick={onClose} className="flex-1">
                                 Cancel
                             </Button>
-                            <Button type="submit" size="lg" onClick={handleSubmit} disabled={!name.trim()} className="flex-2 shadow-lg shadow-blue-500/20">
+                            <Button type="submit" size="lg" onClick={handleSubmit} disabled={!name.trim()} className="flex-2">
                                 Save Changes
                             </Button>
                         </div>

@@ -89,7 +89,7 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
                   type="submit"
                   size="lg"
                   disabled={!name.trim()}
-                  className="flex-2 text-lg shadow-lg shadow-blue-500/20"
+                  className="flex-2 text-lg"
                 >
                   Continue
                 </Button>

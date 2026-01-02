@@ -60,10 +60,14 @@ export interface UpdateSettingsPayload {
 export interface CreateRoomRequest {
     name: string;
     votingSystem: VotingSystemId;
-    adminId: string;
+    adminId?: string;
+    adminName?: string;
 }
 
 export interface CreateRoomResponse {
     roomId: string;
     joinUrl: string;
+    accessToken: string;
+    userId: string;
+    recoveryCode?: string;
 }

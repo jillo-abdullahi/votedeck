@@ -37,7 +37,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
             )}
 
             {/* Header Content */}
-            <div className="flex items-center justify-start space-x-2">
+            <div className="flex items-center justify-start space-x-2 mb-2">
                 {icon && (
                     <div className="p-2 border-r border-slate-700">
                         {icon}

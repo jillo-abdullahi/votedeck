@@ -1,17 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
+import { userManager } from "@/lib/user";
+import { UserMenu } from "@/components/UserMenu";
+import { LoginModal } from "@/components/modals/LoginModal";
 
 export const LandingPage: React.FC = () => {
+    const [userName, setUserName] = useState<string | null>(null);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    useEffect(() => {
+        const token = userManager.getAccessToken();
+        const name = userManager.getUserName();
+        if (token && name) {
+            setUserName(name);
+        }
+    }, []);
+
     return (
         <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30">
             <Header>
-                <button className="hidden sm:block text-slate-300 hover:text-white font-medium text-sm transition-colors">
-                    Login
-                </button>
+                {userName ? (
+                    <UserMenu name={userName} onNameChange={setUserName} />
+                ) : (
+                    <button
+                        onClick={() => setIsLoginModalOpen(true)}
+                        className="hidden cursor-pointer sm:block text-slate-300 hover:text-white font-medium text-sm transition-colors"
+                    >
+                        Sign in
+                    </button>
+                )}
                 <Link
                     to="/create"
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all active:scale-95"
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all active:scale-95 ml-4"
                 >
                     Start new game
                 </Link>
@@ -45,8 +66,8 @@ export const LandingPage: React.FC = () => {
                 {/* Right Content - Visual */}
                 <div className="relative">
                     {/* Decorative Elements */}
-                    <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl rounded-full pointer-events-none" />
-                    <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl rounded-full pointer-events-none" />
+                    <div className="absolute -top-20 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
                     {/* Card Component Mock Application UI */}
                     <div className="relative bg-slate-800 rounded-2xl border border-slate-700 p-8 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
@@ -89,6 +110,10 @@ export const LandingPage: React.FC = () => {
                     </div>
                 </div>
             </main>
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+            />
         </div>
     );
 };

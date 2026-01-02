@@ -107,7 +107,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                                         onClick={handleCopy}
                                         size="lg"
                                         variant={copied ? "success" : "default"}
-                                        className="flex-1 shadow-lg shadow-blue-500/20"
+                                        className="flex-1"
                                         onMouseEnter={() => {
                                             if (copied) checkRef.current?.startAnimation();
                                             else clipboardRef.current?.startAnimation();

@@ -1,14 +1,45 @@
-import { v4 as uuidv4 } from 'uuid';
-
 const USER_ID_KEY = 'votedeck_user_id';
+const TOKEN_KEY = 'votedeck_access_token';
 
 export const userManager = {
     getUserId: (): string => {
-        let id = localStorage.getItem(USER_ID_KEY);
-        if (!id) {
-            id = uuidv4();
-            localStorage.setItem(USER_ID_KEY, id);
-        }
-        return id;
+        return localStorage.getItem(USER_ID_KEY) || '';
     },
+    setUserId: (id: string): void => {
+        if (id) {
+            localStorage.setItem(USER_ID_KEY, id);
+        } else {
+            localStorage.removeItem(USER_ID_KEY);
+        }
+    },
+    getAccessToken: (): string | null => {
+        return localStorage.getItem(TOKEN_KEY);
+    },
+    setAccessToken: (token: string | null): void => {
+        if (token) {
+            localStorage.setItem(TOKEN_KEY, token);
+        } else {
+            localStorage.removeItem(TOKEN_KEY);
+        }
+    },
+    getUserName: (): string => {
+        return localStorage.getItem('votedeck_user_name') || '';
+    },
+    setUserName: (name: string): void => {
+        if (name) {
+            localStorage.setItem('votedeck_user_name', name);
+        } else {
+            localStorage.removeItem('votedeck_user_name');
+        }
+    },
+    getRecoveryCode: (): string => {
+        return localStorage.getItem('votedeck_recovery_code') || '';
+    },
+    setRecoveryCode: (code: string): void => {
+        if (code) {
+            localStorage.setItem('votedeck_recovery_code', code);
+        } else {
+            localStorage.removeItem('votedeck_recovery_code');
+        }
+    }
 };

@@ -8,6 +8,7 @@ import { roomsApi } from "../lib/api";
 import type { VotingSystemId } from "../types";
 import { userManager } from "../lib/user";
 import { ChevronDownIcon, UserIcon } from "lucide-react";
+import { UserMenu } from "@/components/UserMenu";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -35,7 +36,14 @@ export const CreateGamePage: React.FC = () => {
   // Triggered when form is valid and user clicks "Create Game"
   const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (gameName.trim()) {
+    if (!gameName.trim()) return;
+
+    const existingToken = userManager.getAccessToken();
+    const existingName = userManager.getUserName();
+
+    if (existingToken && existingName) {
+      handleFinalSubmit(existingName);
+    } else {
       setIsModalOpen(true);
     }
   };
@@ -43,9 +51,16 @@ export const CreateGamePage: React.FC = () => {
   // Triggered when user submits name in modal
   const handleFinalSubmit = async (displayName: string) => {
     try {
-      const adminId = userManager.getUserId();
-      // Create the room via backend API
-      const { roomId } = await roomsApi.createRoom(gameName, votingSystem as VotingSystemId, adminId);
+      // Create the room via backend API - now passing displayName as adminName
+      const { roomId, accessToken, userId, recoveryCode } = await roomsApi.createRoom(gameName, votingSystem as VotingSystemId, displayName);
+
+      // Store the session details
+      userManager.setAccessToken(accessToken);
+      userManager.setUserId(userId);
+      userManager.setUserName(displayName);
+      if (recoveryCode) {
+        userManager.setRecoveryCode(recoveryCode);
+      }
 
       // Interact with router to navigate
       navigate({
@@ -55,7 +70,6 @@ export const CreateGamePage: React.FC = () => {
       });
     } catch (error) {
       console.error("Failed to create room:", error);
-      // In a real app, we would show a toast error here
     }
   };
 
@@ -72,7 +86,14 @@ export const CreateGamePage: React.FC = () => {
       />
 
       <Header>
-        <div className="font-bold text-slate-300">Create new game</div>
+        {userManager.getUserName() ? (
+          <div className="flex items-center gap-4">
+            <div className="font-bold text-slate-300 mr-4">Create new game</div>
+            <UserMenu name={userManager.getUserName()} onNameChange={() => { }} />
+          </div>
+        ) : (
+          <div className="font-bold text-slate-300">Create new game</div>
+        )}
       </Header>
 
       {/* Main Content */}
@@ -142,7 +163,7 @@ export const CreateGamePage: React.FC = () => {
                         className={`cursor-pointer w-full text-left px-6 py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${votingSystem === sys.id
                           ? "bg-blue-600/10 text-blue-400 font-medium"
                           : "text-slate-300"
-                          }`}
+                          } `}
                       >
                         {sys.label}
                         {votingSystem === sys.id && (

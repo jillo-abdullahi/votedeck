@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import type { User, VoteValue } from '../types';
 import { UserPlusIcon, type UserPlusHandle } from './icons/UserPlusIcon';
-import { UserAvatar } from './UserAvatar';
 
 interface ParticipantsProps {
     users: User[];

@@ -9,9 +9,14 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
     const [error, setError] = useState<string | null>(null);
 
     const userId = userManager.getUserId();
+    const token = userManager.getAccessToken();
 
     useEffect(() => {
-        if (!roomId || !name) return;
+        // We only connect if we have a roomId, a name, and a token
+        if (!roomId || !name || !token) return;
+
+        // Set token for authentication
+        socket.auth = { token };
 
         // Connect socket
         socket.connect();
@@ -20,7 +25,32 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             setIsConnected(true);
             setError(null);
             // Join room once connected
+            // userId is still passed for legacy/mapping purposes, 
+            // but server also gets it from JWT
             socket.emit('JOIN_ROOM', { roomId, userId, name });
+        };
+
+        const onConnectError = async (err: Error) => {
+            console.error('Socket connection error:', err.message);
+            // Check if error is related to authentication
+            if (err.message.includes('Authentication error') || err.message.includes('Invalid token') || err.message.includes('jwt expired')) {
+                try {
+                    console.log('Attempting to refresh token...');
+                    const { accessToken } = await import('../lib/api').then(m => m.authApi.refresh());
+                    userManager.setAccessToken(accessToken);
+
+                    // Update socket auth and reconnect
+                    socket.auth = { token: accessToken };
+                    socket.connect();
+                    console.log('Token refreshed and socket reconnecting...');
+                } catch (refreshErr) {
+                    console.error('Failed to refresh token:', refreshErr);
+                    setError('Authentication failed. Please reload the page.');
+                    userManager.setAccessToken(null); // Clear invalid token
+                }
+            } else {
+                setError(`Connection error: ${err.message}`);
+            }
         };
 
         const onDisconnect = () => {
@@ -36,6 +66,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         };
 
         socket.on('connect', onConnect);
+        socket.on('connect_error', onConnectError);
         socket.on('disconnect', onDisconnect);
         socket.on('ROOM_STATE', onRoomState);
         socket.on('ERROR', onError);
@@ -48,12 +79,13 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         return () => {
             socket.emit('LEAVE_ROOM');
             socket.off('connect', onConnect);
+            socket.off('connect_error', onConnectError);
             socket.off('disconnect', onDisconnect);
             socket.off('ROOM_STATE', onRoomState);
             socket.off('ERROR', onError);
             socket.disconnect();
         };
-    }, [roomId, name, userId]);
+    }, [roomId, name, userId, token]); // Re-run if these change, but internal token update is handled manually
 
     const castVote = useCallback((value: VoteValue) => {
         socket.emit('CAST_VOTE', { value });
