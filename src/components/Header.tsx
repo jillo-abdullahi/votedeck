@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import React from "react";
 import { Link } from "@tanstack/react-router";
 
@@ -8,7 +9,12 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ children, subtitle }) => {
     return (
-        <header className="w-full border-b border-transparent">
+        <motion.header
+            className="w-full border-b border-transparent"
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+        >
             <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full border-b-2 border-blue-500/30">
                 <Link
                     to="/"
@@ -33,6 +39,6 @@ export const Header: React.FC<HeaderProps> = ({ children, subtitle }) => {
 
                 <div className="flex items-center gap-4">{children}</div>
             </nav>
-        </header>
+        </motion.header>
     );
 };
