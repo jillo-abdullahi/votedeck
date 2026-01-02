@@ -5,10 +5,12 @@ import { Header } from "../components/Header";
 import { userManager } from "@/lib/user";
 import { UserMenu } from "@/components/UserMenu";
 import { LoginModal } from "@/components/modals/LoginModal";
+import { JoinRoomModal } from "@/components/modals/JoinRoomModal";
 
 export const LandingPage: React.FC = () => {
     const [userName, setUserName] = useState<string | null>(null);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
     useEffect(() => {
         const token = userManager.getAccessToken();
@@ -94,10 +96,16 @@ export const LandingPage: React.FC = () => {
                     >
                         <Link
                             to="/create"
-                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center"
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center shadow-lg shadow-blue-900/40"
                         >
                             Start new game
                         </Link>
+                        <button
+                            onClick={() => setIsJoinModalOpen(true)}
+                            className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center"
+                        >
+                            Join a game
+                        </button>
                     </motion.div>
                 </motion.div>
 
@@ -189,6 +197,10 @@ export const LandingPage: React.FC = () => {
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
+            />
+            <JoinRoomModal
+                isOpen={isJoinModalOpen}
+                onClose={() => setIsJoinModalOpen(false)}
             />
         </div>
     );

@@ -15,7 +15,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { SpadeIcon } from "lucide-react";
+import { SpadeIcon, Copy, Check } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
@@ -25,6 +25,7 @@ import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
 import { motion, AnimatePresence } from "framer-motion";
 import { SettingsIcon, type SettingsIconHandle } from "@/components/icons/SettingsIcon";
+import { ClipboardIcon, type ClipboardIconHandle } from "@/components/icons/ClipboardIcon";
 import { UserMenu } from "@/components/UserMenu";
 
 import { NotFoundView } from "@/components/NotFoundView";
@@ -38,6 +39,7 @@ export const RoomPage: React.FC = () => {
     const userPlusRef = useRef<UserPlusHandle>(null);
     const logoutRef = useRef<LogoutIconHandle>(null);
     const settingsRef = useRef<SettingsIconHandle>(null);
+    const clipboardRef = useRef<ClipboardIconHandle>(null);
     const navigate = useNavigate();
 
     // Use stored name as fallback if not in URL
@@ -49,6 +51,7 @@ export const RoomPage: React.FC = () => {
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     const [newRecoveryCode, setNewRecoveryCode] = useState("");
+    const [isCopied, setIsCopied] = useState(false);
 
     // Handle anonymous login if we have a name but no token
     React.useEffect(() => {
@@ -154,7 +157,13 @@ export const RoomPage: React.FC = () => {
         resetVotes();
     };
 
-    // If room is not found
+    const handleCopyRoomId = () => {
+        if (roomId) {
+            navigator.clipboard.writeText(roomId);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        }
+    };
     if (socketError === "Room not found") {
         return <NotFoundView />;
     }
@@ -215,13 +224,26 @@ export const RoomPage: React.FC = () => {
             </Header>
 
             {/* Game Top Bar */}
-            <div className="w-full bg-blue-500/3 border-b border-blue-500/20 py-2 px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-700">
+            <div className="w-full bg-blue-500/3 border-b border-blue-500/20 py-3 px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-700">
                 <div className="w-full mx-auto flex items-center justify-between space-x-4">
                     <div className="flex items-center gap-2">
                         <SpadeIcon size={24} className="text-blue-500/60" />
                         <h2 className="text-lg font-semibold text-slate-200">
                             {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
                         </h2>
+
+                        <div className="h-4 w-px bg-slate-700 ml-2 hidden sm:block" />
+
+                        <Tooltip content={isCopied ? "Copied!" : "Copy Room ID"}>
+                            <button className="flex cursor-pointer group items-center gap-2 px-2 py-2 hover:bg-slate-700/50 rounded-md transition-colors text-slate-400 hover:text-slate-200"
+                                onMouseEnter={() => clipboardRef.current?.startAnimation()}
+                                onMouseLeave={() => clipboardRef.current?.stopAnimation()}
+                                onClick={handleCopyRoomId}
+                            >
+                                <span className="text-xs font-mono text-slate-500 hidden sm:inline-block group-hover:text-slate-200">{roomId}</span>
+                                {isCopied ? <Check size={16} className="text-green-400" /> : <ClipboardIcon ref={clipboardRef} size={14} className="cursor-pointer" />}
+                            </button>
+                        </Tooltip>
                     </div>
 
                     <div className="flex items-center gap-2">
