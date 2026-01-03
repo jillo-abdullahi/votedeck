@@ -17,6 +17,14 @@ export const redis = new Redis(redisUrl, {
     tls: redisUrl.startsWith('rediss://') ? {
         rejectUnauthorized: false
     } : undefined,
+    // Stability settings for cloud Redis
+    connectTimeout: 20000,
+    keepAlive: 10000, // Send keepalive every 10s
+    retryStrategy(times) {
+        // Linear backoff: 50ms, 100ms, 150ms... maxing at 2s
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+    }
 });
 
 redis.on('connect', () => {
