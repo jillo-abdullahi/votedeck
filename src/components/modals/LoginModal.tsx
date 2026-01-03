@@ -27,12 +27,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setLoading(true);
 
         try {
-            const { userId, accessToken, name, recoveryCode } = await authApi.restore(code.trim());
+            const { userId, accessToken, name } = await authApi.restore(code.trim());
 
             userManager.setUserId(userId);
             userManager.setAccessToken(accessToken);
             userManager.setUserName(name);
-            userManager.setRecoveryCode(recoveryCode || code.trim());
+
 
             onClose();
             window.location.reload();

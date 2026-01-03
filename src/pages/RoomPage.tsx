@@ -15,7 +15,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { SpadeIcon, Copy, Check } from "lucide-react";
+import { SpadeIcon, Check } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
@@ -52,6 +52,16 @@ export const RoomPage: React.FC = () => {
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     const [newRecoveryCode, setNewRecoveryCode] = useState("");
     const [isCopied, setIsCopied] = useState(false);
+
+    // Check for temporary recovery code (from Create Game flow)
+    React.useEffect(() => {
+        const tempCode = userManager.getTempRecoveryCode();
+        if (tempCode) {
+            setNewRecoveryCode(tempCode);
+            setIsRecoveryModalOpen(true);
+            userManager.setTempRecoveryCode(null);
+        }
+    }, []);
 
     // Handle anonymous login if we have a name but no token
     React.useEffect(() => {
@@ -109,7 +119,6 @@ export const RoomPage: React.FC = () => {
                 userManager.setUserId(userId);
                 userManager.setUserName(newName);
                 if (recoveryCode) {
-                    userManager.setRecoveryCode(recoveryCode);
                     setNewRecoveryCode(recoveryCode);
                     setIsRecoveryModalOpen(true);
                 }

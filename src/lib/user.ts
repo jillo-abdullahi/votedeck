@@ -1,6 +1,8 @@
 const USER_ID_KEY = 'votedeck_user_id';
 const TOKEN_KEY = 'votedeck_access_token';
 
+let tempRecoveryCode: string | null = null;
+
 export const userManager = {
     getUserId: (): string => {
         return localStorage.getItem(USER_ID_KEY) || '';
@@ -32,14 +34,10 @@ export const userManager = {
             localStorage.removeItem('votedeck_user_name');
         }
     },
-    getRecoveryCode: (): string => {
-        return localStorage.getItem('votedeck_recovery_code') || '';
+    getTempRecoveryCode: (): string | null => {
+        return tempRecoveryCode;
     },
-    setRecoveryCode: (code: string): void => {
-        if (code) {
-            localStorage.setItem('votedeck_recovery_code', code);
-        } else {
-            localStorage.removeItem('votedeck_recovery_code');
-        }
+    setTempRecoveryCode: (code: string | null): void => {
+        tempRecoveryCode = code;
     }
 };

@@ -2,12 +2,10 @@ import React, { useState, useRef } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { ChevronDown, Pencil } from "lucide-react";
 import { DisplayNameModal } from "./modals/DisplayNameModal";
-import { RecoveryCodeModal } from "./modals/RecoveryCodeModal";
 import { userManager } from "@/lib/user";
 import { Link } from "@tanstack/react-router";
 import { LayoutGridIcon, type LayoutGridHandle } from "./icons/LayoutGridIcon";
 import { Button } from "@/components/ui/button";
-import { KeyIcon, type KeyHandle } from "./icons/KeyIcon";
 import { LogoutIcon, type LogoutIconHandle } from "./icons/LogoutIcon";
 interface UserMenuProps {
     name: string;
@@ -19,10 +17,9 @@ interface UserMenuProps {
 export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role = "Guest user", onLogout }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
-    const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
+
 
     const layoutGridRef = useRef<LayoutGridHandle>(null);
-    const keyRef = useRef<KeyHandle>(null);
     const logoutRef = useRef<LogoutIconHandle>(null);
 
     const handleNameSubmit = (newName: string) => {
@@ -102,18 +99,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role = "
                                 <LayoutGridIcon ref={layoutGridRef} className="w-6 h-6 mr-5 text-slate-400" />
                                 <span className="text-[16px]">My Games</span>
                             </Link>
-                            <button
-                                onClick={() => {
-                                    setIsRecoveryModalOpen(true);
-                                    setIsOpen(false);
-                                }}
-                                onMouseEnter={() => keyRef.current?.startAnimation()}
-                                onMouseLeave={() => keyRef.current?.stopAnimation()}
-                                className="w-full cursor-pointer flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white font-medium transition-colors"
-                            >
-                                <KeyIcon ref={keyRef} className="w-5 h-5 mr-5 text-slate-400" />
-                                <span className="text-[16px]">My Sign-in Key</span>
-                            </button>
                         </div>
 
                         <Button
@@ -137,11 +122,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role = "
                 initialValue={name || ""}
             />
 
-            <RecoveryCodeModal
-                isOpen={isRecoveryModalOpen}
-                onClose={() => setIsRecoveryModalOpen(false)}
-                recoveryCode={userManager.getRecoveryCode()}
-            />
+
         </div>
     );
 };

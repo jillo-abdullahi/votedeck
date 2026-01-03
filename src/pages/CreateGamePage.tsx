@@ -59,7 +59,7 @@ export const CreateGamePage: React.FC = () => {
       userManager.setUserId(userId);
       userManager.setUserName(displayName);
       if (recoveryCode) {
-        userManager.setRecoveryCode(recoveryCode);
+        userManager.setTempRecoveryCode(recoveryCode);
       }
 
       // Interact with router to navigate
