@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { socket } from '../lib/socket';
 import { userManager } from '../lib/user';
 import type { RoomState, VoteValue } from '../types';
@@ -11,6 +11,12 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
 
     const userId = userManager.getUserId();
     const token = userManager.getAccessToken();
+
+    // Track name in ref to avoid reconnecting when only name changes
+    const nameRef = useRef(name);
+    useEffect(() => {
+        nameRef.current = name;
+    }, [name]);
 
     useEffect(() => {
         // We only connect if we have a roomId, a name, and a token
@@ -28,7 +34,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             // Join room once connected
             // userId is still passed for legacy/mapping purposes, 
             // but server also gets it from JWT
-            socket.emit('JOIN_ROOM', { roomId, userId, name });
+            socket.emit('JOIN_ROOM', { roomId, userId, name: nameRef.current });
         };
 
         const onConnectError = async (err: Error) => {
@@ -93,7 +99,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             socket.off('ERROR', onError);
             socket.disconnect();
         };
-    }, [roomId, name, userId, token]); // Re-run if these change, but internal token update is handled manually
+    }, [roomId, userId, token]); // Name removed to prevent reconnects on name change
 
     const castVote = useCallback((value: VoteValue) => {
         socket.emit('CAST_VOTE', { value });

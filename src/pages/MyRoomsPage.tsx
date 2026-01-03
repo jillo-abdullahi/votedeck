@@ -26,7 +26,7 @@ export const MyRoomsPage: React.FC = () => {
     const [total, setTotal] = useState(0);
     const [roomToDelete, setRoomToDelete] = useState<RoomSummary | null>(null);
 
-    const userName = userManager.getUserName();
+    const [userName, setUserName] = useState(userManager.getUserName());
     const userId = userManager.getUserId();
     const trashRef = useRef<Trash2IconHandle>(null);
 
@@ -72,7 +72,7 @@ export const MyRoomsPage: React.FC = () => {
         <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30">
             <Header>
                 {userName ? (
-                    <UserMenu name={userName} onNameChange={() => { }} />
+                    <UserMenu name={userName} onNameChange={setUserName} />
                 ) : (
                     <Link
                         to="/"

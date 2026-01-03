@@ -245,9 +245,7 @@ export const RoomPage: React.FC = () => {
                     <UserMenu
                         name={name || "Guest"}
                         role={isAdmin ? "Game Host" : "Guest user"}
-                        onNameChange={() => {
-                            setIsDisplayNameModalOpen(true);
-                        }}
+                        onNameChange={handleNameSubmit}
                         onLogout={() => {
                             leaveRoom();
                         }}

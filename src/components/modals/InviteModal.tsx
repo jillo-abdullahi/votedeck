@@ -93,9 +93,9 @@ export const InviteModal: React.FC<InviteModalProps> = ({
 
                                 <div className="flex gap-4">
                                     <Button
-                                        variant="outline"
+                                        variant="ghost"
                                         size="lg"
-                                        className="px-6 border-slate-700 hover:border-blue-500 group"
+                                        className="group"
                                         onClick={() => setShowQr(true)}
                                         onMouseEnter={() => qrCodeRef.current?.startAnimation()}
                                         onMouseLeave={() => qrCodeRef.current?.stopAnimation()}
