@@ -3,7 +3,8 @@ import { RoomAvatar } from "@/components/RoomAvatar";
 import { useParams, useSearch, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
-import { Participants } from "@/components/Participants";
+
+import { PokerTable } from "@/components/PokerTable";
 import { VotingDeck } from "@/components/VotingDeck";
 import { Controls } from "@/components/Controls";
 import type { VoteValue, VotingSystemId, RevealPolicy } from "@/types";
@@ -16,7 +17,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Check } from "lucide-react";
+import { Check, SpadeIcon, RefreshCcw } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
@@ -321,40 +322,44 @@ export const RoomPage: React.FC = () => {
                 </div>
             </div>
 
-            <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-                {/* 1. Participants Section (Top) */}
-                <section
-                    aria-label="Participants"
-                    className="w-full flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700"
-                >
-                    <Participants
-                        users={roomState.users}
-                        votes={roomState.votes}
-                        revealed={roomState.revealed}
-                        onInvite={handleInvite}
-                    />
-                </section>
-
-                {/* 2. Active Area (Middle) - Fixed Height */}
-                <section
-                    aria-label="Active Area"
-                    className="w-full min-h-[12rem] flex items-center justify-center rounded-3xl border-2 border-dashed border-slate-700 bg-slate-800/30 relative animate-in zoom-in-95 duration-700 delay-100 overflow-hidden"
+            <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-4">
+                <PokerTable
+                    users={roomState.users}
+                    votes={roomState.votes}
+                    revealed={roomState.revealed}
                 >
                     <AnimatePresence mode="wait">
                         {roomState.revealed ? (
+
                             <motion.div
-                                key="summary"
+                                key="revealed-state"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.4, ease: "easeOut" }}
-                                className="w-full h-full relative"
+                                className="flex flex-col items-center gap-2"
                             >
-                                <RevealSummary
-                                    votes={roomState.votes}
-                                    votingSystem={roomState.votingSystem}
-                                    isVisible={roomState.revealed}
-                                />
+                                {(() => {
+                                    const canReset = roomState.revealPolicy === 'everyone' || isAdmin;
+                                    return (
+                                        <>
+                                            <Button
+                                                onClick={handleReset}
+                                                disabled={!canReset}
+                                                size={'lg'}
+                                                className="group disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <RefreshCcw className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" />
+                                                Start New Vote
+                                            </Button>
+                                            {!canReset && (
+                                                <p className="text-slate-500 text-[10px] italic">
+                                                    Only host can start vote
+                                                </p>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </motion.div>
                         ) : (
                             <motion.div
@@ -363,17 +368,24 @@ export const RoomPage: React.FC = () => {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.4, ease: "easeOut" }}
-                                className="relative z-10"
+                                className="relative z-10 w-full flex justify-center"
                             >
                                 {(() => {
                                     const hasAnyVotes = roomState.users.some((u) => u.hasVoted);
                                     const canIReveal = roomState.revealPolicy === 'everyone' || isAdmin;
                                     const currentAdmin = roomState.users.find(u => u.id === roomState.adminId);
 
-                                    let disabledReason = "";
                                     if (!hasAnyVotes) {
-                                        disabledReason = "Waiting for first player to pick a card...";
-                                    } else if (!canIReveal) {
+                                        return (
+                                            <div className="flex items-center gap-3 text-blue-400 animate-pulse">
+                                                <SpadeIcon className="w-6 h-6" />
+                                                <span className="font-medium tracking-wide text-md">Pick your cards!</span>
+                                            </div>
+                                        );
+                                    }
+
+                                    let disabledReason = "";
+                                    if (!canIReveal) {
                                         disabledReason = `Only ${currentAdmin?.name || 'the host'} can reveal votes.`;
                                     }
 
@@ -388,7 +400,7 @@ export const RoomPage: React.FC = () => {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </section>
+                </PokerTable>
             </main>
 
             {/* 3. Voting Deck Section (Sticky Bottom) */}
@@ -409,9 +421,17 @@ export const RoomPage: React.FC = () => {
                         onVote={handleVote}
                         revealed={roomState.revealed}
                         votingSystem={roomState.votingSystem}
-                        onReset={handleReset}
-                        canReset={roomState.revealPolicy === 'everyone' || isAdmin}
-                    />
+                    >
+                        {roomState.revealed && (
+                            <div className="w-full mb-8">
+                                <RevealSummary
+                                    votes={roomState.votes}
+                                    votingSystem={roomState.votingSystem}
+                                    isVisible={roomState.revealed}
+                                />
+                            </div>
+                        )}
+                    </VotingDeck>
                 </div>
             </section>
 
