@@ -102,7 +102,7 @@ export const LandingPage: React.FC = () => {
                         </Link>
                         <button
                             onClick={() => setIsJoinModalOpen(true)}
-                            className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center"
+                            className="px-8 cursor-pointer py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center"
                         >
                             Join a game
                         </button>

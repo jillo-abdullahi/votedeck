@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { RoomAvatar } from "@/components/RoomAvatar";
 import { useParams, useSearch, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
@@ -15,7 +16,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { SpadeIcon, Check } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
@@ -270,8 +271,8 @@ export const RoomPage: React.FC = () => {
             {/* Game Top Bar */}
             <div className="w-full bg-blue-500/3 border-b border-blue-500/20 py-3 px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-700">
                 <div className="w-full mx-auto flex items-center justify-between space-x-4">
-                    <div className="flex items-center gap-2">
-                        <SpadeIcon size={24} className="text-blue-500/70" />
+                    <div className="flex items-center gap-3">
+                        <RoomAvatar isAdmin={isAdmin} size="sm" className="shrink-0" />
                         <h2 className="text-lg font-semibold text-slate-200 max-w-md md:max-w-xl truncate">
                             {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
                         </h2>

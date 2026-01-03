@@ -4,10 +4,11 @@ import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { roomsApi } from "../lib/api";
 import { userManager } from "../lib/user";
-import { Calendar, User, Crown, ArrowRight } from "lucide-react";
+import { Calendar, ArrowRight, User } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
+import { RoomAvatar } from "@/components/RoomAvatar";
 
 interface RoomSummary {
     id: string;
@@ -144,8 +145,8 @@ export const MyRoomsPage: React.FC = () => {
                                     className="group block bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-blue-500/50 rounded-xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative"
                                 >
                                     <div className="flex items-start justify-between mb-4">
-                                        <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                            {isAdmin ? <Crown size={24} /> : <User size={24} />}
+                                        <div className="transition-transform group-hover:scale-105 duration-300">
+                                            <RoomAvatar isAdmin={isAdmin} size="md" />
                                         </div>
                                         <div className="flex flex-col items-end gap-2">
                                             {isAdmin && (
