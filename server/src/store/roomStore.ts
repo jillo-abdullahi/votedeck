@@ -35,6 +35,7 @@ export const roomStore = {
         };
 
         await redis.hset(`room:${roomId}:meta`, roomMeta);
+        // ioredis syntax
         await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
 
         return {
@@ -43,7 +44,7 @@ export const roomStore = {
             createdAt: pgRoom.createdAt,
             users: new Map(),
             votes: new Map(),
-        } as any;
+        } as unknown as Room;
     },
 
     /**
@@ -77,8 +78,9 @@ export const roomStore = {
 
         return {
             ...meta,
-            revealed: meta.revealed === 'true',
-            createdAt: new Date(meta.createdAt),
+            // Cast strictly to string to handle both "true" string and true boolean
+            revealed: String((meta as any).revealed) === 'true',
+            createdAt: new Date((meta as any).createdAt),
         };
     },
 
@@ -102,7 +104,7 @@ export const roomStore = {
 
         const multi = redis.pipeline();
         multi.sadd(`room:${roomId}:users`, user.id);
-        multi.hset(`room:${roomId}:user_data`, user.id, JSON.stringify(user));
+        multi.hset(`room:${roomId}:user_data`, { [user.id]: JSON.stringify(user) });
 
         // Track participation in Postgres
         await (prisma as any).participant.upsert({
@@ -170,7 +172,9 @@ export const roomStore = {
         const userData = await redis.hget(`room:${roomId}:user_data`, userId);
         if (!userData) return false;
 
-        const user = JSON.parse(userData);
+        const user = typeof userData === 'string'
+            ? JSON.parse(userData)
+            : (userData as unknown as User);
         const updatedUser = { ...user, ...updates };
 
         // Update Postgres
@@ -181,7 +185,7 @@ export const roomStore = {
             });
         }
 
-        await redis.hset(`room:${roomId}:user_data`, userId, JSON.stringify(updatedUser));
+        await redis.hset(`room:${roomId}:user_data`, { [userId]: JSON.stringify(updatedUser) });
         return true;
     },
 
@@ -193,21 +197,21 @@ export const roomStore = {
         if (!exists) return false;
 
         if (updates.name !== undefined) {
-            await redis.hset(`room:${roomId}:meta`, 'name', updates.name);
+            await redis.hset(`room:${roomId}:meta`, { name: updates.name });
             await (prisma.room as any).update({
                 where: { id: roomId },
                 data: { name: updates.name },
             });
         }
         if (updates.votingSystem !== undefined) {
-            await redis.hset(`room:${roomId}:meta`, 'votingSystem', updates.votingSystem);
+            await redis.hset(`room:${roomId}:meta`, { votingSystem: updates.votingSystem });
             await (prisma.room as any).update({
                 where: { id: roomId },
                 data: { votingSystem: updates.votingSystem },
             });
         }
         if (updates.revealPolicy !== undefined) {
-            await redis.hset(`room:${roomId}:meta`, 'revealPolicy', updates.revealPolicy);
+            await redis.hset(`room:${roomId}:meta`, { revealPolicy: updates.revealPolicy });
         }
 
         return true;
@@ -220,11 +224,17 @@ export const roomStore = {
         const mapping = await redis.get(`socket:${socketId}`);
         if (!mapping) return undefined;
 
-        const { userId, roomId } = JSON.parse(mapping);
-        const userData = await redis.hget(`room:${roomId}:user_data`, userId);
+        const { userId, roomId } = typeof mapping === 'string'
+            ? JSON.parse(mapping)
+            : (mapping as unknown as { userId: string; roomId: string });
+        const userData = await redis.hget(`room:${roomId}:user_data`, userId) as string;
         if (!userData) return undefined;
 
-        return { user: JSON.parse(userData), roomId };
+        const user = typeof userData === 'string'
+            ? JSON.parse(userData)
+            : (userData as unknown as User);
+
+        return { user, roomId };
     },
 
     /**
@@ -256,7 +266,7 @@ export const roomStore = {
                 where: { roomId, userId }
             });
         } else {
-            await redis.hset(`room:${roomId}:votes`, userId, voteValue);
+            await redis.hset(`room:${roomId}:votes`, { [userId]: voteValue });
             await (prisma as any).vote.upsert({
                 where: { roomId_userId: { roomId, userId } },
                 update: { value: voteValue },
@@ -273,7 +283,9 @@ export const roomStore = {
         const exists = await redis.exists(`room:${roomId}:meta`);
         if (!exists) return false;
 
-        await redis.hset(`room:${roomId}:meta`, 'revealed', 'true');
+        if (!exists) return false;
+
+        await redis.hset(`room:${roomId}:meta`, { revealed: 'true' });
         await (prisma.room as any).update({
             where: { id: roomId },
             data: { revealed: true }
@@ -289,7 +301,8 @@ export const roomStore = {
         if (!exists) return false;
 
         const multi = redis.pipeline();
-        multi.hset(`room:${roomId}:meta`, 'revealed', 'false');
+        // Upstash might serialize 'false' as boolean false, so we handle that in getRoom
+        multi.hset(`room:${roomId}:meta`, { revealed: 'false' });
         multi.del(`room:${roomId}:votes`);
         await multi.exec();
 
@@ -312,8 +325,8 @@ export const roomStore = {
         if (!meta) return undefined;
 
         let userIds = await redis.smembers(`room:${roomId}:users`);
-        let userDataMap = await redis.hgetall(`room:${roomId}:user_data`);
-        let voteMap = await redis.hgetall(`room:${roomId}:votes`);
+        let userDataMap = await redis.hgetall(`room:${roomId}:user_data`) || {};
+        let voteMap = await redis.hgetall(`room:${roomId}:votes`) || {};
 
         // RESTORE FROM POSTGRES if Redis is empty but metadata exists
         // This handles cases where room expired from Redis but we want to view history
@@ -334,16 +347,16 @@ export const roomStore = {
                     // Repopulate Users
                     users.forEach((u: any) => {
                         multi.sadd(`room:${roomId}:users`, u.id);
-                        multi.hset(`room:${roomId}:user_data`, u.id, JSON.stringify({ id: u.id, name: u.name }));
+                        multi.hset(`room:${roomId}:user_data`, { [u.id]: JSON.stringify({ id: u.id, name: u.name }) });
                         // Update local vars for this response
                         userIds.push(u.id);
-                        userDataMap[u.id] = JSON.stringify({ id: u.id, name: u.name });
+                        if (userDataMap) userDataMap[u.id] = JSON.stringify({ id: u.id, name: u.name });
                     });
 
                     // Repopulate Votes
                     votes.forEach((v: any) => {
-                        multi.hset(`room:${roomId}:votes`, v.userId, v.value);
-                        voteMap[v.userId] = v.value;
+                        multi.hset(`room:${roomId}:votes`, { [v.userId]: v.value });
+                        if (voteMap) voteMap[v.userId] = v.value;
                     });
 
                     // Set expiry
@@ -362,8 +375,8 @@ export const roomStore = {
                 if (pgVotes.length > 0) {
                     const multi = redis.pipeline();
                     pgVotes.forEach((v: any) => {
-                        multi.hset(`room:${roomId}:votes`, v.userId, v.value);
-                        voteMap[v.userId] = v.value;
+                        multi.hset(`room:${roomId}:votes`, { [v.userId]: v.value });
+                        if (voteMap) voteMap[v.userId] = v.value;
                     });
                     await multi.exec();
                 }
@@ -371,21 +384,36 @@ export const roomStore = {
         }
 
         const users = userIds.map((id: string) => {
-            const data = JSON.parse(userDataMap[id] || '{}');
+            const rawData = userDataMap ? userDataMap[id] : null;
+            let data: User;
+
+            if (typeof rawData === 'string') {
+                try {
+                    data = JSON.parse(rawData);
+                } catch (e) {
+                    console.error('Failed to parse user data:', rawData, e);
+                    data = { id, name: 'Unknown', socketId: '' };
+                }
+            } else if (typeof rawData === 'object' && rawData !== null) {
+                data = rawData as User;
+            } else {
+                data = { id, name: 'Unknown', socketId: '' };
+            }
+
             return {
                 id,
                 name: data.name || 'Unknown',
-                hasVoted: !!voteMap[id],
+                hasVoted: !!(voteMap && voteMap[id]),
             };
         });
 
         const votes: Record<string, string | null> = {};
         if (meta.revealed) {
             for (const id of userIds) {
-                votes[id] = voteMap[id] || null;
+                votes[id] = voteMap ? (voteMap[id] as string) : null;
             }
         } else if (forUserId) {
-            const myVote = voteMap[forUserId];
+            const myVote = voteMap ? (voteMap[forUserId] as string) : null;
             if (myVote) {
                 votes[forUserId] = myVote;
             }
@@ -447,13 +475,9 @@ export const roomStore = {
         const results = await multi.exec();
 
         const roomsWithCounts = paginated.map((room, index) => {
-            const err = results?.[index]?.[0];
-            const members = (results?.[index]?.[1] as string[]) || [];
-
-            if (err) {
-                console.error('Failed to fetch room members:', err);
-                return { ...room, activeUsers: 0 };
-            }
+            const result = results?.[index];
+            // ioredis pipeline returns [error, result]
+            const members = (result?.[1] as string[]) || [];
 
             // Count active users excluding the admin
             const activeUsers = members.filter(id => id !== room.adminId).length;

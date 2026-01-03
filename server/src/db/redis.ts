@@ -5,8 +5,18 @@ dotenv.config();
 
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
+if (!process.env.REDIS_URL) {
+    console.warn('⚠️  REDIS_URL is missing. Defaulting to localhost.');
+}
+
 export const redis = new Redis(redisUrl, {
     maxRetriesPerRequest: null,
+    // Add family: 0 to fallback between IPv4/IPv6 (helps with Upstash/Railway)
+    family: 0,
+    // Explicitly enable TLS if using rediss protocol
+    tls: redisUrl.startsWith('rediss://') ? {
+        rejectUnauthorized: false
+    } : undefined,
 });
 
 redis.on('connect', () => {
