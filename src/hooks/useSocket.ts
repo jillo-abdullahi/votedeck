@@ -39,21 +39,31 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
 
         const onConnectError = async (err: Error) => {
             console.error('Socket connection error:', err.message);
+
             // Check if error is related to authentication
             if (err.message.includes('Authentication error') || err.message.includes('Invalid token') || err.message.includes('jwt expired')) {
+                // If we're already connecting/refreshing, don't cascade error yet
                 try {
                     console.log('Attempting to refresh token...');
-                    const { accessToken } = await import('../lib/api').then(m => m.authApi.refresh());
+                    // Use dynamic import to avoid circular dependency
+                    const { authApi } = await import('../lib/api');
+                    const { accessToken } = await authApi.refresh();
+
                     userManager.setAccessToken(accessToken);
 
                     // Update socket auth and reconnect
                     socket.auth = { token: accessToken };
                     socket.connect();
                     console.log('Token refreshed and socket reconnecting...');
+
+                    // Clear any previous error if we successfully triggered a reconnect
+                    setError(null);
                 } catch (refreshErr) {
                     console.error('Failed to refresh token:', refreshErr);
+                    // Explicitly disconnect to stop retrying with bad token
+                    socket.disconnect();
                     setError('Authentication failed. Please reload the page.');
-                    userManager.setAccessToken(null); // Clear invalid token
+                    userManager.setAccessToken(null);
                 }
             } else {
                 setError(`Connection error: ${err.message}`);

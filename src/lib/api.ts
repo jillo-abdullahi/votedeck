@@ -77,10 +77,19 @@ export const authApi = {
         return response.data;
     },
     refresh: async (): Promise<{ accessToken: string }> => {
-        const response = await api.post<{ accessToken: string }>('/auth/refresh');
-        return response.data;
+        if (refreshPromise) return refreshPromise;
+
+        refreshPromise = api.post<{ accessToken: string }>('/auth/refresh')
+            .then(res => res.data)
+            .finally(() => {
+                refreshPromise = null;
+            });
+
+        return refreshPromise;
     }
 };
+
+let refreshPromise: Promise<{ accessToken: string }> | null = null;
 
 export const roomsApi = {
     createRoom: async (name: string, votingSystem: VotingSystemId, adminName: string): Promise<CreateRoomResponse> => {
