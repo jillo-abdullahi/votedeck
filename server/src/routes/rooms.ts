@@ -150,4 +150,43 @@ export async function roomRoutes(fastify: FastifyInstance) {
             });
         }
     );
+    /**
+     * DELETE /rooms/:id
+     * Delete a room
+     */
+    fastify.delete<{ Params: { id: string } }>(
+        '/rooms/:id',
+        async (request, reply) => {
+            try {
+                const { id } = request.params;
+                const decoded = await request.jwtVerify() as { sub: string };
+                const userId = decoded.sub;
+
+                const room = await roomStore.getRoom(id);
+
+                if (!room) {
+                    return reply.code(404).send({ error: 'Room not found' });
+                }
+
+                if (room.adminId !== userId) {
+                    return reply.code(403).send({ error: 'Only the host can delete this room' });
+                }
+
+                // Broadcast room closed event
+                const io = (fastify as any).io;
+                if (io) {
+                    io.to(id).emit('ROOM_CLOSED');
+                    // Force disconnect all clients in this room
+                    io.in(id).disconnectSockets(true);
+                }
+
+                await roomStore.deleteRoom(id);
+
+                return reply.send({ success: true });
+            } catch (err) {
+                console.error('Delete room error:', err);
+                return reply.code(500).send({ error: 'Failed to delete room' });
+            }
+        }
+    );
 }

@@ -439,9 +439,74 @@ export const roomStore = {
         // Apply pagination in memory (since we combined two lists)
         const paginated = allRooms.slice(offset, offset + limit);
 
+        // Fetch active user IDs for these rooms
+        const multi = redis.pipeline();
+        paginated.forEach(room => {
+            multi.smembers(`room:${room.id}:users`);
+        });
+        const results = await multi.exec();
+
+        const roomsWithCounts = paginated.map((room, index) => {
+            const err = results?.[index]?.[0];
+            const members = (results?.[index]?.[1] as string[]) || [];
+
+            if (err) {
+                console.error('Failed to fetch room members:', err);
+                return { ...room, activeUsers: 0 };
+            }
+
+            // Count active users excluding the admin
+            const activeUsers = members.filter(id => id !== room.adminId).length;
+
+            return {
+                ...room,
+                activeUsers
+            };
+        });
+
         return {
-            rooms: paginated,
+            rooms: roomsWithCounts,
             total: allRooms.length
         };
+    },
+
+    /**
+     * Delete room completely
+     */
+    async deleteRoom(roomId: string): Promise<boolean> {
+        // Collect all keys to delete from Redis
+        const keys = [
+            `room:${roomId}:meta`,
+            `room:${roomId}:users`,
+            `room:${roomId}:user_data`,
+            `room:${roomId}:votes`
+        ];
+
+        // Find all socket keys related to this room to clean them up?
+        // It's expensive to iterate all "room:{roomId}:user:*:sockets".
+        // Instead, rely on TTL or just leave them (they won't be accessible without room meta).
+        // Best effort: Get users and try to clean their socket sets.
+        const userIds = await redis.smembers(`room:${roomId}:users`);
+        for (const uid of userIds) {
+            keys.push(`room:${roomId}:user:${uid}:sockets`);
+        }
+
+        await redis.del(...keys);
+
+        // Delete from Postgres
+        // Due to cascade or manual delete?
+        // Votes and Participants should cascade delete if set up, 
+        // but for safety let's delete explicitly if needed.
+        // Assuming cascade delete is NOT set up in schema yet based on previous code doing manual deletes.
+
+        try {
+            await (prisma as any).participant.deleteMany({ where: { roomId } });
+            await (prisma as any).vote.deleteMany({ where: { roomId } });
+            await (prisma.room as any).delete({ where: { id: roomId } });
+            return true;
+        } catch (error) {
+            console.error('Failed to delete room from DB:', error);
+            return false;
+        }
     }
 };

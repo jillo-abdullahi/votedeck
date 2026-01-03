@@ -41,9 +41,6 @@ async function start() {
     await fastify.register(authRoutes);
     await fastify.register(roomRoutes);
 
-    // Start Fastify server
-    await fastify.listen({ port: PORT, host: HOST });
-
     // Create Socket.IO server
     const io = new SocketIOServer(fastify.server, {
         cors: {
@@ -51,6 +48,9 @@ async function start() {
             credentials: true,
         },
     });
+
+    // Make io accessible in routes
+    fastify.decorate('io', io);
 
     // WebSocket Handshake Authentication
     io.use((socket, next) => {
@@ -74,6 +74,9 @@ async function start() {
 
     // Setup Socket.IO handlers
     setupSocketHandlers(io);
+
+    // Start Fastify server
+    await fastify.listen({ port: PORT, host: HOST });
 
     console.log(`🚀 Server running at http://${HOST}:${PORT}`);
     console.log(`🔌 Socket.IO ready for connections`);

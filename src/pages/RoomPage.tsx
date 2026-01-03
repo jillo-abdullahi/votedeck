@@ -92,7 +92,8 @@ export const RoomPage: React.FC = () => {
         leaveRoom,
         updateName,
         updateSettings,
-        error: socketError
+        error: socketError,
+        isRoomClosed
     } = useSocket(roomId, name);
 
     const isAdmin = roomState?.adminId === userId;
@@ -173,8 +174,42 @@ export const RoomPage: React.FC = () => {
             setTimeout(() => setIsCopied(false), 2000);
         }
     };
+
     if (socketError === "Room not found") {
         return <NotFoundView />;
+    }
+
+    if (isRoomClosed) {
+        return (
+            <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center justify-center p-6 text-center">
+                <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-16 h-16 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-4">Room Closed</h2>
+                    <p className="text-slate-400 mb-8">
+                        The host has closed this room. You can return to the home page or create a new game.
+                    </p>
+                    <div className="flex flex-col gap-3">
+                        <Button
+                            onClick={() => navigate({ to: "/" })}
+                            className="w-full bg-slate-700 hover:bg-slate-600 text-white"
+                        >
+                            Back to Home
+                        </Button>
+                        <Button
+                            onClick={() => navigate({ to: "/create" })}
+                            className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+                        >
+                            Start New Game
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     // If room is not loaded yet
@@ -236,8 +271,8 @@ export const RoomPage: React.FC = () => {
             <div className="w-full bg-blue-500/3 border-b border-blue-500/20 py-3 px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-700">
                 <div className="w-full mx-auto flex items-center justify-between space-x-4">
                     <div className="flex items-center gap-2">
-                        <SpadeIcon size={24} className="text-blue-500/60" />
-                        <h2 className="text-lg font-semibold text-slate-200">
+                        <SpadeIcon size={24} className="text-blue-500/70" />
+                        <h2 className="text-lg font-semibold text-slate-200 max-w-md md:max-w-xl truncate">
                             {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
                         </h2>
 
@@ -340,7 +375,7 @@ export const RoomPage: React.FC = () => {
                                     if (!hasAnyVotes) {
                                         disabledReason = "Waiting for first player to pick a card...";
                                     } else if (!canIReveal) {
-                                        disabledReason = `Only ${currentAdmin?.name || 'the administrator'} can reveal votes.`;
+                                        disabledReason = `Only ${currentAdmin?.name || 'the host'} can reveal votes.`;
                                     }
 
                                     return (

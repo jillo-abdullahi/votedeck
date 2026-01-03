@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ModalHeader } from "@/components/ModalHeader";
 import { DownloadIcon, type DownloadHandle } from "@/components/icons/DownloadIcon";
 import { ClipboardIcon, type ClipboardIconHandle } from "@/components/icons/ClipboardIcon";
+import { ModalAlert } from "@/components/ModalAlert";
 
 interface RecoveryCodeModalProps {
     isOpen: boolean;
@@ -42,7 +43,7 @@ export const RecoveryCodeModal: React.FC<RecoveryCodeModalProps> = ({ isOpen, on
                         className="relative bg-slate-800 border-2 border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="p-8 pb-4">
+                        <div className="px-8 pt-4 pb-4">
                             <ModalHeader
                                 title="Sign-in Key"
                                 subtitle="Your sign in key to access saved rooms"
@@ -58,18 +59,15 @@ export const RecoveryCodeModal: React.FC<RecoveryCodeModalProps> = ({ isOpen, on
                                 </code>
                             </div>
 
-                            <div className="flex gap-3 bg-blue-500/5 p-4 rounded-xl">
-                                <div className="flex items-center justify-start border-r-1 border-slate-700 pr-3">
-                                    <InfoIcon className="w-8 h-8 text-slate-400" />
-                                </div>
-                                <p className="text-slate-400 text-sm leading-relaxed text-left px-2">
-                                    Save this key somewhere safe. If you sign out or switch devices, you'll need this key to sign back in.
-                                    <br />
-                                    <span className="text-blue-400 font-medium">VoteDeck can't see or recover this key.</span>
-                                </p>
-
-                            </div>
-
+                            <ModalAlert
+                                variant="info"
+                                description={
+                                    <>
+                                        Save this key somewhere safe. If you sign out or switch devices, you'll need this key to sign back in.
+                                        <strong> VoteDeck can't see or recover this key.</strong>
+                                    </>
+                                }
+                            />
 
                             <div className="flex gap-3 mt-2">
                                 <Button
@@ -106,8 +104,8 @@ export const RecoveryCodeModal: React.FC<RecoveryCodeModalProps> = ({ isOpen, on
                             </div>
                         </div>
                     </motion.div>
-                </div >
+                </div>
             )}
-        </AnimatePresence >
+        </AnimatePresence>
     );
 };

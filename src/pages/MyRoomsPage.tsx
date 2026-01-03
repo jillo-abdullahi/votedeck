@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { roomsApi } from "../lib/api";
 import { userManager } from "../lib/user";
 import { Calendar, User, Crown, ArrowRight } from "lucide-react";
+import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
+
+import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 
 interface RoomSummary {
     id: string;
     name: string;
     createdAt: string;
     adminId: string;
+    activeUsers?: number;
 }
 
 export const MyRoomsPage: React.FC = () => {
@@ -19,9 +23,12 @@ export const MyRoomsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [total, setTotal] = useState(0);
+    const [roomToDelete, setRoomToDelete] = useState<RoomSummary | null>(null);
 
     const userName = userManager.getUserName();
     const userId = userManager.getUserId();
+
+    const trashRef = useRef<Trash2IconHandle>(null);
 
     useEffect(() => {
         // Redirect if not logged in
@@ -113,6 +120,7 @@ export const MyRoomsPage: React.FC = () => {
                                 month: 'short',
                                 day: 'numeric'
                             });
+                            const hasActiveUsers = (room.activeUsers || 0) > 0;
 
                             return (
                                 <Link
@@ -120,33 +128,75 @@ export const MyRoomsPage: React.FC = () => {
                                     to="/room/$roomId"
                                     params={{ roomId: room.id }}
                                     search={{ name: userName }}
-                                    className="group block bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-blue-500/50 rounded-xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl"
+                                    className="group block bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-blue-500/50 rounded-xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative"
                                 >
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                                             {isAdmin ? <Crown size={24} /> : <User size={24} />}
                                         </div>
-                                        {isAdmin && (
-                                            <span className="text-xs font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 px-2 py-1 rounded">
-                                                Host
-                                            </span>
-                                        )}
+                                        <div className="flex flex-col items-end gap-2">
+                                            {isAdmin && (
+                                                <span className="text-xs font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 px-2 py-1 rounded">
+                                                    Host
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <h3 className="text-xl font-bold text-white mb-2 truncate group-hover:text-blue-400 transition-colors">
                                         {room.name || "Untitled Game"}
                                     </h3>
 
-                                    <div className="flex items-center gap-2 text-sm text-slate-400">
-                                        <Calendar size={14} />
-                                        <span>{date}</span>
+                                    <div className="flex items-center gap-4 text-sm text-slate-400 mt-4">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar size={14} />
+                                            <span>{date}</span>
+                                        </div>
+                                        {hasActiveUsers && (
+                                            <div className="flex items-center gap-1.5 text-green-400">
+                                                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                                                <span className="text-xs font-medium">{room.activeUsers} active</span>
+                                            </div>
+                                        )}
                                     </div>
+
+                                    {isAdmin && (
+                                        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setRoomToDelete(room);
+                                                }}
+                                                onMouseEnter={() => trashRef.current?.startAnimation()}
+                                                onMouseLeave={() => trashRef.current?.stopAnimation()}
+                                                className="p-1 w-10 h-10 flex items-center justify-center cursor-pointer bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors"
+                                                title="Delete room"
+                                            >
+                                                <Trash2Icon ref={trashRef} />
+                                            </button>
+                                        </div>
+                                    )}
                                 </Link>
                             );
                         })}
                     </div>
                 )}
             </main>
+
+            <DeleteRoomModal
+                isOpen={!!roomToDelete}
+                onClose={() => setRoomToDelete(null)}
+                onDeleted={() => {
+                    if (roomToDelete) {
+                        setRooms(prev => prev.filter(r => r.id !== roomToDelete.id));
+                        setTotal(prev => prev - 1);
+                    }
+                }}
+                roomId={roomToDelete?.id || ''}
+                roomName={roomToDelete?.name || ''}
+                activeUsers={roomToDelete?.activeUsers || 0}
+            />
         </div>
     );
 };

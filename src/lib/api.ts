@@ -98,5 +98,10 @@ export const roomsApi = {
             params: { limit, offset }
         });
         return response.data;
+    },
+
+    deleteRoom: async (roomId: string): Promise<{ success: boolean }> => {
+        const response = await api.delete<{ success: boolean }>(`/rooms/${roomId}`);
+        return response.data;
     }
 };

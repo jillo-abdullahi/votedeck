@@ -7,6 +7,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
     const [roomState, setRoomState] = useState<RoomState | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isRoomClosed, setIsRoomClosed] = useState(false);
 
     const userId = userManager.getUserId();
     const token = userManager.getAccessToken();
@@ -61,6 +62,11 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             setRoomState(state);
         };
 
+        const onRoomClosed = () => {
+            setIsRoomClosed(true);
+            socket.disconnect();
+        };
+
         const onError = (err: { message: string }) => {
             setError(err.message);
         };
@@ -69,6 +75,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         socket.on('connect_error', onConnectError);
         socket.on('disconnect', onDisconnect);
         socket.on('ROOM_STATE', onRoomState);
+        socket.on('ROOM_CLOSED', onRoomClosed);
         socket.on('ERROR', onError);
 
         // If already connected, join immediately
@@ -82,6 +89,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             socket.off('connect_error', onConnectError);
             socket.off('disconnect', onDisconnect);
             socket.off('ROOM_STATE', onRoomState);
+            socket.off('ROOM_CLOSED', onRoomClosed);
             socket.off('ERROR', onError);
             socket.disconnect();
         };
@@ -116,6 +124,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         roomState,
         isConnected,
         error,
+        isRoomClosed,
         userId,
         castVote,
         revealVotes,
