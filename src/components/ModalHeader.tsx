@@ -22,7 +22,6 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
 
     return (
         <div className={cn("relative", className)}>
-            {/* Close Button - Only render if onClose is provided */}
             {onClose && (
                 <Button
                     variant="ghost"
@@ -36,8 +35,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
                 </Button>
             )}
 
-            {/* Header Content */}
-            <div className="flex items-center justify-start space-x-2 mb-2 mt-4">
+            <div className="flex items-center justify-start space-x-2 mb-2 pt-6">
                 {icon && (
                     <div className="p-2 border-r border-slate-700">
                         {icon}

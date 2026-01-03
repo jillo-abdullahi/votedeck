@@ -61,10 +61,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative bg-slate-800 border-2 border-slate-700 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+                        className="relative bg-slate-800 border-2 border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="p-8 pb-4">
+                        <div className="px-8 pt-6 pb-4">
                             <ModalHeader
                                 title="Welcome Back"
                                 subtitle="Enter your sign-in key to access your account"

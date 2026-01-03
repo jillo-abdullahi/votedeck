@@ -508,5 +508,16 @@ export const roomStore = {
             console.error('Failed to delete room from DB:', error);
             return false;
         }
+    },
+
+    /**
+     * Get active user count for a room (excluding admin)
+     */
+    async getActiveUserCount(roomId: string): Promise<number> {
+        const room = await this.getRoom(roomId);
+        if (!room) return 0;
+
+        const members = await redis.smembers(`room:${roomId}:users`);
+        return members.filter(id => id !== room.adminId).length;
     }
 };

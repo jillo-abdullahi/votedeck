@@ -6,8 +6,8 @@ import { roomsApi } from "../lib/api";
 import { userManager } from "../lib/user";
 import { Calendar, User, Crown, ArrowRight } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
-
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
+import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
 
 interface RoomSummary {
     id: string;
@@ -27,8 +27,21 @@ export const MyRoomsPage: React.FC = () => {
 
     const userName = userManager.getUserName();
     const userId = userManager.getUserId();
-
     const trashRef = useRef<Trash2IconHandle>(null);
+
+    // Listen for real-time updates
+    useMyRoomsSocket((payload) => {
+        setRooms(prev => prev.map(room =>
+            room.id === payload.roomId
+                ? { ...room, activeUsers: payload.activeUsers }
+                : room
+        ));
+
+        // Also update selected room if modal is open
+        if (roomToDelete?.id === payload.roomId) {
+            setRoomToDelete(prev => prev ? { ...prev, activeUsers: payload.activeUsers } : null);
+        }
+    });
 
     useEffect(() => {
         // Redirect if not logged in
@@ -173,7 +186,7 @@ export const MyRoomsPage: React.FC = () => {
                                                 className="p-1 w-10 h-10 flex items-center justify-center cursor-pointer bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors"
                                                 title="Delete room"
                                             >
-                                                <Trash2Icon ref={trashRef} />
+                                                <Trash2Icon ref={trashRef} size={20} />
                                             </button>
                                         </div>
                                     )}

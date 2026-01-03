@@ -22,9 +22,27 @@ async function broadcastRoomState(io: SocketIOServer, roomId: string) {
     }
 }
 
+async function notifyRoomAdmin(io: SocketIOServer, roomId: string) {
+    const room = await roomStore.getRoom(roomId);
+    if (!room) return;
+
+    const activeUsers = await roomStore.getActiveUserCount(roomId);
+
+    io.to(`user:${room.adminId}`).emit('MY_ROOM_UPDATE', {
+        roomId,
+        activeUsers
+    });
+}
+
 export function setupSocketHandlers(io: SocketIOServer) {
     io.on('connection', (socket: Socket) => {
         console.log(`Socket connected: ${socket.id}`);
+
+        // Join user-specific channel for personal updates (like dashboard)
+        const userId = (socket as any).userId;
+        if (userId) {
+            socket.join(`user:${userId}`);
+        }
 
         /**
          * JOIN_ROOM
@@ -59,8 +77,13 @@ export function setupSocketHandlers(io: SocketIOServer) {
             // Broadcast updated room state
             await broadcastRoomState(io, roomId);
 
+            // Notify admin's dashboard
+            await notifyRoomAdmin(io, roomId);
+
             console.log(`User ${name} (${userId}) joined room ${roomId}`);
         });
+
+        // ... existing CAST_VOTE, REVEAL, RESET, UPDATE_NAME, UPDATE_SETTINGS handlers ...
 
         /**
          * CAST_VOTE
@@ -204,6 +227,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
             if (wasRemoved) {
                 await broadcastRoomState(io, roomId);
+                await notifyRoomAdmin(io, roomId);
             }
         });
 
@@ -220,6 +244,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
                 if (wasRemoved) {
                     await broadcastRoomState(io, roomId);
+                    await notifyRoomAdmin(io, roomId);
                 }
             }
         });
