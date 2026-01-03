@@ -113,6 +113,9 @@ export const roomStore = {
 
         // REMOVED: multi.hdel(`room:${roomId}:votes`, user.id); -- Keep votes for reloads
 
+        multi.sadd(`room:${roomId}:user:${user.id}:sockets`, user.socketId || '');
+        multi.expire(`room:${roomId}:user:${user.id}:sockets`, ROOM_TTL);
+
         multi.expire(`room:${roomId}:users`, ROOM_TTL);
         multi.expire(`room:${roomId}:user_data`, ROOM_TTL);
         multi.expire(`room:${roomId}:votes`, ROOM_TTL);
@@ -130,14 +133,34 @@ export const roomStore = {
 
         const multi = redis.pipeline();
         multi.srem(`room:${roomId}:users`, userId);
-        // multi.hdel(`room:${roomId}:user_data`, userId); -- Keep data for reloads
-        // multi.hdel(`room:${roomId}:votes`, userId); -- Keep votes for reloads
+        // Clean up sockets set just in case
+        multi.del(`room:${roomId}:user:${userId}:sockets`);
+
         await multi.exec();
 
-        // REMOVED immediate admin promotion. 
-        // We trust the adminId persisted in Postgres/Redis meta.
-
         return true;
+    },
+
+    /**
+     * Remove a specific socket for a user.
+     * Only removes the user from the room if they have no other sockets connected.
+     */
+    async removeSocketFromUser(roomId: string, userId: string, socketId: string): Promise<boolean> {
+        const socketSetKey = `room:${roomId}:user:${userId}:sockets`;
+
+        // Remove this specific socket
+        await redis.srem(socketSetKey, socketId);
+
+        // Check how many are left
+        const remainingSockets = await redis.scard(socketSetKey);
+
+        if (remainingSockets > 0) {
+            // User still has other tabs open, don't remove them from the room
+            return false;
+        }
+
+        // No sockets left, remove user completely
+        return await this.removeUser(roomId, userId);
     },
 
     /**

@@ -198,11 +198,13 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
             const { user, roomId } = userInfo;
 
-            await roomStore.removeUser(roomId, user.id);
+            const wasRemoved = await roomStore.removeSocketFromUser(roomId, user.id, socket.id);
             await roomStore.unmapSocket(socket.id);
             socket.leave(roomId);
 
-            await broadcastRoomState(io, roomId);
+            if (wasRemoved) {
+                await broadcastRoomState(io, roomId);
+            }
         });
 
         /**
@@ -213,10 +215,12 @@ export function setupSocketHandlers(io: SocketIOServer) {
             if (userInfo) {
                 const { user, roomId } = userInfo;
 
-                await roomStore.removeUser(roomId, user.id);
+                const wasRemoved = await roomStore.removeSocketFromUser(roomId, user.id, socket.id);
                 await roomStore.unmapSocket(socket.id);
 
-                await broadcastRoomState(io, roomId);
+                if (wasRemoved) {
+                    await broadcastRoomState(io, roomId);
+                }
             }
         });
     });
