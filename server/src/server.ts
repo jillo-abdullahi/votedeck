@@ -21,7 +21,24 @@ async function start() {
 
     // Register CORS
     await fastify.register(cors, {
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        origin: (origin, cb) => {
+            const allowedOrigins = [
+                process.env.FRONTEND_URL,
+                'http://localhost:5173',
+                'http://127.0.0.1:5173'
+            ].filter(Boolean);
+
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return cb(null, true);
+
+            if (allowedOrigins.includes(origin)) {
+                return cb(null, true);
+            }
+
+            // For now, in this hybrid dev/prod mode, let's log the failure to help debugging
+            console.log(`Blocked by CORS: ${origin}`);
+            return cb(new Error("Not allowed"), false);
+        },
         credentials: true,
     });
 
