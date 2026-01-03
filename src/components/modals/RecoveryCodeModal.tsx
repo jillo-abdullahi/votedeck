@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckIcon, ShieldCheck, InfoIcon } from "lucide-react";
+import { CheckIcon, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ModalHeader } from "@/components/ModalHeader";
 import { DownloadIcon, type DownloadHandle } from "@/components/icons/DownloadIcon";
