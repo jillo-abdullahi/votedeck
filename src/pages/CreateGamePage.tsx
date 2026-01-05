@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { PageLayout } from "@/components/PageLayout";
 import { useNavigate } from "@tanstack/react-router";
 import { DisplayNameModal } from "../components/modals/DisplayNameModal";
 import { Header } from "../components/Header";
@@ -107,7 +108,7 @@ export const CreateGamePage: React.FC = () => {
   )?.label;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col selection:bg-blue-500/30">
+    <PageLayout>
       <DisplayNameModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -262,6 +263,6 @@ export const CreateGamePage: React.FC = () => {
           </form>
         </motion.div>
       </main>
-    </div>
+    </PageLayout>
   );
 };

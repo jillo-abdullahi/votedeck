@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { RoomAvatar } from "@/components/RoomAvatar";
+import { PageLayout } from "@/components/PageLayout";
 import { useParams, useSearch, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
@@ -239,7 +240,7 @@ export const RoomPage: React.FC = () => {
     const hasVotes = roomState.users.some((u) => u.hasVoted);
 
     return (
-        <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col">
+        <PageLayout>
             <Header>
                 <div className="flex items-center gap-6">
                     {/* User Profile Dropdown */}
@@ -492,6 +493,6 @@ export const RoomPage: React.FC = () => {
                 onClose={() => setIsRecoveryModalOpen(false)}
                 recoveryCode={newRecoveryCode}
             />
-        </div>
+        </PageLayout>
     );
 };

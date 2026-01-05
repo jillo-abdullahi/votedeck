@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { PageLayout } from "@/components/PageLayout";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
@@ -69,7 +70,7 @@ export const MyRoomsPage: React.FC = () => {
     }, [navigate]);
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30">
+        <PageLayout>
             <Header>
                 {userName ? (
                     <UserMenu name={userName} onNameChange={setUserName} />
@@ -89,7 +90,7 @@ export const MyRoomsPage: React.FC = () => {
                 </Link>
             </Header>
 
-            <main className="max-w-5xl mx-auto px-6 py-12">
+            <main className="w-full p-12">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold">My Games</h1>
                     <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -211,6 +212,6 @@ export const MyRoomsPage: React.FC = () => {
                 roomName={roomToDelete?.name || ''}
                 activeUsers={roomToDelete?.activeUsers || 0}
             />
-        </div>
+        </PageLayout>
     );
 };

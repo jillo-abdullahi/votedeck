@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import React, { useState, useEffect } from "react";
+import { PageLayout } from "@/components/PageLayout";
 import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
 import { userManager } from "@/lib/user";
@@ -44,7 +45,7 @@ export const LandingPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30">
+        <PageLayout>
             <Header>
                 {userName ? (
                     <UserMenu name={userName} onNameChange={setUserName} />
@@ -65,7 +66,7 @@ export const LandingPage: React.FC = () => {
             </Header>
 
             {/* Hero Section */}
-            <main className="max-w-7xl mx-auto px-12 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
+            <main className="w-full px-12 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left Content */}
                 <motion.div
                     className="flex flex-col gap-8 max-w-xl"
@@ -202,6 +203,6 @@ export const LandingPage: React.FC = () => {
                 isOpen={isJoinModalOpen}
                 onClose={() => setIsJoinModalOpen(false)}
             />
-        </div>
+        </PageLayout>
     );
 };
