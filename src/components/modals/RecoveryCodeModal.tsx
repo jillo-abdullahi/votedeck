@@ -43,7 +43,7 @@ export const RecoveryCodeModal: React.FC<RecoveryCodeModalProps> = ({ isOpen, on
                         className="relative bg-slate-800 border-2 border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="px-8 pt-4 pb-4">
+                        <div className="p-8">
                             <ModalHeader
                                 title="Sign-in Key"
                                 subtitle="Your sign in key to access saved rooms"
