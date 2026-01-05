@@ -50,37 +50,42 @@ export function setupSocketHandlers(io: SocketIOServer) {
         socket.on('JOIN_ROOM', async (payload: JoinRoomPayload) => {
             const { roomId, userId, name } = payload;
 
-            const room = await roomStore.getRoom(roomId);
-            if (!room) {
-                socket.emit('ERROR', { message: 'Room not found' });
-                return;
+            try {
+                const room = await roomStore.getRoom(roomId);
+                if (!room) {
+                    socket.emit('ERROR', { message: 'Room not found' });
+                    return;
+                }
+
+                // Map socket to user/room for disconnection handling
+                await roomStore.mapSocket(socket.id, userId, roomId);
+
+                // Add user to room
+                const success = await roomStore.addUser(roomId, {
+                    id: userId,
+                    name,
+                    socketId: socket.id,
+                });
+
+                if (!success) {
+                    socket.emit('ERROR', { message: 'Failed to join room' });
+                    return;
+                }
+
+                // Join socket room
+                socket.join(roomId);
+
+                // Broadcast updated room state
+                await broadcastRoomState(io, roomId);
+
+                // Notify admin's dashboard
+                await notifyRoomAdmin(io, roomId);
+
+                console.log(`User ${name} (${userId}) joined room ${roomId}`);
+            } catch (err) {
+                console.error(`[JOIN_ROOM] Error for room ${roomId}:`, err);
+                socket.emit('ERROR', { message: 'Internal server error while joining room' });
             }
-
-            // Map socket to user/room for disconnection handling
-            await roomStore.mapSocket(socket.id, userId, roomId);
-
-            // Add user to room
-            const success = await roomStore.addUser(roomId, {
-                id: userId,
-                name,
-                socketId: socket.id,
-            });
-
-            if (!success) {
-                socket.emit('ERROR', { message: 'Failed to join room' });
-                return;
-            }
-
-            // Join socket room
-            socket.join(roomId);
-
-            // Broadcast updated room state
-            await broadcastRoomState(io, roomId);
-
-            // Notify admin's dashboard
-            await notifyRoomAdmin(io, roomId);
-
-            console.log(`User ${name} (${userId}) joined room ${roomId}`);
         });
 
         // ... existing CAST_VOTE, REVEAL, RESET, UPDATE_NAME, UPDATE_SETTINGS handlers ...

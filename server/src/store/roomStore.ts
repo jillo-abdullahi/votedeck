@@ -13,6 +13,7 @@ export const roomStore = {
         const roomId = generateRoomId();
 
         // Persist in Postgres
+        console.log(`[createRoom] Creating room ${roomId} in Postgres...`);
         const pgRoom = await (prisma.room as any).create({
             data: {
                 id: roomId,
@@ -22,6 +23,7 @@ export const roomStore = {
                 revealed: false,
             }
         });
+        console.log(`[createRoom] Postgres room created. Saving to Redis...`);
 
         // Persist in Redis
         const roomMeta = {
@@ -34,9 +36,15 @@ export const roomStore = {
             createdAt: pgRoom.createdAt.toISOString(),
         };
 
-        await redis.hset(`room:${roomId}:meta`, roomMeta);
-        // ioredis syntax
-        await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
+        try {
+            await redis.hset(`room:${roomId}:meta`, roomMeta);
+            // ioredis syntax
+            await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
+            console.log(`[createRoom] Redis save successful.`);
+        } catch (err) {
+            console.error(`[createRoom] Redis save failed:`, err);
+            // Don't throw, let it return (Postgres is source of truth)
+        }
 
         return {
             ...roomMeta,
@@ -51,7 +59,13 @@ export const roomStore = {
      * Get room by ID
      */
     async getRoom(roomId: string): Promise<any | undefined> {
-        let meta = await redis.hgetall(`room:${roomId}:meta`);
+        let meta: any = null;
+        try {
+            meta = await redis.hgetall(`room:${roomId}:meta`);
+        } catch (err) {
+            console.warn(`[getRoom] Redis lookup failed for ${roomId}, falling back to DB:`, err);
+            // Fallthrough to Postgres
+        }
 
         // Fallback to Postgres if not in Redis
         if (!meta || Object.keys(meta).length === 0) {
@@ -72,8 +86,13 @@ export const roomStore = {
                 createdAt: pgRoom.createdAt.toISOString(),
             };
 
-            await redis.hset(`room:${roomId}:meta`, meta);
-            await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
+            try {
+                await redis.hset(`room:${roomId}:meta`, meta);
+                await redis.expire(`room:${roomId}:meta`, ROOM_TTL);
+            } catch (err) {
+                console.warn(`[getRoom] Failed to repopulate Redis for ${roomId}:`, err);
+                // Continue, returning the room from Postgres data
+            }
         }
 
         return {
@@ -241,7 +260,11 @@ export const roomStore = {
      * Map socket ID to user and room
      */
     async mapSocket(socketId: string, userId: string, roomId: string) {
-        await redis.set(`socket:${socketId}`, JSON.stringify({ userId, roomId }), 'EX', ROOM_TTL);
+        try {
+            await redis.set(`socket:${socketId}`, JSON.stringify({ userId, roomId }), 'EX', ROOM_TTL);
+        } catch (err) {
+            console.error(`[mapSocket] Redis set failed for ${socketId}:`, err);
+        }
     },
 
     /**
