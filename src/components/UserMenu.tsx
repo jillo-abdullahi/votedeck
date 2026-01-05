@@ -14,7 +14,7 @@ interface UserMenuProps {
     onLogout?: () => void;
 }
 
-export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role = "Guest user", onLogout }) => {
+export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, onLogout }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
 
@@ -67,7 +67,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role = "
                     <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
                         <div className="p-4 border-b border-slate-700 flex items-center gap-4">
                             <div className="relative group/avatar cursor-pointer">
-                                <UserAvatar name={name || "Guest"} size={48} />
+                                <UserAvatar name={name || "Guest"} size={role ? 48 : 32} />
                             </div>
                             <div className="flex-1 flex flex-col justify-center items-start">
                                 <div
@@ -82,9 +82,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role = "
                                     </span>
                                     <Pencil className="w-3.5 h-3.5 text-white/50 group-hover/name:text-white transition-colors shrink-0" />
                                 </div>
-                                <div className="text-slate-400 text-sm font-medium">
-                                    {role}
-                                </div>
+                                {role && (
+                                    <div className="text-slate-400 text-sm font-medium">
+                                        {role}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

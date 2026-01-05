@@ -178,11 +178,11 @@ export const CreateGamePage: React.FC = () => {
                     type="button"
                     onClick={() => !isCreating && setIsDropdownOpen(!isDropdownOpen)}
                     disabled={isCreating}
-                    className="w-full cursor-pointer bg-slate-800 border-2 border-slate-700 rounded-xl py-3 px-4 sm:py-4 sm:px-6 text-left text-base sm:text-lg text-white hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full cursor-pointer bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-left text-lg text-white hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span className="truncate pr-2 sm:pr-8">{selectedSystemLabel}</span>
+                    <span className="truncate pr-8">{selectedSystemLabel}</span>
                     <div
-                      className={`text-slate-500 transition-transform duration-200 group-hover:text-slate-400 shrink-0 ${isDropdownOpen ? "rotate-180" : ""
+                      className={`text-slate-500 transition-transform duration-200 group-hover:text-slate-400 ${isDropdownOpen ? "rotate-180" : ""
                         }`}
                     >
                       <ChevronDownIcon size={24} />
@@ -200,14 +200,14 @@ export const CreateGamePage: React.FC = () => {
                             setVotingSystem(sys.id);
                             setIsDropdownOpen(false);
                           }}
-                          className={`cursor-pointer w-full text-left px-4 py-3 sm:px-6 sm:py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${votingSystem === sys.id
+                          className={`cursor-pointer w-full text-left px-6 py-4 hover:bg-slate-700 transition-colors flex items-center border-b border-slate-700 last:border-0 ${votingSystem === sys.id
                             ? "bg-blue-600/10 text-blue-400 font-medium"
                             : "text-slate-300"
                             } `}
                         >
-                          <span className="whitespace-normal leading-tight">{sys.label}</span>
+                          {sys.label}
                           {votingSystem === sys.id && (
-                            <span className="ml-auto pl-2 text-blue-500 shrink-0">
+                            <span className="ml-auto text-blue-500">
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="20"

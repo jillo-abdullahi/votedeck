@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Target, BarChart3 } from 'lucide-react';
 import type { VotingSystemId } from '../types';
-import { calculateAgreement } from '../lib/utils';
+import { calculateAgreement, calculateTshirtConsensus } from '../lib/utils';
 
 interface RevealSummaryProps {
     votes: Record<string, string | null>;
@@ -19,7 +19,7 @@ interface SummaryBoxProps {
 }
 
 const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "" }) => (
-    <div className={`min-w-0 bg-slate-800/40 border-none rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
+    <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
         <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                 <div className="p-1 px-1.5 bg-slate-900/50 rounded-md border border-slate-700/50">
@@ -42,9 +42,14 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
 
         if (allCastedVotes.length === 0) return null;
 
-        // 1. Calculate Average (only for numeric-ish systems)
+        // 1. Calculate Average or Consensus
         let average: number | null = null;
-        if (votingSystem !== 'tshirts') {
+        let consensus: string | null = null;
+
+        if (votingSystem === 'tshirts') {
+            const result = calculateTshirtConsensus(activeVotes);
+            consensus = result.consensus;
+        } else {
             const sum = activeVotes.reduce((acc, v) => {
                 const val = v === "½" ? 0.5 : parseFloat(v);
                 return isNaN(val) ? acc : acc + val;
@@ -63,23 +68,46 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
         // 3. Agreement Level
         const agreement = calculateAgreement(Object.values(counts), allCastedVotes.length);
 
-        // 4. Agreement Image
-        let agreementImg = "/agree-15.png";
-        if (agreement > 75) agreementImg = "/agree-95.png";
-        else if (agreement > 50) agreementImg = "/agree-75.png";
-        else if (agreement > 35) agreementImg = "/agree-50.png";
-        else if (agreement > 15) agreementImg = "/agree-35.png";
-
         return {
             average: average !== null ? (average % 1 === 0 ? average.toString() : Math.round(average)) : null,
+            consensus,
             sortedCounts,
             agreement,
-            agreementImg,
             totalVoters: allCastedVotes.length
         };
     }, [votes, votingSystem]);
 
     if (!stats) return null;
+
+    const getAgreementColors = (agreement: number) => {
+        if (agreement > 75) {
+            return {
+                border: "border-emerald-500/50",
+                bg: "bg-emerald-500/20",
+                barBorder: "border-emerald-500/50",
+                text: "text-emerald-400",
+                textDim: "text-emerald-400/80"
+            };
+        }
+        if (agreement >= 35) {
+            return {
+                border: "border-yellow-500/50",
+                bg: "bg-yellow-500/20",
+                barBorder: "border-yellow-500/50",
+                text: "text-yellow-400",
+                textDim: "text-yellow-400/80"
+            };
+        }
+        return {
+            border: "border-red-500/50",
+            bg: "bg-red-500/20",
+            barBorder: "border-red-500/50",
+            text: "text-red-400",
+            textDim: "text-red-400/80"
+        };
+    };
+
+    const colors = getAgreementColors(stats.agreement);
 
     return (
         <AnimatePresence>
@@ -89,16 +117,20 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="w-full flex flex-col md:flex-row items-stretch justify-center gap-4 p-4 h-full"
+                    className="w-full flex flex-col md:flex-row items-stretch justify-center gap-4 px-4 h-full"
                 >
-                    {/* Average Box - Takes less space */}
+                    {/* Average/Consensus Box - Takes less space */}
                     <SummaryBox
-                        title="Average"
+                        title={votingSystem === 'tshirts' ? "Consensus" : "Average"}
                         icon={<Target className="w-3 h-3 text-blue-500" />}
                         className="flex-[0.8]"
                     >
-                        {stats.average !== null ? (
-                            <div className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                        {stats.consensus ? (
+                            <div className="text-5xl font-black text-white">
+                                {stats.consensus}
+                            </div>
+                        ) : stats.average !== null ? (
+                            <div className="text-5xl font-black text-white">
                                 {stats.average}
                             </div>
                         ) : (
@@ -132,35 +164,23 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                         className="flex-[1.5]"
                     >
                         <div className="w-full flex items-center gap-4 py-2 px-1">
-                            {/* Agreement Status Image */}
-                            <div className="w-12 h-12 rounded-full bg-slate-900/50 border border-blue-500/50 flex-shrink-0 overflow-hidden flex items-center justify-center">
-                                <motion.img
-                                    key={stats.agreementImg}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    src={stats.agreementImg}
-                                    alt="Agreement Status"
-                                    className="w-full h-full object-contain rounded-full"
-                                />
-                            </div>
-
                             <div className="flex-1 flex flex-col gap-2">
-                                <div className="relative h-12 w-full bg-slate-900/50 rounded-xl border border-blue-500/50 overflow-hidden group">
+                                <div className={`relative h-12 w-full bg-slate-900/50 rounded-xl border overflow-hidden group ${colors.border}`}>
                                     {/* Fill Bar */}
                                     {stats.agreement > 0 && (
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${stats.agreement}%` }}
                                             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-                                            className={`absolute left-0 top-0 h-full bg-blue-500/20  ${stats.agreement === 100 ? 'w-full' : 'border-r border-blue-500/50'}`}
+                                            className={`absolute left-0 top-0 h-full ${colors.bg} ${stats.agreement === 100 ? 'w-full' : `border-r ${colors.barBorder}`}`}
                                         />
                                     )}
 
                                     {/* Labels Layer */}
                                     <div className="absolute inset-0 flex items-center justify-center px-6 pointer-events-none">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-sm font-semibold text-blue-400 tracking-wide uppercase">Agreed</span>
-                                            <span className="text-sm font-semibold text-blue-400/80">{stats.agreement}%</span>
+                                            <span className={`text-sm font-semibold tracking-wide uppercase ${colors.text}`}>Agreed</span>
+                                            <span className={`text-sm font-semibold ${colors.textDim}`}>{stats.agreement}%</span>
                                         </div>
                                     </div>
                                 </div>

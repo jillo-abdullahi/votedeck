@@ -268,26 +268,35 @@ export const RoomPage: React.FC = () => {
             </Header>
 
             {/* Game Top Bar */}
-            <div className="w-full bg-blue-500/3 border-b border-blue-500/20 py-3 px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-700">
-                <div className="w-full mx-auto flex items-center justify-between space-x-4">
+            <div className="w-full bg-blue-500/3 mt-2 rounded-xl border border-blue-500/20 px-2 py-2 animate-in fade-in slide-in-from-top-2 duration-700">
+                <div className="w-full mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <RoomAvatar isAdmin={isAdmin} size="sm" className="shrink-0" />
-                        <h2 className="text-lg font-semibold text-slate-200 max-w-md md:max-w-xl truncate">
+                        <h2 className="text-md font-semibold text-slate-200 max-w-md md:max-w-xl truncate">
                             {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
                         </h2>
 
-                        <div className="h-4 w-px bg-slate-700 ml-2 hidden sm:block" />
+                        <div className="h-4 w-px bg-slate-700 hidden sm:block" />
 
-                        <Tooltip content={isCopied ? "Copied!" : "Copy Room ID"}>
-                            <button className="flex cursor-pointer group items-center gap-2 px-2 py-2 hover:bg-slate-700/50 rounded-md transition-colors text-slate-400 hover:text-slate-200"
-                                onMouseEnter={() => clipboardRef.current?.startAnimation()}
-                                onMouseLeave={() => clipboardRef.current?.stopAnimation()}
-                                onClick={handleCopyRoomId}
-                            >
-                                <span className="text-xs font-mono text-slate-500 hidden sm:inline-block group-hover:text-slate-200">{roomId}</span>
-                                {isCopied ? <Check size={16} className="text-green-400" /> : <ClipboardIcon ref={clipboardRef} size={14} className="cursor-pointer" />}
-                            </button>
-                        </Tooltip>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-slate-400 hidden sm:inline-block">
+                                {roomId}
+                            </span>
+                            <Tooltip content={isCopied ? "Copied!" : "Copy Room ID"}>
+                                <button
+                                    className="w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-slate-700/50 rounded-md transition-colors text-slate-400 hover:text-slate-200"
+                                    onMouseEnter={() => clipboardRef.current?.startAnimation()}
+                                    onMouseLeave={() => clipboardRef.current?.stopAnimation()}
+                                    onClick={handleCopyRoomId}
+                                >
+                                    {isCopied ? (
+                                        <Check size={16} className="text-green-400" />
+                                    ) : (
+                                        <ClipboardIcon ref={clipboardRef} size={14} />
+                                    )}
+                                </button>
+                            </Tooltip>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -299,9 +308,9 @@ export const RoomPage: React.FC = () => {
                                     onClick={() => setIsSettingsModalOpen(true)}
                                     onMouseEnter={() => settingsRef.current?.startAnimation()}
                                     onMouseLeave={() => settingsRef.current?.stopAnimation()}
-                                    className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-full w-10 h-10"
+                                    className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-full w-8 h-8"
                                 >
-                                    <SettingsIcon ref={settingsRef} className="w-6 h-6" />
+                                    <SettingsIcon ref={settingsRef} size={20} />
                                 </Button>
                             </Tooltip>
                         )}
@@ -313,9 +322,9 @@ export const RoomPage: React.FC = () => {
                                 onClick={handleExitGame}
                                 onMouseEnter={() => logoutRef.current?.startAnimation()}
                                 onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                                className="text-red-400 hover:bg-slate-700/50 hover:text-red-300 rounded-full w-10 h-10"
+                                className="text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-full w-8 h-8 flex items-center justify-center"
                             >
-                                <LogoutIcon ref={logoutRef} className="w-5 h-5" />
+                                <LogoutIcon ref={logoutRef} size={16} />
                             </Button>
                         </Tooltip>
                     </div>
@@ -404,18 +413,34 @@ export const RoomPage: React.FC = () => {
             </main>
 
             {/* 3. Voting Deck Section (Sticky Bottom) */}
-            <section
+            <motion.section
+                layout
                 aria-label="Voting Deck"
-                className="sticky bottom-0 z-40 w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-800 pb-4 pt-4 animate-in slide-in-from-bottom-full duration-700 delay-200"
+                className="sticky bottom-0 z-40 w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-800 pb-4 pt-4"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{
+                    layout: { duration: 0.3, ease: "easeInOut" },
+                    y: { duration: 0.7, delay: 0.2 }
+                }}
             >
                 <div className="max-w-5xl mx-auto px-4">
-                    {!roomState.revealed && (
-                        <div className="flex justify-center mb-4">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
-                                Choose your card here
-                            </span>
-                        </div>
-                    )}
+                    <AnimatePresence mode="wait">
+                        {!roomState.revealed && (
+                            <motion.div
+                                key="title"
+                                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
+                                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex justify-center overflow-hidden"
+                            >
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                                    Choose your card here
+                                </span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                     <VotingDeck
                         selectedValue={myVote}
                         onVote={handleVote}
@@ -423,7 +448,7 @@ export const RoomPage: React.FC = () => {
                         votingSystem={roomState.votingSystem}
                     >
                         {roomState.revealed && (
-                            <div className="w-full mb-8">
+                            <div className="w-full">
                                 <RevealSummary
                                     votes={roomState.votes}
                                     votingSystem={roomState.votingSystem}
@@ -433,7 +458,7 @@ export const RoomPage: React.FC = () => {
                         )}
                     </VotingDeck>
                 </div>
-            </section>
+            </motion.section>
 
             <InviteModal
                 isOpen={isInviteModalOpen}

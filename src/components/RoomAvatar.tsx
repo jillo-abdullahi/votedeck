@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crown, User } from "lucide-react";
+import { Crown, SpadeIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RoomAvatarProps {
@@ -10,9 +10,9 @@ interface RoomAvatarProps {
 
 export const RoomAvatar: React.FC<RoomAvatarProps> = ({ isAdmin, size = 'md', className }) => {
     const sizeConfig = {
-        sm: { p: "p-2", icon: 20 },
-        md: { p: "p-3", icon: 24 },
-        lg: { p: "p-4", icon: 32 },
+        sm: { p: "p-2", icon: 16 },
+        md: { p: "p-3", icon: 20 },
+        lg: { p: "p-4", icon: 24 },
     };
 
     const { p, icon } = sizeConfig[size];
@@ -20,10 +20,10 @@ export const RoomAvatar: React.FC<RoomAvatarProps> = ({ isAdmin, size = 'md', cl
     return (
         <div className={cn(
             p,
-            "bg-blue-500/10 rounded-lg text-blue-400 hover:bg-blue-500 hover:text-white transition-colors",
+            "bg-blue-500/10 rounded-lg text-blue-400",
             className
         )}>
-            {isAdmin ? <Crown size={icon} /> : <User size={icon} />}
+            {isAdmin ? <Crown size={icon} /> : <SpadeIcon size={icon} />}
         </div>
     );
 };

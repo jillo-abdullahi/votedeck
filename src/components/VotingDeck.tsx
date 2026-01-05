@@ -27,25 +27,27 @@ export const VotingDeck: React.FC<VotingDeckProps> = ({
     const cards = SYSTEM_CARDS[votingSystem] || SYSTEM_CARDS.fibonacci;
 
     return (
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
             {revealed ? (
                 <motion.div
+                    layout
                     key="summary"
-                    initial={{ y: "100%", opacity: 0 }}
+                    initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: "100%", opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    exit={{ y: 50, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                     className="flex flex-col items-center justify-center py-4 w-full"
                 >
                     {children}
                 </motion.div>
             ) : (
                 <motion.div
+                    layout
                     key="cards"
-                    initial={{ y: "100%", opacity: 0 }}
+                    initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: "100%", opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    exit={{ y: 50, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                     className="flex flex-wrap justify-center gap-3 py-2"
                 >
                     {cards.map((value) => {

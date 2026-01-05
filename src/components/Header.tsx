@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ children, subtitle }) => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
         >
-            <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full border-b-2 border-blue-500/30">
+            <nav className="flex items-center justify-between px-2 py-4 max-w-7xl mx-auto w-full border-b-2 border-blue-500/30">
                 <Link
                     to="/"
                     className="flex items-center gap-3 hover:opacity-90 transition-opacity group"

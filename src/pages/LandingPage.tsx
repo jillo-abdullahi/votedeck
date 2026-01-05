@@ -65,7 +65,7 @@ export const LandingPage: React.FC = () => {
             </Header>
 
             {/* Hero Section */}
-            <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
+            <main className="max-w-7xl mx-auto px-12 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left Content */}
                 <motion.div
                     className="flex flex-col gap-8 max-w-xl"
@@ -76,7 +76,7 @@ export const LandingPage: React.FC = () => {
                     <div className="space-y-4">
                         <motion.h1
                             variants={itemVariants}
-                            className="text-5xl sm:text-6xl font-extrabold leading-tight text-left"
+                            className="text-3xl sm:text-5xl font-extrabold leading-tight text-left"
                         >
                             Scrum Poker for <br />
                             <span className="text-blue-500">agile teams</span>
@@ -96,13 +96,13 @@ export const LandingPage: React.FC = () => {
                     >
                         <Link
                             to="/create"
-                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center shadow-lg shadow-blue-900/40"
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-slate-200 hover:text-white rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center duration-300"
                         >
                             Start new game
                         </Link>
                         <button
                             onClick={() => setIsJoinModalOpen(true)}
-                            className="px-8 cursor-pointer py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center"
+                            className="px-8 cursor-pointer py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-600 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 block text-center duration-300"
                         >
                             Join a game
                         </button>
@@ -167,7 +167,7 @@ export const LandingPage: React.FC = () => {
                                 <div className="flex gap-4">
                                     {[1, 2, 3].map((i) => (
                                         <div key={i} className="flex flex-col items-center gap-2">
-                                            <div className="w-12 h-16 rounded bg-slate-700 animate-pulse" />
+                                            <div className="w-12 h-16 rounded bg-slate-700" />
                                             <div className="w-8 h-2 rounded bg-slate-600" />
                                         </div>
                                     ))}
@@ -175,7 +175,7 @@ export const LandingPage: React.FC = () => {
 
                                 {/* Mock Table/Deck */}
                                 <div className="w-full h-32 bg-slate-700/30 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-700 text-slate-500 text-sm">
-                                    VoteDeck Active Area
+                                    Reveal votes
                                 </div>
 
                                 {/* Mock Cards Hand */}
