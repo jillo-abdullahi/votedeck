@@ -51,7 +51,7 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative bg-slate-800 border-2 border-slate-700 rounded-2xl p-8 w-full max-w-lg shadow-2xl flex flex-col"
+            className="relative bg-slate-900 border-2 border-slate-800/50 rounded-3xl p-8 w-full max-w-lg shadow-2xl flex flex-col"
           >
             <ModalHeader
               title={initialValue ? "Change your name" : "Enter your name"}
@@ -69,7 +69,7 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
                     placeholder="Your display name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-900 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
+                    className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
                     autoFocus
                     required
                   />

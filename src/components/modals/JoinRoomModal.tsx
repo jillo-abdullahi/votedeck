@@ -67,7 +67,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative bg-slate-800 border-2 border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+                        className="relative bg-slate-900 border-2 border-slate-800/50 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-8 pb-4">
@@ -82,7 +82,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
                         <form onSubmit={handleJoin} className="px-8 pb-8 flex flex-col gap-6">
                             <div className="space-y-2">
                                 <Input
-                                    placeholder="Enter Room ID..."
+                                    placeholder="ROOM ID"
                                     value={roomId}
                                     onChange={(e) => setRoomId(e.target.value)}
                                     autoFocus

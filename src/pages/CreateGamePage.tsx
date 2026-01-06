@@ -154,7 +154,7 @@ export const CreateGamePage: React.FC = () => {
                     placeholder="e.g. Sprint 32 Planning"
                     value={gameName}
                     onChange={(e) => setGameName(e.target.value)}
-                    className="w-full bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg pr-14"
+                    className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg pr-14"
                     required
                     autoFocus
                     disabled={isCreating}
@@ -179,7 +179,7 @@ export const CreateGamePage: React.FC = () => {
                     type="button"
                     onClick={() => !isCreating && setIsDropdownOpen(!isDropdownOpen)}
                     disabled={isCreating}
-                    className="w-full cursor-pointer bg-slate-800 border-2 border-slate-700 rounded-xl py-4 px-6 text-left text-lg text-white hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full cursor-pointer bg-slate-800/50 border-2 border-slate-700 rounded-xl py-4 px-6 text-left text-lg text-white hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-lg flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="truncate pr-8">{selectedSystemLabel}</span>
                     <div

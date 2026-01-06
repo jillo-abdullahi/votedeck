@@ -61,7 +61,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative bg-slate-800 border-2 border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+                        className="relative bg-slate-900 border-2 border-slate-800/50 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="px-8 pt-6 pb-4">
@@ -103,10 +103,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
                             <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
-                                    <span className="w-full border-t border-slate-700/50" />
+                                    <span className="w-full border-t border-slate-800/50" />
                                 </div>
                                 <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-slate-800 px-2 text-slate-400/60 font-semibold">First time here?</span>
+                                    <span className="bg-slate-900 px-2 text-slate-400/60 font-semibold">First time here?</span>
                                 </div>
                             </div>
 

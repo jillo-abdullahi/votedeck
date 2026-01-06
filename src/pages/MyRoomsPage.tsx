@@ -5,11 +5,12 @@ import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { roomsApi } from "../lib/api";
 import { userManager } from "../lib/user";
-import { Calendar, ArrowRight, User } from "lucide-react";
+import { Calendar, ArrowRight, SpadeIcon } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
 import { RoomAvatar } from "@/components/RoomAvatar";
+import { Button } from "@/components/ui/button";
 
 interface RoomSummary {
     id: string;
@@ -82,20 +83,19 @@ export const MyRoomsPage: React.FC = () => {
                         Back to Home
                     </Link>
                 )}
-                <Link
-                    to="/create"
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all active:scale-95 ml-4"
-                >
-                    Start new game
-                </Link>
+                <Button asChild>
+                    <Link to="/create">
+                        Start new game
+                    </Link>
+                </Button>
             </Header>
 
             <main className="w-full p-12">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold">My Games</h1>
-                    <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
+                    <h1 className="text-3xl font-semibold">My Games</h1>
+                    {total > 0 && <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
                         {total} {total === 1 ? "game" : "games"}
-                    </span>
+                    </span>}
                 </div>
 
                 {loading ? (
@@ -109,7 +109,7 @@ export const MyRoomsPage: React.FC = () => {
                 ) : rooms.length === 0 ? (
                     <div className="text-center py-20 bg-slate-800/30 rounded-3xl border-2 border-dashed border-slate-700">
                         <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
-                            <User size={32} />
+                            <SpadeIcon size={32} />
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2">
                             No games found
@@ -118,13 +118,16 @@ export const MyRoomsPage: React.FC = () => {
                             You haven't created or joined any games yet. Start a new game to
                             get going!
                         </p>
-                        <Link
-                            to="/create"
-                            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all"
-                        >
-                            Start new game
-                            <ArrowRight size={18} />
-                        </Link>
+                        <Button asChild size="lg">
+                            <Link
+                                to="/create"
+                                className="inline-flex items-center gap-2"
+                            >
+                                Start new game
+                                <ArrowRight size={18} />
+                            </Link>
+                        </Button>
+
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -143,7 +146,7 @@ export const MyRoomsPage: React.FC = () => {
                                     to="/room/$roomId"
                                     params={{ roomId: room.id }}
                                     search={{ name: userName }}
-                                    className="group block bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-blue-500/50 rounded-xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative"
+                                    className="group block bg-slate-800/30 hover:bg-slate-700/30 border border-slate-700/30 hover:border-blue-500/50 rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative"
                                 >
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="transition-transform group-hover:scale-105 duration-300">

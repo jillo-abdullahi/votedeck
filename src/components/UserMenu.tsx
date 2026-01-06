@@ -64,8 +64,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                         className="fixed inset-0 z-40"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
-                        <div className="p-4 border-b border-slate-700 flex items-center gap-4">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
+                        <div className="p-4 border-b border-slate-800 flex items-center gap-4">
                             <div className="relative group/avatar cursor-pointer">
                                 <UserAvatar name={name || "Guest"} size={role ? 48 : 32} />
                             </div>
@@ -90,11 +90,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                             </div>
                         </div>
 
-                        <div className="border-b border-slate-700/50">
+                        <div className="border-b border-slate-800/50">
                             <Link
                                 to="/my"
                                 onClick={() => setIsOpen(false)}
-                                className="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white font-medium transition-colors"
+                                className="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white font-medium transition-colors"
                                 onMouseEnter={() => layoutGridRef.current?.startAnimation()}
                                 onMouseLeave={() => layoutGridRef.current?.stopAnimation()}
                             >
@@ -108,7 +108,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                             onClick={handleLogout}
                             onMouseEnter={() => logoutRef.current?.startAnimation()}
                             onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                            className="w-full cursor-pointer justify-start text-left px-4 py-3 text-red-400 bg-transparent hover:bg-slate-700 hover:text-red-300 font-medium h-auto rounded-none"
+                            className="w-full cursor-pointer justify-start text-left px-4 py-3 text-red-400 bg-transparent hover:bg-slate-800 hover:text-red-300 font-medium h-auto rounded-none"
                         >
                             <LogoutIcon ref={logoutRef} className="w-6 h-6 mr-2" />
                             <span className="text-[16px]">Sign out</span>

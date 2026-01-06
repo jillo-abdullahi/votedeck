@@ -18,7 +18,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Check, SpadeIcon, RefreshCcw } from "lucide-react";
+import { Check, SpadeIcon, RefreshCcw, UserIcon } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
@@ -185,12 +185,9 @@ export const RoomPage: React.FC = () => {
     if (isRoomClosed) {
         return (
             <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center justify-center p-6 text-center">
-                <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
+                <div className="bg-slate-800/30 p-8 rounded-2xl border border-slate-700/30 shadow-3xl max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
                     <div className="w-16 h-16 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                            <line x1="12" y1="2" x2="12" y2="12"></line>
-                        </svg>
+                        <UserIcon size={32} />
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-4">Room Closed</h2>
                     <p className="text-slate-400 mb-8">
@@ -198,14 +195,15 @@ export const RoomPage: React.FC = () => {
                     </p>
                     <div className="flex flex-col gap-3">
                         <Button
+                            size="lg"
+                            variant="ghost"
                             onClick={() => navigate({ to: "/" })}
-                            className="w-full bg-slate-700 hover:bg-slate-600 text-white"
                         >
                             Back to Home
                         </Button>
                         <Button
+                            size="lg"
                             onClick={() => navigate({ to: "/create" })}
-                            className="w-full bg-blue-600 hover:bg-blue-500 text-white"
                         >
                             Start New Game
                         </Button>

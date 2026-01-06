@@ -81,7 +81,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative bg-slate-800 border-2 border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        className="relative bg-slate-900 border-2 border-slate-800/50 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-8 pb-4">
@@ -104,7 +104,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="w-full bg-slate-900 border-2 border-slate-700 rounded-xl py-3 px-4 text-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
+                                        className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl py-3 px-4 text-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
                                         required
                                     />
                                 </div>
@@ -119,7 +119,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                             type="button"
                                             disabled={!canChangeVotingSystem}
                                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                            className={`w-full cursor-pointer bg-slate-900 border-2 border-slate-700 rounded-xl py-3 px-4 text-left text-white flex items-center justify-between group transition-all shadow-inner ${!canChangeVotingSystem ? "opacity-60 cursor-not-allowed" : "hover:border-slate-600 focus:border-blue-500"
+                                            className={`w-full cursor-pointer bg-slate-800/50 border-2 border-slate-700 rounded-xl py-3 px-4 text-left text-white flex items-center justify-between group transition-all shadow-inner ${!canChangeVotingSystem ? "opacity-60 cursor-not-allowed" : "hover:border-slate-600 focus:border-blue-500"
                                                 }`}
                                         >
                                             <span className="truncate pr-4">

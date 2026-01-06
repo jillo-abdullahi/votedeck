@@ -51,7 +51,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
             />
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-lg bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6 overflow-hidden">
+            <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl shadow-2xl border border-slate-800/50 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6 overflow-hidden">
                 {/* Header */}
                 <ModalHeader
                     title={showQr ? "Scan QR Code" : "Invite players"}
@@ -85,7 +85,9 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                                             type="text"
                                             readOnly
                                             value={roomUrl}
-                                            className="w-full bg-slate-900/50 border-2 border-blue-500/30 rounded-2xl py-4 px-4 text-lg text-blue-100 focus:outline-none focus:border-blue-500 transition-all shadow-inner font-mono"
+                                            autoFocus
+                                            onFocus={(e) => e.currentTarget.select()}
+                                            className="w-full bg-slate-800/50 border-2 border-blue-500/30 rounded-2xl py-4 px-4 text-lg text-blue-100 focus:outline-none focus:border-blue-500 transition-all shadow-inner font-mono"
                                             onClick={(e) => e.currentTarget.select()}
                                         />
                                     </div>

@@ -47,7 +47,7 @@ export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-lg bg-slate-800 rounded-3xl shadow-2xl border border-slate-700 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6">
+            <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl shadow-2xl border border-slate-800/50 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6">
                 <ModalHeader
                     title="Delete Room"
                     subtitle={`Permanently delete ${roomName}`}
