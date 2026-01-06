@@ -53,8 +53,8 @@ export const RecoveryCodeModal: React.FC<RecoveryCodeModalProps> = ({ isOpen, on
                         </div>
 
                         <div className="px-8 pb-8 flex flex-col gap-6">
-                            <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col items-center gap-2">
-                                <code className="text-3xl font-mono text-blue-400 font-semibold tracking-wider select-all text-center break-all">
+                            <div className="bg-slate-950/70 p-6 rounded-xl border border-slate-800 flex flex-col items-center gap-2">
+                                <code className="text-2xl font-mono text-blue-400 font-semibold tracking-wider select-all text-center break-all">
                                     {recoveryCode}
                                 </code>
                             </div>

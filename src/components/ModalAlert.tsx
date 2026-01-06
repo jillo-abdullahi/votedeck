@@ -50,7 +50,7 @@ export const ModalAlert: React.FC<ModalAlertProps> = ({
             <div className={cn("px-2 py-1 rounded-lg h-fit shrink-0", styles.iconBg)}>
                 {icon || DefaultIcon}
             </div>
-            <div className={cn("text-md leading-relaxed border-l pl-3", styles.border, styles.text)}>
+            <div className={cn("text-md leading-relaxed border-l pl-4", styles.border, styles.text)}>
                 {description}
             </div>
         </div>

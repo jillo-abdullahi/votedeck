@@ -113,6 +113,7 @@ export const CreateGamePage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleFinalSubmit}
+        isLoading={isCreating}
       />
 
       <Header>

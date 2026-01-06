@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { ModalHeader } from "@/components/ModalHeader";
-import { UserIcon } from "lucide-react";
+import { UserIcon, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface DisplayNameModalProps {
@@ -9,6 +9,7 @@ interface DisplayNameModalProps {
   onClose: () => void;
   onSubmit: (name: string) => void;
   initialValue?: string;
+  isLoading?: boolean;
 }
 
 export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
@@ -16,6 +17,7 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
   onClose,
   onSubmit,
   initialValue = "",
+  isLoading = false,
 }) => {
   const [name, setName] = React.useState(initialValue);
 
@@ -42,7 +44,7 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/40 backdrop-blur-md"
-            onClick={onClose}
+            onClick={isLoading ? undefined : onClose}
           />
 
           {/* Modal Content */}
@@ -58,7 +60,7 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
               subtitle="How should you appear to other players?"
               className="mb-8"
               icon={<UserIcon className="w-12 h-12 text-blue-500" />}
-              onClose={onClose}
+              onClose={isLoading ? undefined : onClose}
             />
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -69,9 +71,10 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
                     placeholder="Your display name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
+                    className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl py-4 px-6 text-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
                     autoFocus
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -82,16 +85,25 @@ export const DisplayNameModal: React.FC<DisplayNameModalProps> = ({
                   size="lg"
                   onClick={onClose}
                   className="flex-1"
+                  disabled={isLoading}
+                  type="button"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   size="lg"
-                  disabled={!name.trim()}
+                  disabled={!name.trim() || isLoading}
                   className="flex-2 text-lg"
                 >
-                  Continue
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Continue"
+                  )}
                 </Button>
               </div>
             </form>
