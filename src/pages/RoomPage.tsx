@@ -51,7 +51,6 @@ export const RoomPage: React.FC = () => {
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(!name);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-    const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     const [newRecoveryCode, setNewRecoveryCode] = useState("");
     const [isCopied, setIsCopied] = useState(false);
@@ -66,25 +65,16 @@ export const RoomPage: React.FC = () => {
         }
     }, []);
 
-    // Handle anonymous login if we have a name but no token
+    // Handle redirect if name in URL but no token (Back button case)
     React.useEffect(() => {
-        const checkAuth = async () => {
-            const currentToken = userManager.getAccessToken();
-            if (name && !currentToken && !isAuthenticating) {
-                setIsAuthenticating(true);
-                try {
-                    const { accessToken, userId } = await authApi.loginAnonymous();
-                    userManager.setAccessToken(accessToken);
-                    userManager.setUserId(userId);
-                } catch (err) {
-                    console.error("Failed to login anonymously:", err);
-                } finally {
-                    setIsAuthenticating(false);
-                }
-            }
-        };
-        checkAuth();
-    }, [name, isAuthenticating]);
+        const currentToken = userManager.getAccessToken();
+        // If we have a name (from URL or local state) but no token, it means the session is invalid
+        // (likely user logged out and hit back button).
+        // We should redirect to home to start fresh instead of auto-creating a user.
+        if (name && !currentToken) {
+            navigate({ to: "/" });
+        }
+    }, [name, navigate]);
 
     const {
         roomState,
@@ -116,7 +106,6 @@ export const RoomPage: React.FC = () => {
 
         // If we don't have a token yet, performing an anonymous login
         if (!userManager.getAccessToken()) {
-            setIsAuthenticating(true);
             try {
                 const { accessToken, userId, recoveryCode } = await authApi.loginAnonymous();
                 userManager.setAccessToken(accessToken);
@@ -128,8 +117,6 @@ export const RoomPage: React.FC = () => {
                 }
             } catch (err) {
                 console.error("Failed to login anonymously during name submission:", err);
-            } finally {
-                setIsAuthenticating(false);
             }
         }
 
