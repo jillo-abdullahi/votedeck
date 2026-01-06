@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Settings, LogOut, RefreshCcw, Target, Layers, Users } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { Link } from "@tanstack/react-router";
@@ -45,7 +46,7 @@ export const LandingPage: React.FC = () => {
     };
 
     return (
-        <PageLayout>
+        <PageLayout className="bg-transparent">
             <Header>
                 {userName ? (
                     <UserMenu name={userName} onNameChange={setUserName} />
@@ -66,7 +67,8 @@ export const LandingPage: React.FC = () => {
             </Header>
 
             {/* Hero Section */}
-            <main className="w-full px-12 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
+            <main className="w-full p-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center"
+            >
                 {/* Left Content */}
                 <motion.div
                     className="flex flex-col gap-8 max-w-xl"
@@ -155,40 +157,99 @@ export const LandingPage: React.FC = () => {
                             }}
                             className="relative bg-slate-800 rounded-2xl border border-slate-700 p-8 shadow-2xl transform transition-transform duration-500 hover:scale-[1.02]"
                         >
-                            {/* Window Controls */}
-                            <div className="flex gap-2 mb-6">
-                                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                                <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                            {/* Mock Header */}
+                            <div className="flex items-center justify-between mb-8 border-b border-slate-700 pb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                                        <span className="text-[10px] font-bold">P</span>
+                                    </div>
+                                    <span className="text-xs font-semibold text-slate-200">Sprint 46 planning</span>
+                                    <span className="text-[10px] text-slate-500 hidden sm:inline-block">| VAGMNA</span>
+                                </div>
+                                <div className="flex gap-2 text-slate-500">
+                                    <Settings size={12} />
+                                    <LogOut size={12} />
+                                </div>
                             </div>
 
                             {/* Content Mock */}
-                            <div className="flex flex-col gap-8 items-center">
-                                {/* Mock Participants */}
+                            <div className="flex flex-col gap-2 items-center w-full">
+                                {/* Top Participants */}
                                 <div className="flex gap-4">
-                                    {[1, 2, 3].map((i) => (
-                                        <div key={i} className="flex flex-col items-center gap-2">
-                                            <div className="w-12 h-16 rounded bg-slate-700" />
-                                            <div className="w-8 h-2 rounded bg-slate-600" />
+                                    <div className="flex flex-col items-center gap-1">
+                                        <div className="w-10 h-14 bg-white rounded-lg shadow-lg flex items-center justify-center mb-1">
+                                            <span className="text-slate-900 font-bold text-sm">8</span>
                                         </div>
-                                    ))}
+                                        <span className="text-[10px] text-slate-400 font-medium">Jillo</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <div className="w-10 h-14 bg-white rounded-lg shadow-lg flex items-center justify-center mb-1">
+                                            <span className="text-slate-900 font-bold text-sm">8</span>
+                                        </div>
+                                        <span className="text-[10px] text-slate-400 font-medium">Sarah</span>
+                                    </div>
                                 </div>
 
-                                {/* Mock Table/Deck */}
-                                <div className="w-full h-32 bg-slate-700/30 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-700 text-slate-500 text-sm">
-                                    Reveal votes
+                                {/* Central Action */}
+                                <div className="w-full rounded-2xl bg-slate-800/50 border-2 border-slate-700 relative h-[80px] flex items-center justify-center p-4 shadow-xl">
+                                    <div className="bg-blue-600/30 rounded-lg px-4 py-2 flex items-center gap-2">
+                                        <RefreshCcw size={12} className="text-white" />
+                                        <span className="text-xs font-bold text-white">Start New Vote</span>
+                                    </div>
                                 </div>
 
-                                {/* Mock Cards Hand */}
-                                <div className="flex gap-2">
-                                    {[1, 2, 3, 5, 8].map((n) => (
-                                        <div
-                                            key={n}
-                                            className="w-10 h-14 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm"
-                                        >
-                                            {n}
+                                {/* Bottom Participant */}
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="w-10 h-14 bg-white rounded-lg shadow-lg flex items-center justify-center mb-1">
+                                        <span className="text-slate-900 font-bold text-sm">3</span>
+                                    </div>
+                                    <span className="text-[10px] text-slate-400 font-medium">Jimmy</span>
+                                </div>
+
+                                {/* Footer Stats */}
+                                <div className="grid grid-cols-3 gap-3 w-full mt-2">
+                                    {/* Average */}
+                                    <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50 flex flex-col items-center gap-2">
+                                        <div className="flex items-center gap-1.5 text-blue-400 opacity-80">
+                                            <Target size={10} />
+                                            <span className="text-[8px] font-bold tracking-wider uppercase">Average</span>
                                         </div>
-                                    ))}
+                                        <span className="text-2xl font-bold text-white">6</span>
+                                    </div>
+
+                                    {/* Votes Breakdown */}
+                                    <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50 flex flex-col gap-2">
+                                        <div className="flex items-center gap-1.5 text-purple-400 opacity-80 mb-1">
+                                            <Layers size={10} />
+                                            <span className="text-[8px] font-bold tracking-wider uppercase">3 Votes</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <div className="flex items-center gap-1">
+                                                <span className="bg-blue-500/20 text-blue-300 px-1 rounded font-bold">8</span>
+                                                <span className="text-slate-400">2 votes</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between text-[10px]">
+                                            <div className="flex items-center gap-1">
+                                                <span className="bg-blue-500/20 text-blue-300 px-1 rounded font-bold">3</span>
+                                                <span className="text-slate-400">1 vote</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Agreement */}
+                                    <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50 flex flex-col gap-2">
+                                        <div className="flex items-center gap-1.5 text-green-400 opacity-80">
+                                            <Users size={10} />
+                                            <span className="text-[8px] font-bold tracking-wider uppercase">Agreement</span>
+                                        </div>
+                                        <div className="flex-1 flex items-end">
+                                            <div className="w-full h-6 rounded border border-yellow-500/30 bg-yellow-500/10 relative overflow-hidden flex items-center">
+                                                <div className="absolute inset-y-0 left-0 bg-yellow-500/20 w-[67%]" />
+                                                <span className="relative z-10 text-[8px] font-bold text-yellow-500 w-full text-center">AGREED 67%</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

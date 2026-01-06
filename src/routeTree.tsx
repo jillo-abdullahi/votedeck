@@ -1,4 +1,4 @@
-import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router';
+import { createRootRoute, createRoute, createRouter, Outlet, useLocation } from '@tanstack/react-router';
 import { LandingPage } from './pages/LandingPage';
 import { RoomPage } from './pages/RoomPage';
 import { CreateGamePage } from './pages/CreateGamePage';
@@ -6,12 +6,29 @@ import { MyRoomsPage } from './pages/MyRoomsPage';
 import { NotFoundView } from './components/NotFoundView';
 
 // Create a root route
+const RootComponent = () => {
+    const location = useLocation();
+    const isLanding = location.pathname === '/';
+
+    return (
+        <div
+            className="min-h-screen w-full font-sans text-slate-200"
+            style={isLanding ? {
+                backgroundImage: "url('/intro-bg.svg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+            } : { background: '#0f172a' }} // Default to slate-900 hex for other pages if needed, or let PageLayout handle it
+        >
+            <div className="max-w-7xl mx-auto">
+                <Outlet />
+            </div>
+        </div>
+    );
+};
+
 const rootRoute = createRootRoute({
-    component: () => (
-        <>
-            <Outlet />
-        </>
-    ),
+    component: RootComponent,
     notFoundComponent: () => <NotFoundView />
 });
 

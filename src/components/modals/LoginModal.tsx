@@ -76,7 +76,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                         <form onSubmit={handleLogin} className="px-8 pb-8 flex flex-col gap-6">
                             <div className="space-y-2">
                                 <Input
-                                    placeholder="Enter your sign-in key..."
+                                    placeholder="Sign-in key"
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}
                                     autoFocus
@@ -105,8 +105,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                                 <div className="absolute inset-0 flex items-center">
                                     <span className="w-full border-t border-slate-700/50" />
                                 </div>
-                                <div className="relative flex justify-center text-xs uppercase font-medium">
-                                    <span className="bg-slate-800 px-2 text-slate-500">First time here?</span>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-slate-800 px-2 text-slate-400/60 font-semibold">First time here?</span>
                                 </div>
                             </div>
 
