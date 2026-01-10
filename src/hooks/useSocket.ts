@@ -8,6 +8,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isRoomClosed, setIsRoomClosed] = useState(false);
+    const [countdownAction, setCountdownAction] = useState<{ duration: number } | null>(null);
 
     const userId = userManager.getUserId();
     // Token is now handled via HTTP-only cookies
@@ -58,6 +59,14 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
 
         const onRoomState = (state: RoomState) => {
             setRoomState(state);
+            // If room becomes revealed, clear any active countdown
+            if (state.revealed) {
+                setCountdownAction(null);
+            }
+        };
+
+        const onCountdownStart = (payload: { duration: number }) => {
+            setCountdownAction(payload);
         };
 
         const onRoomClosed = () => {
@@ -73,6 +82,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
         socket.on('connect_error', onConnectError);
         socket.on('disconnect', onDisconnect);
         socket.on('ROOM_STATE', onRoomState);
+        socket.on('COUNTDOWN_START', onCountdownStart);
         socket.on('ROOM_CLOSED', onRoomClosed);
         socket.on('ERROR', onError);
 
@@ -90,6 +100,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
             socket.off('connect_error', onConnectError);
             socket.off('disconnect', onDisconnect);
             socket.off('ROOM_STATE', onRoomState);
+            socket.off('COUNTDOWN_START', onCountdownStart);
             socket.off('ROOM_CLOSED', onRoomClosed);
             socket.off('ERROR', onError);
             socket.disconnect();
@@ -117,7 +128,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
         socket.emit('UPDATE_NAME', { name: newName });
     }, []);
 
-    const updateSettings = useCallback((settings: { name?: string; votingSystem?: string; revealPolicy?: string }) => {
+    const updateSettings = useCallback((settings: { name?: string; votingSystem?: string; revealPolicy?: string; enableCountdown?: boolean }) => {
         socket.emit('UPDATE_SETTINGS', settings);
     }, []);
 
@@ -127,6 +138,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
         error,
         isRoomClosed,
         userId,
+        countdownAction,
         castVote,
         revealVotes,
         resetVotes,

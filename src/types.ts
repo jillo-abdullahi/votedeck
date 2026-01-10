@@ -18,4 +18,5 @@ export type RoomState = {
   revealed: boolean;
   users: User[];
   votes: Record<string, VoteValue | null>;
+  enableCountdown?: boolean;
 };

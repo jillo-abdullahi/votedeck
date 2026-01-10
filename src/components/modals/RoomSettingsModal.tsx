@@ -8,11 +8,12 @@ import { motion, AnimatePresence } from "framer-motion";
 interface RoomSettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (settings: { name: string; votingSystem: VotingSystemId; revealPolicy: RevealPolicy }) => void;
+    onSubmit: (settings: { name: string; votingSystem: VotingSystemId; revealPolicy: RevealPolicy; enableCountdown: boolean }) => void;
     initialSettings: {
         name: string;
         votingSystem: VotingSystemId;
         revealPolicy: RevealPolicy;
+        enableCountdown?: boolean;
     };
     canChangeVotingSystem: boolean;
 }
@@ -45,6 +46,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
     const [name, setName] = useState(initialSettings.name);
     const [votingSystem, setVotingSystem] = useState<VotingSystemId>(initialSettings.votingSystem);
     const [revealPolicy, setRevealPolicy] = useState<RevealPolicy>(initialSettings.revealPolicy);
+    const [enableCountdown, setEnableCountdown] = useState<boolean>(initialSettings.enableCountdown ?? true);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
@@ -52,13 +54,14 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
             setName(initialSettings.name);
             setVotingSystem(initialSettings.votingSystem);
             setRevealPolicy(initialSettings.revealPolicy);
+            setEnableCountdown(initialSettings.enableCountdown ?? true);
         }
     }, [isOpen, initialSettings]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (name.trim()) {
-            onSubmit({ name, votingSystem, revealPolicy });
+            onSubmit({ name, votingSystem, revealPolicy, enableCountdown });
         }
     };
 
@@ -173,6 +176,30 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                     </div>
                                 </div>
 
+                                {/* Countdown Setting */}
+                                <div className="space-y-3 pt-2">
+                                    <div className="flex items-center justify-start">
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Countdown</label>
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 rounded-xl border-2 border-slate-700 bg-slate-900 border-opacity-50">
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-white text-sm">Reveal Countdown</span>
+                                            <span className="text-xs text-slate-500 mt-1">Show a 3-second countdown before revealing votes</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setEnableCountdown(!enableCountdown)}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${enableCountdown ? "bg-blue-500" : "bg-slate-700"
+                                                }`}
+                                        >
+                                            <span
+                                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enableCountdown ? "translate-x-6" : "translate-x-1"
+                                                    }`}
+                                            />
+                                        </button>
+                                    </div>
+                                </div>
+
                                 {/* Reveal Policy */}
                                 <div className="space-y-3 pt-2">
                                     <div className="flex items-center justify-start">
@@ -189,17 +216,19 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                                     : "bg-slate-900 border-slate-700 hover:border-slate-600"
                                                     }`}
                                             >
-                                                <div className="flex items-center justify-between w-full mb-1">
-                                                    <span className={`font-bold ${revealPolicy === policy.id ? "text-blue-400" : "text-white"}`}>
+                                                <div className="flex items-center justify-between w-full">
+                                                    <span className={`text-sm font-bold ${revealPolicy === policy.id ? "text-blue-400" : "text-white"}`}>
                                                         {policy.label}
                                                     </span>
                                                     {revealPolicy === policy.id && <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50" />}
                                                 </div>
-                                                <span className="text-sm text-slate-500 leading-relaxed">{policy.description}</span>
+                                                <span className="text-xs text-slate-500 leading-relaxed">{policy.description}</span>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
+
+
                             </form>
                         </div>
 

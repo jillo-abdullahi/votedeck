@@ -7,9 +7,10 @@ interface PokerTableProps {
     votes: Record<string, VoteValue | null>;
     revealed: boolean;
     children: React.ReactNode;
+    overlay?: React.ReactNode;
 }
 
-export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, children }) => {
+export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, children, overlay }) => {
     // Distribute users into Top, Right, Bottom, Left positions for the table layout
     const { top, right, bottom, left } = useMemo(() => {
         const count = users.length;
@@ -81,9 +82,10 @@ export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, 
                 </div>
 
                 {/* The Table (Active Area) */}
-                <div className="flex-1 rounded-[2rem] bg-slate-800/50 border-2 border-slate-700 relative h-[140px] flex items-center justify-center p-4 shadow-xl">
+                <div className="flex-1 rounded-[2rem] bg-slate-800/50 border-2 border-slate-700 relative h-[140px] flex items-center justify-center p-4 shadow-xl overflow-hidden">
                     <div className="absolute inset-0 rounded-[1.8rem] border border-slate-600/30 pointer-events-none" />
                     {children}
+                    {overlay}
                 </div>
 
                 {/* Right Column */}

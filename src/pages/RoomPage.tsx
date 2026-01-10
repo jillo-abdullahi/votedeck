@@ -26,6 +26,7 @@ import { RoomSettingsModal } from "@/components/modals/RoomSettingsModal";
 import { RecoveryCodeModal } from "@/components/modals/RecoveryCodeModal";
 import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
+import { CountdownOverlay } from "@/components/CountdownOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import { SettingsIcon, type SettingsIconHandle } from "@/components/icons/SettingsIcon";
 import { ClipboardIcon, type ClipboardIconHandle } from "@/components/icons/ClipboardIcon";
@@ -112,8 +113,14 @@ export const RoomPage: React.FC = () => {
         updateName,
         updateSettings,
         error: socketError,
-        isRoomClosed
+        isRoomClosed,
+        countdownAction
     } = useSocket(roomId, name, !isAuthLoading);
+
+    // Use backend-driven countdown state
+    // When countdownAction is present, we are counting down.
+    // When it is null (cleared by revealed state or timeout), we are done.
+    const isCountingDown = !!countdownAction;
 
     const isAdmin = roomState?.adminId === userId;
 
@@ -167,7 +174,7 @@ export const RoomPage: React.FC = () => {
         }
     };
 
-    const handleSettingsSubmit = (settings: { name: string; votingSystem: VotingSystemId; revealPolicy: RevealPolicy }) => {
+    const handleSettingsSubmit = (settings: { name: string; votingSystem: VotingSystemId; revealPolicy: RevealPolicy; enableCountdown: boolean }) => {
         updateSettings(settings);
         setIsSettingsModalOpen(false);
     };
@@ -370,10 +377,17 @@ export const RoomPage: React.FC = () => {
                 <PokerTable
                     users={roomState.users}
                     votes={roomState.votes}
-                    revealed={roomState.revealed}
+                    revealed={roomState.revealed && !isCountingDown}
+                    overlay={
+                        <AnimatePresence mode="wait">
+                            {isCountingDown && countdownAction && (
+                                <CountdownOverlay duration={countdownAction.duration} />
+                            )}
+                        </AnimatePresence>
+                    }
                 >
                     <AnimatePresence mode="wait">
-                        {roomState.revealed ? (
+                        {roomState.revealed && !isCountingDown ? (
 
                             <motion.div
                                 key="revealed-state"
@@ -479,15 +493,15 @@ export const RoomPage: React.FC = () => {
                     <VotingDeck
                         selectedValue={myVote}
                         onVote={handleVote}
-                        revealed={roomState.revealed}
+                        revealed={roomState.revealed && !isCountingDown}
                         votingSystem={roomState.votingSystem}
                     >
-                        {roomState.revealed && (
+                        {roomState.revealed && !isCountingDown && (
                             <div className="w-full">
                                 <RevealSummary
                                     votes={roomState.votes}
                                     votingSystem={roomState.votingSystem}
-                                    isVisible={roomState.revealed}
+                                    isVisible={roomState.revealed && !isCountingDown}
                                 />
                             </div>
                         )}
@@ -518,6 +532,7 @@ export const RoomPage: React.FC = () => {
                         name: roomState.name,
                         votingSystem: roomState.votingSystem,
                         revealPolicy: roomState.revealPolicy,
+                        enableCountdown: roomState.enableCountdown,
                     }}
                     canChangeVotingSystem={!hasVotes}
                 />
