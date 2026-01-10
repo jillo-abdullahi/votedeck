@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
-import { userManager } from "@/lib/user";
+import { useGetAuthMe } from "@/lib/api/generated";
 import { UserMenu } from "@/components/UserMenu";
 import { LoginModal } from "@/components/modals/LoginModal";
 import { JoinRoomModal } from "@/components/modals/JoinRoomModal";
@@ -15,13 +15,18 @@ export const LandingPage: React.FC = () => {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-    useEffect(() => {
-        const token = userManager.getAccessToken();
-        const name = userManager.getUserName();
-        if (token && name) {
-            setUserName(name);
+    const { data: userData } = useGetAuthMe({
+        query: {
+            retry: false,
+            staleTime: Infinity,
         }
-    }, []);
+    });
+
+    useEffect(() => {
+        if (userData?.name) {
+            setUserName(userData.name);
+        }
+    }, [userData]);
 
     const containerVariants = {
         hidden: { opacity: 0 },

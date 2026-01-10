@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import { roomsApi } from '@/lib/api';
+import { useDeleteRoomsId } from '@/lib/api/generated';
 import { ModalHeader } from '@/components/ModalHeader';
 import { ModalAlert } from '@/components/ModalAlert';
 
@@ -22,21 +22,18 @@ export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     roomName,
     activeUsers
 }) => {
-    const [isDeleting, setIsDeleting] = useState(false);
+    const { mutateAsync: deleteRoom, isPending: isDeleting } = useDeleteRoomsId();
 
     if (!isOpen) return null;
 
     const handleDelete = async () => {
-        setIsDeleting(true);
         try {
-            await roomsApi.deleteRoom(roomId);
+            await deleteRoom({ id: roomId });
             onDeleted();
             onClose();
         } catch (error) {
             console.error('Failed to delete room:', error);
             alert('Failed to delete room. Please try again.');
-        } finally {
-            setIsDeleting(false);
         }
     };
 

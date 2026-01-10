@@ -33,7 +33,7 @@ import { UserMenu } from "@/components/UserMenu";
 
 import { NotFoundView } from "@/components/NotFoundView";
 
-import { authApi } from "@/lib/api";
+import { usePostAuthAnonymous, useGetAuthMe } from "@/lib/api/generated";
 import { userManager } from "@/lib/user";
 
 export const RoomPage: React.FC = () => {
@@ -44,6 +44,43 @@ export const RoomPage: React.FC = () => {
     const settingsRef = useRef<SettingsIconHandle>(null);
     const clipboardRef = useRef<ClipboardIconHandle>(null);
     const navigate = useNavigate();
+    const { mutateAsync: loginAnonymous } = usePostAuthAnonymous();
+    // Validate session on mount to detect stale local storage vs invalid cookie
+    const {
+        data: userData,
+        isError: isAuthError,
+        error: authError,
+        isLoading: isAuthLoading
+    } = useGetAuthMe({
+        query: { retry: false, staleTime: 0 },
+        request: {
+            // @ts-ignore
+            _skipAuthRedirect: true
+        }
+    });
+
+    // Sync remote user data to local state
+    React.useEffect(() => {
+        if (userData) {
+            if (userData.id) userManager.setUserId(userData.id);
+            if (userData.name) {
+                userManager.setUserName(userData.name);
+                setIsDisplayNameModalOpen(false);
+            }
+        }
+    }, [userData]);
+
+    // Clear stale local storage if auth fails
+    React.useEffect(() => {
+        if (isAuthError && (authError as any)?.response?.status === 401) {
+            // Only clear if we actually have something to clear
+            if (userManager.getUserId()) {
+                console.log("Session invalid, clearing stale local user data");
+                userManager.setUserId("");
+                userManager.setUserName("");
+            }
+        }
+    }, [isAuthError, authError]);
 
     // Use stored name as fallback if not in URL
     const name = searchName || userManager.getUserName();
@@ -65,17 +102,6 @@ export const RoomPage: React.FC = () => {
         }
     }, []);
 
-    // Handle redirect if name in URL but no token (Back button case)
-    React.useEffect(() => {
-        const currentToken = userManager.getAccessToken();
-        // If we have a name (from URL or local state) but no token, it means the session is invalid
-        // (likely user logged out and hit back button).
-        // We should redirect to home to start fresh instead of auto-creating a user.
-        if (name && !currentToken) {
-            navigate({ to: "/" });
-        }
-    }, [name, navigate]);
-
     const {
         roomState,
         userId,
@@ -87,7 +113,7 @@ export const RoomPage: React.FC = () => {
         updateSettings,
         error: socketError,
         isRoomClosed
-    } = useSocket(roomId, name);
+    } = useSocket(roomId, name, !isAuthLoading);
 
     const isAdmin = roomState?.adminId === userId;
 
@@ -104,19 +130,26 @@ export const RoomPage: React.FC = () => {
     const handleNameSubmit = async (newName: string) => {
         setIsDisplayNameModalOpen(false);
 
-        // If we don't have a token yet, performing an anonymous login
-        if (!userManager.getAccessToken()) {
+        // If we don't have a user ID OR we had an auth error (stale session), login anonymously
+        // We rely on userData to know if we are truly logged in
+        const isStaleSession = isAuthError && (authError as any)?.response?.status === 401;
+        const needsLogin = !userData || isStaleSession;
+
+        if (needsLogin) {
             try {
-                const { accessToken, userId, recoveryCode } = await authApi.loginAnonymous();
-                userManager.setAccessToken(accessToken);
-                userManager.setUserId(userId);
-                userManager.setUserName(newName);
+                // Anonymous login (creates user session)
+                const { userId, recoveryCode } = await loginAnonymous();
+
+                if (userId) {
+                    userManager.setUserId(userId);
+                }
+
                 if (recoveryCode) {
-                    setNewRecoveryCode(recoveryCode);
+                    setNewRecoveryCode(recoveryCode); // Set state for immediate display
                     setIsRecoveryModalOpen(true);
                 }
             } catch (err) {
-                console.error("Failed to login anonymously during name submission:", err);
+                console.error("Failed to login anonymously:", err);
             }
         }
 
@@ -165,6 +198,20 @@ export const RoomPage: React.FC = () => {
         }
     };
 
+    // Show loading while checking auth
+    if (isAuthLoading) {
+        return (
+            <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center justify-center p-6">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="text-xl font-medium text-slate-400">
+                        Joining room...
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (socketError === "Room not found") {
         return <NotFoundView />;
     }
@@ -208,12 +255,14 @@ export const RoomPage: React.FC = () => {
                     isOpen={isDisplayNameModalOpen}
                     onClose={() => navigate({ to: "/" })}
                     onSubmit={handleNameSubmit}
+                    initialValue={name || ""}
+                    isLoading={isAuthLoading} // Prevent submission while verifying session
                 />
                 {!isDisplayNameModalOpen && (
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
                         <div className="text-xl font-medium text-slate-400">
-                            {socketError ? `Error: ${socketError}` : "Joining room..."}
+                            {socketError ? `Error: ${socketError}` : "Connecting..."}
                         </div>
                     </div>
                 )}
@@ -454,9 +503,10 @@ export const RoomPage: React.FC = () => {
 
             <DisplayNameModal
                 isOpen={isDisplayNameModalOpen}
-                onClose={() => setIsDisplayNameModalOpen(false)}
+                onClose={() => navigate({ to: "/" })}
                 onSubmit={handleNameSubmit}
                 initialValue={name || ""}
+                isLoading={isAuthLoading}
             />
 
             {roomState && (

@@ -1,5 +1,5 @@
 const USER_ID_KEY = 'votedeck_user_id';
-const TOKEN_KEY = 'votedeck_access_token';
+
 
 let tempRecoveryCode: string | null = null;
 
@@ -12,16 +12,6 @@ export const userManager = {
             localStorage.setItem(USER_ID_KEY, id);
         } else {
             localStorage.removeItem(USER_ID_KEY);
-        }
-    },
-    getAccessToken: (): string | null => {
-        return localStorage.getItem(TOKEN_KEY);
-    },
-    setAccessToken: (token: string | null): void => {
-        if (token) {
-            localStorage.setItem(TOKEN_KEY, token);
-        } else {
-            localStorage.removeItem(TOKEN_KEY);
         }
     },
     getUserName: (): string => {

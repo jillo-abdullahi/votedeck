@@ -3,14 +3,14 @@ import { socket } from '../lib/socket';
 import { userManager } from '../lib/user';
 import type { RoomState, VoteValue } from '../types';
 
-export const useSocket = (roomId: string | undefined, name: string | undefined) => {
+export const useSocket = (roomId: string | undefined, name: string | undefined, enabled: boolean = true) => {
     const [roomState, setRoomState] = useState<RoomState | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isRoomClosed, setIsRoomClosed] = useState(false);
 
     const userId = userManager.getUserId();
-    const token = userManager.getAccessToken();
+    // Token is now handled via HTTP-only cookies
 
     // Track name in ref to avoid reconnecting when only name changes
     const nameRef = useRef(name);
@@ -18,12 +18,11 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         nameRef.current = name;
     }, [name]);
 
-    useEffect(() => {
-        // We only connect if we have a roomId, a name, and a token
-        if (!roomId || !name || !token) return;
+    const hasName = !!name;
 
-        // Set token for authentication
-        socket.auth = { token };
+    useEffect(() => {
+        // We only connect if we have a roomId and a name, and are enabled
+        if (!roomId || !name || !enabled) return;
 
         // Connect socket
         socket.connect();
@@ -37,34 +36,17 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             socket.emit('JOIN_ROOM', { roomId, userId, name: nameRef.current });
         };
 
-        const onConnectError = async (err: Error) => {
+        const onConnectError = (err: Error) => {
             console.error('Socket connection error:', err.message);
 
             // Check if error is related to authentication
             if (err.message.includes('Authentication error') || err.message.includes('Invalid token') || err.message.includes('jwt expired')) {
-                // If we're already connecting/refreshing, don't cascade error yet
-                try {
-                    console.log('Attempting to refresh token...');
-                    // Use dynamic import to avoid circular dependency
-                    const { authApi } = await import('../lib/api');
-                    const { accessToken } = await authApi.refresh();
+                // If auth fails, the cookie is likely invalid/expired.
+                socket.disconnect();
+                setError('Authentication failed. Please reload the page.');
 
-                    userManager.setAccessToken(accessToken);
-
-                    // Update socket auth and reconnect
-                    socket.auth = { token: accessToken };
-                    socket.connect();
-                    console.log('Token refreshed and socket reconnecting...');
-
-                    // Clear any previous error if we successfully triggered a reconnect
-                    setError(null);
-                } catch (refreshErr) {
-                    console.error('Failed to refresh token:', refreshErr);
-                    // Explicitly disconnect to stop retrying with bad token
-                    socket.disconnect();
-                    setError('Authentication failed. Please reload the page.');
-                    userManager.setAccessToken(null);
-                }
+                // Optional: Redirect to home if critical, but keeping error state is safer for now
+                // window.location.href = '/'; 
             } else {
                 setError(`Connection error: ${err.message}`);
             }
@@ -100,7 +82,10 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
         }
 
         return () => {
-            socket.emit('LEAVE_ROOM');
+            if (socket.connected) {
+                // Modified to pass payload only if really needed, but sticking to simple emit for now as per previous verified state
+                socket.emit('LEAVE_ROOM');
+            }
             socket.off('connect', onConnect);
             socket.off('connect_error', onConnectError);
             socket.off('disconnect', onDisconnect);
@@ -109,7 +94,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined) 
             socket.off('ERROR', onError);
             socket.disconnect();
         };
-    }, [roomId, userId, token]); // Name removed to prevent reconnects on name change
+    }, [roomId, userId, hasName, enabled]); // Name removed to prevent reconnects on name change, but we need to connect when name becomes available
 
     const castVote = useCallback((value: VoteValue) => {
         socket.emit('CAST_VOTE', { value });

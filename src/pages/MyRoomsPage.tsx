@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { PageLayout } from "@/components/PageLayout";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
-import { roomsApi } from "../lib/api";
-import { userManager } from "../lib/user";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGetRoomsMy, useGetAuthMe, getGetRoomsMyQueryKey, type GetRoomsMy200, type GetRoomsMy200RoomsItem } from "@/lib/api/generated";
 import { Calendar, ArrowRight, SpadeIcon } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
@@ -12,33 +12,43 @@ import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
 import { RoomAvatar } from "@/components/RoomAvatar";
 import { Button } from "@/components/ui/button";
 
-interface RoomSummary {
-    id: string;
-    name: string;
-    createdAt: string;
-    adminId: string;
-    activeUsers?: number;
-}
-
 export const MyRoomsPage: React.FC = () => {
-    const navigate = useNavigate();
-    const [rooms, setRooms] = useState<RoomSummary[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [total, setTotal] = useState(0);
-    const [roomToDelete, setRoomToDelete] = useState<RoomSummary | null>(null);
+    const queryClient = useQueryClient();
+    const { data: roomsData, isLoading: loading, error: queryError } = useGetRoomsMy();
 
-    const [userName, setUserName] = useState(userManager.getUserName());
-    const userId = userManager.getUserId();
+    // Define extended type for local usage
+    type RoomWithMeta = GetRoomsMy200RoomsItem & { activeUsers?: number };
+
+    // State
+    const [roomToDelete, setRoomToDelete] = useState<RoomWithMeta | null>(null);
+    const [userName, setUserName] = useState<string | null>(null);
     const trashRef = useRef<Trash2IconHandle>(null);
 
-    // Listen for real-time updates
+    // Auth Data
+    const { data: userData } = useGetAuthMe({
+        query: { retry: false, staleTime: Infinity }
+    });
+
+    // Sync User Name
+    useEffect(() => {
+        if (userData?.name) {
+            setUserName(userData.name);
+        }
+    }, [userData]);
+
+    // Listen for real-time updates and update Query Cache
     useMyRoomsSocket((payload) => {
-        setRooms(prev => prev.map(room =>
-            room.id === payload.roomId
-                ? { ...room, activeUsers: payload.activeUsers }
-                : room
-        ));
+        queryClient.setQueryData(getGetRoomsMyQueryKey(), (old: GetRoomsMy200 | undefined) => {
+            if (!old?.rooms) return old;
+            return {
+                ...old,
+                rooms: old.rooms.map(room =>
+                    room.id === payload.roomId
+                        ? { ...room, activeUsers: payload.activeUsers }
+                        : room
+                )
+            };
+        });
 
         // Also update selected room if modal is open
         if (roomToDelete?.id === payload.roomId) {
@@ -46,29 +56,14 @@ export const MyRoomsPage: React.FC = () => {
         }
     });
 
+    // Error handling
+    const error = queryError ? "Failed to load your rooms. Please try again." : null;
+
     useEffect(() => {
-        // Redirect if not logged in
-        if (!userManager.getAccessToken()) {
-            navigate({ to: "/" });
-            return;
+        if (queryError) {
+            // global interceptor handles 401
         }
-
-        const fetchRooms = async () => {
-            try {
-                setLoading(true);
-                const data = await roomsApi.getMyRooms();
-                setRooms(data.rooms);
-                setTotal(data.total);
-            } catch (err) {
-                console.error("Failed to fetch rooms:", err);
-                setError("Failed to load your rooms. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchRooms();
-    }, [navigate]);
+    }, [queryError]);
 
     return (
         <PageLayout>
@@ -93,8 +88,8 @@ export const MyRoomsPage: React.FC = () => {
             <main className="w-full p-12">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-semibold">My Games</h1>
-                    {total > 0 && <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
-                        {total} {total === 1 ? "game" : "games"}
+                    {(roomsData?.total || 0) > 0 && <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {roomsData?.total} {roomsData?.total === 1 ? "game" : "games"}
                     </span>}
                 </div>
 
@@ -106,7 +101,7 @@ export const MyRoomsPage: React.FC = () => {
                     <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-xl text-center">
                         {error}
                     </div>
-                ) : rooms.length === 0 ? (
+                ) : (roomsData?.rooms?.length || 0) === 0 ? (
                     <div className="text-center py-20 bg-slate-800/30 rounded-3xl border-2 border-dashed border-slate-700">
                         <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
                             <SpadeIcon size={32} />
@@ -130,23 +125,25 @@ export const MyRoomsPage: React.FC = () => {
 
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {rooms.map((room) => {
-                            const isAdmin = room.adminId === userId;
-                            const date = new Date(room.createdAt).toLocaleDateString(undefined, {
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {((roomsData?.rooms || []) as RoomWithMeta[]).map((room, index) => {
+                            const isAdmin = true; // For "My Rooms", user is always admin implied
+                            // Fix date parsing if createdAt is optional
+                            const date = room.createdAt ? new Date(room.createdAt).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric'
-                            });
+                            }) : '';
                             const hasActiveUsers = (room.activeUsers || 0) > 0;
 
                             return (
                                 <Link
                                     key={room.id}
                                     to="/room/$roomId"
-                                    params={{ roomId: room.id }}
-                                    search={{ name: userName }}
-                                    className="group block bg-slate-800/30 hover:bg-slate-700/30 border border-slate-700/30 hover:border-blue-500/50 rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative"
+                                    params={{ roomId: room.id! }}
+                                    search={{ name: userName || undefined }}
+                                    style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
+                                    className="group block bg-slate-800/30 hover:bg-slate-700/30 ring-1 ring-slate-700/30 hover:ring-blue-500/50 rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative animate-in fade-in duration-500"
                                 >
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="transition-transform group-hover:scale-105 duration-300">
@@ -201,15 +198,13 @@ export const MyRoomsPage: React.FC = () => {
                     </div>
                 )}
             </main>
-
+            {/* Modal handling */}
             <DeleteRoomModal
                 isOpen={!!roomToDelete}
                 onClose={() => setRoomToDelete(null)}
                 onDeleted={() => {
-                    if (roomToDelete) {
-                        setRooms(prev => prev.filter(r => r.id !== roomToDelete.id));
-                        setTotal(prev => prev - 1);
-                    }
+                    queryClient.invalidateQueries({ queryKey: getGetRoomsMyQueryKey() });
+                    setRoomToDelete(null);
                 }}
                 roomId={roomToDelete?.id || ''}
                 roomName={roomToDelete?.name || ''}

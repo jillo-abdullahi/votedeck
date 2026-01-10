@@ -5,7 +5,7 @@ import { DisplayNameModal } from "../components/modals/DisplayNameModal";
 import { Header } from "../components/Header";
 import { Button } from "@/components/ui/button";
 import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/MoveRightIcon";
-import { roomsApi } from "../lib/api";
+import { usePostRooms, useGetAuthMe } from "../lib/api/generated";
 import type { VotingSystemId } from "../types";
 import { userManager } from "../lib/user";
 import { ChevronDownIcon, UserIcon, Layers, Loader2, SpadeIcon } from "lucide-react";
@@ -58,6 +58,22 @@ export const CreateGamePage: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  const { data: userData } = useGetAuthMe({
+    query: {
+      retry: false,
+      staleTime: Infinity,
+    },
+    request: {
+      // @ts-ignore - custom property handled in interceptor
+      _skipAuthRedirect: true
+    }
+  });
+
+  const { mutateAsync: createRoom, isPending: isCreatingRoom } = usePostRooms();
+
+  // Use mutation pending state, combined with local state if needed (though isCreatingRoom is likely enough)
+  const isLoading = isCreating || isCreatingRoom;
+
   const moveRightIconRef = useRef<MoveRightIconHandle>(null);
 
   // Triggered when form is valid and user clicks "Create Game"
@@ -65,11 +81,8 @@ export const CreateGamePage: React.FC = () => {
     e.preventDefault();
     if (!gameName.trim()) return;
 
-    const existingToken = userManager.getAccessToken();
-    const existingName = userManager.getUserName();
-
-    if (existingToken && existingName) {
-      handleFinalSubmit(existingName);
+    if (userData?.name) {
+      handleFinalSubmit(userData.name);
     } else {
       setIsModalOpen(true);
     }
@@ -80,11 +93,16 @@ export const CreateGamePage: React.FC = () => {
     setIsCreating(true);
     try {
       // Create the room via backend API - now passing displayName as adminName
-      const { roomId, accessToken, userId, recoveryCode } = await roomsApi.createRoom(gameName, votingSystem as VotingSystemId, displayName);
+      const { roomId, userId, recoveryCode } = await createRoom({
+        data: {
+          name: gameName,
+          votingSystem: votingSystem as VotingSystemId,
+          adminName: displayName
+        }
+      });
 
-      // Store the session details
-      userManager.setAccessToken(accessToken);
-      userManager.setUserId(userId);
+      // Store the session details (only those not in cookie)
+      userManager.setUserId(userId!);
       userManager.setUserName(displayName);
       if (recoveryCode) {
         userManager.setTempRecoveryCode(recoveryCode);
@@ -93,7 +111,7 @@ export const CreateGamePage: React.FC = () => {
       // Interact with router to navigate
       navigate({
         to: "/room/$roomId",
-        params: { roomId },
+        params: { roomId: roomId! },
         search: { name: displayName },
       });
     } catch (error) {
@@ -117,11 +135,11 @@ export const CreateGamePage: React.FC = () => {
       />
 
       <Header>
-        {userManager.getUserName() && (
+        {userData?.name ? (
           <div className="flex items-center gap-4">
-            <UserMenu name={userManager.getUserName()} onNameChange={() => { }} />
+            <UserMenu name={userData.name} onNameChange={() => { }} />
           </div>
-        )}
+        ) : null}
       </Header>
 
       {/* Main Content */}
@@ -252,13 +270,13 @@ export const CreateGamePage: React.FC = () => {
                 onMouseEnter={() => moveRightIconRef.current?.startAnimation()}
                 onMouseLeave={() => moveRightIconRef.current?.stopAnimation()}
               >
-                {isCreating ? (
+                {isLoading ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
                   <span>Create Game</span>
                 )}
-                {!isCreating && <MoveRightIcon ref={moveRightIconRef} />}
-                {isCreating && <span>Creating...</span>}
+                {!isLoading && <MoveRightIcon ref={moveRightIconRef} />}
+                {isLoading && <span>Creating...</span>}
               </Button>
             </motion.div>
           </form>

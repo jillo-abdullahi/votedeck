@@ -3,10 +3,12 @@ import { UserAvatar } from "./UserAvatar";
 import { ChevronDown, Pencil } from "lucide-react";
 import { DisplayNameModal } from "./modals/DisplayNameModal";
 import { userManager } from "@/lib/user";
+import { usePostAuthLogout } from "@/lib/api/generated";
 import { Link } from "@tanstack/react-router";
 import { LayoutGridIcon, type LayoutGridHandle } from "./icons/LayoutGridIcon";
 import { Button } from "@/components/ui/button";
 import { LogoutIcon, type LogoutIconHandle } from "./icons/LogoutIcon";
+
 interface UserMenuProps {
     name: string;
     onNameChange?: (newName: string) => void;
@@ -17,6 +19,7 @@ interface UserMenuProps {
 export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, onLogout }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+    const { mutateAsync: logout } = usePostAuthLogout();
 
 
     const layoutGridRef = useRef<LayoutGridHandle>(null);
@@ -30,10 +33,16 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
         }
     };
 
-    const handleLogout = () => {
-        userManager.setAccessToken(null);
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+
         userManager.setUserId("");
         userManager.setUserName("");
+
         if (onLogout) {
             onLogout();
         }

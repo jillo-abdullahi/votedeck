@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { roomsApi } from "@/lib/api";
+import { getRoomsId } from "@/lib/api/generated";
 import { useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ModalHeader } from "@/components/ModalHeader";
@@ -32,13 +32,14 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
         }
 
         try {
-            // Validate room exists
-            await roomsApi.getRoom(cleanRoomId);
+            // Validate room exists using the generated fetcher
+            await getRoomsId(cleanRoomId);
 
             // Navigate to room
             await navigate({ to: "/room/$roomId", params: { roomId: cleanRoomId } });
             onClose();
         } catch (err: any) {
+            // Error handling remains same
             if (err.response?.status === 404) {
                 setError("Room not found. Please check the ID and try again.");
             } else {

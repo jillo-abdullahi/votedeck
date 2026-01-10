@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authApi } from "@/lib/api";
+import { usePostAuthRestore } from "@/lib/api/generated";
 import { userManager } from "@/lib/user";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,18 +21,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     const loginIconRef = useRef<LoginIconHandle>(null);
 
+    const { mutateAsync: restore } = usePostAuthRestore();
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
         try {
-            const { userId, accessToken, name } = await authApi.restore(code.trim());
+            const { userId, name } = await restore({ data: { recoveryCode: code.trim() } });
 
-            userManager.setUserId(userId);
-            userManager.setAccessToken(accessToken);
-            userManager.setUserName(name);
-
+            userManager.setUserId(userId!);
+            userManager.setUserName(name || "");
 
             onClose();
             window.location.reload();

@@ -1,116 +1,51 @@
-import axios from 'axios';
-import type { VotingSystemId, RoomState } from '../types';
-import { userManager } from './user';
+import axios, { type AxiosRequestConfig, type AxiosError } from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-const api = axios.create({
+export const AXIOS_INSTANCE = axios.create({
     baseURL: API_URL,
     withCredentials: true,
 });
 
-// Add interceptor to attach JWT
-api.interceptors.request.use((config) => {
-    const token = userManager.getAccessToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
-// Add interceptor to handle 401s
-api.interceptors.response.use(
+// Add interceptor to handle 401s (global error handling)
+AXIOS_INSTANCE.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
+    (error) => {
+        // If error is 401, it means the cookie is invalid/expired
+        if (error.response?.status === 401) {
+            // Check if the request explicitly opts out of global 401 handling
+            const skipRedirect = (error.config as any)?._skipAuthRedirect;
+            if (skipRedirect) {
+                return Promise.reject(error);
+            }
 
-        // If error is 401 and we haven't retried yet, AND it's not the refresh endpoint itself
-        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
-            originalRequest._retry = true;
-
-            try {
-                // Call refresh endpoint
-                const { accessToken } = await authApi.refresh();
-
-                // Update user manager with new token
-                userManager.setAccessToken(accessToken);
-
-                // Update header
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-
-                // Retry original request
-                return api(originalRequest);
-            } catch (refreshError) {
-                // If refresh fails, user is truly unauthorized
-                // Redirect to home/login and clear any local state if needed
-                if (window.location.pathname !== '/') {
-                    // Optional: window.location.href = '/'; 
-                }
-                return Promise.reject(refreshError);
+            // Redirect to home if not already there to clear state
+            if (window.location.pathname !== '/') {
+                // We rely on the backend clearing the cookie or it being expired
+                // A force reload or navigation to / ensures fresh state
+                window.location.href = '/';
             }
         }
         return Promise.reject(error);
     }
 );
 
-export interface CreateRoomResponse {
-    roomId: string;
-    joinUrl: string;
-    accessToken: string;
-    userId: string;
-    recoveryCode?: string;
-}
+// Custom instance function for Orval
+export const customInstance = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
+    const source = axios.CancelToken.source();
+    const promise = AXIOS_INSTANCE({
+        ...config,
+        ...options,
+        cancelToken: source.token,
+    }).then(({ data }) => data);
 
-export interface AuthResponse {
-    userId: string;
-    accessToken: string;
-    recoveryCode?: string;
-}
+    // @ts-ignore
+    promise.cancel = () => {
+        source.cancel('Query was cancelled');
+    };
 
-export const authApi = {
-    loginAnonymous: async (): Promise<AuthResponse> => {
-        const response = await api.post<AuthResponse>('/auth/anonymous');
-        return response.data;
-    },
-    restore: async (recoveryCode: string): Promise<AuthResponse & { name: string }> => {
-        const response = await api.post<AuthResponse & { name: string }>('/auth/restore', { recoveryCode });
-        return response.data;
-    },
-    refresh: async (): Promise<{ accessToken: string }> => {
-        if (refreshPromise) return refreshPromise;
-
-        refreshPromise = api.post<{ accessToken: string }>('/auth/refresh')
-            .then(res => res.data)
-            .finally(() => {
-                refreshPromise = null;
-            });
-
-        return refreshPromise;
-    }
+    return promise;
 };
 
-let refreshPromise: Promise<{ accessToken: string }> | null = null;
-
-export const roomsApi = {
-    createRoom: async (name: string, votingSystem: VotingSystemId, adminName: string): Promise<CreateRoomResponse> => {
-        const response = await api.post<CreateRoomResponse>('/rooms', { name, votingSystem, adminName });
-        return response.data;
-    },
-
-    getRoom: async (id: string): Promise<RoomState> => {
-        const response = await api.get<RoomState>(`/rooms/${id}`);
-        return response.data;
-    },
-
-    getMyRooms: async (limit: number = 20, offset: number = 0): Promise<{ rooms: any[], total: number }> => {
-        const response = await api.get<{ rooms: any[], total: number }>('/rooms/my', {
-            params: { limit, offset }
-        });
-        return response.data;
-    },
-
-    deleteRoom: async (roomId: string): Promise<{ success: boolean }> => {
-        const response = await api.delete<{ success: boolean }>(`/rooms/${roomId}`);
-        return response.data;
-    }
-};
+// Define ErrorType for Orval to use
+export type ErrorType<Error> = AxiosError<Error>;
