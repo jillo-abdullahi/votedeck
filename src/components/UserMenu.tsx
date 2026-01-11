@@ -51,7 +51,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
     };
 
     return (
-        <div className="relative z-50">
+        <div className="relative z-40">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex cursor-pointer items-center gap-3 hover:opacity-80 transition-opacity group"

@@ -18,7 +18,7 @@ const RootComponent = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
-            } : { background: '#0f172a' }} // Default to slate-900 hex for other pages if needed, or let PageLayout handle it
+            } : { background: '#0f172a' }}
         >
             <div className="max-w-7xl mx-auto">
                 <Outlet />
