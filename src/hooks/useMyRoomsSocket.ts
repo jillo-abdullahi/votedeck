@@ -1,27 +1,41 @@
 import { useEffect } from 'react';
 import { socket } from '../lib/socket';
+import { useAuth } from './useAuth';
 
-interface RoomUpdatePayload {
-    roomId: string;
-    activeUsers: number;
-}
 
-export const useMyRoomsSocket = (onRoomUpdate: (payload: RoomUpdatePayload) => void) => {
+export const useMyRoomsSocket = (onRoomUpdate: (payload: any) => void) => {
+    const { user, loading } = useAuth();
+
     useEffect(() => {
-        // Socket should automatically send cookies
-        socket.connect();
+        if (loading) return;
+
+        const connect = async () => {
+            if (user) {
+                const token = await user.getIdToken();
+                socket.auth = { token };
+            }
+            // Ensure clean state
+            if (socket.connected) socket.disconnect();
+            socket.connect();
+        };
+
+        connect();
 
         const onConnectError = (err: Error) => {
-            console.error('Socket connection error:', err.message);
+            console.error('MyRooms socket error:', err.message);
+        };
+
+        const onUpdate = (payload: any) => {
+            if (onRoomUpdate) onRoomUpdate(payload);
         };
 
         socket.on('connect_error', onConnectError);
-        socket.on('MY_ROOM_UPDATE', onRoomUpdate);
+        socket.on('MY_ROOM_UPDATE', onUpdate);
 
         return () => {
             socket.off('connect_error', onConnectError);
-            socket.off('MY_ROOM_UPDATE', onRoomUpdate);
+            socket.off('MY_ROOM_UPDATE', onUpdate);
             socket.disconnect();
         };
-    }, [onRoomUpdate]);
+    }, [onRoomUpdate, user, loading]);
 };

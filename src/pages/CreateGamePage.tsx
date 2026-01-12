@@ -1,16 +1,19 @@
 import React, { useState, useRef } from "react";
+import { signInAnonymously, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { PageLayout } from "@/components/PageLayout";
 import { useNavigate } from "@tanstack/react-router";
 import { DisplayNameModal } from "../components/modals/DisplayNameModal";
 import { Header } from "../components/Header";
 import { Button } from "@/components/ui/button";
 import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/MoveRightIcon";
-import { usePostRooms, useGetAuthMe } from "../lib/api/generated";
+import { usePostRooms } from "../lib/api/generated";
 import type { VotingSystemId } from "../types";
 import { userManager } from "../lib/user";
 import { ChevronDownIcon, UserIcon, Layers, Loader2, SpadeIcon } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 import { motion } from "motion/react";
+import { useAuth } from "@/hooks/useAuth";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -58,16 +61,8 @@ export const CreateGamePage: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data: userData } = useGetAuthMe({
-    query: {
-      retry: false,
-      staleTime: Infinity,
-    },
-    request: {
-      // @ts-ignore - custom property handled in interceptor
-      _skipAuthRedirect: true
-    }
-  });
+  // Use Firebase Auth hook
+  const { user } = useAuth();
 
   const { mutateAsync: createRoom, isPending: isCreatingRoom } = usePostRooms();
 
@@ -81,17 +76,32 @@ export const CreateGamePage: React.FC = () => {
     e.preventDefault();
     if (!gameName.trim()) return;
 
-    if (userData?.name) {
-      handleFinalSubmit(userData.name);
+    if (user?.displayName) {
+      handleFinalSubmit(user.displayName);
     } else {
       setIsModalOpen(true);
     }
   };
 
+  // ... (handleFinalSubmit logic already updated in previous steps, just keep it or ensure we don't break it)
+
+  // Note: I will only replace the top section up to handleInitialSubmit to avoid overwriting the complex logic in handleFinalSubmit if possible.
+  // But I need to remove useGetAuthMe import.
+  // I will target up to Header.
+
+
   // Triggered when user submits name in modal
   const handleFinalSubmit = async (displayName: string) => {
     setIsCreating(true);
     try {
+      // If not logged in, sign in anonymously
+      if (!auth.currentUser) {
+        const cred = await signInAnonymously(auth);
+        await updateProfile(cred.user, { displayName });
+        // Ensure auth state propagates
+        await cred.user.reload();
+      }
+
       // Create the room via backend API - now passing displayName as adminName
       const { roomId, userId, recoveryCode } = await createRoom({
         data: {
@@ -135,9 +145,9 @@ export const CreateGamePage: React.FC = () => {
       />
 
       <Header>
-        {userData?.name ? (
+        {user?.displayName ? (
           <div className="flex items-center gap-4">
-            <UserMenu name={userData.name} onNameChange={() => { }} />
+            <UserMenu name={user.displayName} onNameChange={() => { }} photoURL={user.photoURL} />
           </div>
         ) : null}
       </Header>

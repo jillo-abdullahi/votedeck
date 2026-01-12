@@ -7,6 +7,18 @@ export const AXIOS_INSTANCE = axios.create({
     withCredentials: true,
 });
 
+import { auth } from './firebase';
+
+// Add interceptor to attach Firebase ID Token
+AXIOS_INSTANCE.interceptors.request.use(async (config) => {
+    const user = auth.currentUser;
+    if (user) {
+        const token = await user.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // Add interceptor to handle 401s (global error handling)
 AXIOS_INSTANCE.interceptors.response.use(
     (response) => response,

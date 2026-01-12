@@ -1,32 +1,23 @@
 import { motion } from "motion/react";
 import { Settings, LogOut, RefreshCcw, Target, Layers, Users } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
-import { useGetAuthMe } from "@/lib/api/generated";
+import { useAuth } from "@/hooks/useAuth"; // Use Auth Hook
 import { UserMenu } from "@/components/UserMenu";
 import { LoginModal } from "@/components/modals/LoginModal";
 import { JoinRoomModal } from "@/components/modals/JoinRoomModal";
 import { Button } from "@/components/ui/button";
 
 export const LandingPage: React.FC = () => {
-    const [userName, setUserName] = useState<string | null>(null);
+    // const [userName, setUserName] = useState<string | null>(null); // No longer needed
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-    const { data: userData } = useGetAuthMe({
-        query: {
-            retry: false,
-            staleTime: Infinity,
-        }
-    });
-
-    useEffect(() => {
-        if (userData?.name) {
-            setUserName(userData.name);
-        }
-    }, [userData]);
+    const { user } = useAuth(); // Use Firebase Auth state
+    const userName = user?.displayName || user?.email?.split('@')[0] || "Guest";
+    const isLoggedIn = !!user;
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -54,8 +45,8 @@ export const LandingPage: React.FC = () => {
     return (
         <PageLayout className="bg-transparent">
             <Header>
-                {userName ? (
-                    <UserMenu name={userName} onNameChange={setUserName} />
+                {isLoggedIn ? (
+                    <UserMenu name={userName} photoURL={user?.photoURL} />
                 ) : (
                     <button
                         onClick={() => setIsLoginModalOpen(true)}

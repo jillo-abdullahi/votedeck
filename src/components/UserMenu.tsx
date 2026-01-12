@@ -8,17 +8,21 @@ import { Link } from "@tanstack/react-router";
 import { LayoutGridIcon, type LayoutGridHandle } from "./icons/LayoutGridIcon";
 import { Button } from "@/components/ui/button";
 import { LogoutIcon, type LogoutIconHandle } from "./icons/LogoutIcon";
+import { auth } from "@/lib/firebase"; // Firebase Import
 
 interface UserMenuProps {
     name: string;
     onNameChange?: (newName: string) => void;
     role?: string;
     onLogout?: () => void;
+    photoURL?: string | null;
 }
 
-export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, onLogout }) => {
+export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, onLogout, photoURL }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+
+    // We keep this for now to clear cookies if backend uses them, but wrapped in try/catch safely
     const { mutateAsync: logout } = usePostAuthLogout();
 
 
@@ -35,11 +39,21 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
 
     const handleLogout = async () => {
         try {
-            await logout();
+            // Firebase Sign Out (Primary)
+            await auth.signOut();
+
+            // Backend Sign Out (Cleanup)
+            try {
+                await logout();
+            } catch (err) {
+                // Ignore backend logout errors if token is already gone or invalid
+                console.warn("Backend logout warning", err);
+            }
         } catch (error) {
             console.error("Logout failed", error);
         }
 
+        // Clear local state
         userManager.setUserId("");
         userManager.setUserName("");
 
@@ -56,7 +70,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex cursor-pointer items-center gap-3 hover:opacity-80 transition-opacity group"
             >
-                <UserAvatar name={name || "Guest"} size={32} />
+                <UserAvatar name={name || "Guest"} size={32} src={photoURL} />
                 <div className="flex items-center gap-2">
                     <span className="text-white font-bold hidden sm:block text-lg truncate max-w-[120px]">
                         {name || "Guest"}
@@ -76,7 +90,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                     <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
                         <div className="p-4 border-b border-slate-800 flex items-center gap-4">
                             <div className="relative group/avatar cursor-pointer">
-                                <UserAvatar name={name || "Guest"} size={role ? 48 : 32} />
+                                <UserAvatar name={name || "Guest"} size={role ? 48 : 32} src={photoURL} />
                             </div>
                             <div className="flex-1 flex flex-col justify-center items-start">
                                 <div
@@ -132,8 +146,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                 onSubmit={handleNameSubmit}
                 initialValue={name || ""}
             />
-
-
         </div>
     );
 };

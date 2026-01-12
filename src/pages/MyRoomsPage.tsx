@@ -4,13 +4,14 @@ import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGetRoomsMy, useGetAuthMe, getGetRoomsMyQueryKey, type GetRoomsMy200, type GetRoomsMy200RoomsItem } from "@/lib/api/generated";
+import { useGetRoomsMy, getGetRoomsMyQueryKey, type GetRoomsMy200, type GetRoomsMy200RoomsItem } from "@/lib/api/generated";
 import { Calendar, ArrowRight, SpadeIcon } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
 import { RoomAvatar } from "@/components/RoomAvatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 export const MyRoomsPage: React.FC = () => {
     const queryClient = useQueryClient();
@@ -21,20 +22,11 @@ export const MyRoomsPage: React.FC = () => {
 
     // State
     const [roomToDelete, setRoomToDelete] = useState<RoomWithMeta | null>(null);
-    const [userName, setUserName] = useState<string | null>(null);
     const trashRef = useRef<Trash2IconHandle>(null);
 
     // Auth Data
-    const { data: userData } = useGetAuthMe({
-        query: { retry: false, staleTime: Infinity }
-    });
-
-    // Sync User Name
-    useEffect(() => {
-        if (userData?.name) {
-            setUserName(userData.name);
-        }
-    }, [userData]);
+    const { user } = useAuth();
+    const userName = user?.displayName || user?.email?.split('@')[0];
 
     // Listen for real-time updates and update Query Cache
     useMyRoomsSocket((payload) => {
@@ -69,7 +61,7 @@ export const MyRoomsPage: React.FC = () => {
         <PageLayout>
             <Header>
                 {userName ? (
-                    <UserMenu name={userName} onNameChange={setUserName} />
+                    <UserMenu name={userName} photoURL={user?.photoURL} />
                 ) : (
                     <Link
                         to="/"

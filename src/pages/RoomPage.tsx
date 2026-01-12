@@ -34,7 +34,9 @@ import { UserMenu } from "@/components/UserMenu";
 
 import { NotFoundView } from "@/components/NotFoundView";
 
-import { usePostAuthAnonymous, useGetAuthMe } from "@/lib/api/generated";
+import { signInAnonymously, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/hooks/useAuth";
 import { userManager } from "@/lib/user";
 
 export const RoomPage: React.FC = () => {
@@ -45,49 +47,35 @@ export const RoomPage: React.FC = () => {
     const settingsRef = useRef<SettingsIconHandle>(null);
     const clipboardRef = useRef<ClipboardIconHandle>(null);
     const navigate = useNavigate();
-    const { mutateAsync: loginAnonymous } = usePostAuthAnonymous();
-    // Validate session on mount to detect stale local storage vs invalid cookie
-    const {
-        data: userData,
-        isError: isAuthError,
-        error: authError,
-        isLoading: isAuthLoading
-    } = useGetAuthMe({
-        query: { retry: false, staleTime: 0 },
-        request: {
-            // @ts-ignore
-            _skipAuthRedirect: true
-        }
-    });
 
-    // Sync remote user data to local state
+
+    // Auth State
+    const { user, loading: isAuthLoading } = useAuth();
+
+    // Use auth name or search param or fallback
+    // Priority: Firebase Name -> URL Search Name -> "Guest" (conceptually)
+    // Actually if user is logged in, use user.displayName.
+    // If not logged in, we wait for input.
+    const name = user?.displayName || searchName;
+
+    // userManager sync (optional, maybe not needed if we rely on user object, keeping for socket fallback if any)
     React.useEffect(() => {
-        if (userData) {
-            if (userData.id) userManager.setUserId(userData.id);
-            if (userData.name) {
-                userManager.setUserName(userData.name);
-                setIsDisplayNameModalOpen(false);
-            }
-        }
-    }, [userData]);
-
-    // Clear stale local storage if auth fails
-    React.useEffect(() => {
-        if (isAuthError && (authError as any)?.response?.status === 401) {
-            // Only clear if we actually have something to clear
-            if (userManager.getUserId()) {
-                console.log("Session invalid, clearing stale local user data");
-                userManager.setUserId("");
-                userManager.setUserName("");
-            }
-        }
-    }, [isAuthError, authError]);
-
-    // Use stored name as fallback if not in URL
-    const name = searchName || userManager.getUserName();
+        if (user?.uid) userManager.setUserId(user.uid);
+        if (user?.displayName) userManager.setUserName(user.displayName);
+    }, [user]);
 
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-    const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(!name);
+    // Open name modal if not loading and no name (and no user)
+    // If user exists, we have name. If user doesn't exist, we need name (which triggers anonymous login)
+    const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(false);
+
+    React.useEffect(() => {
+        if (!isAuthLoading && !name) {
+            setIsDisplayNameModalOpen(true);
+        } else if (name) {
+            setIsDisplayNameModalOpen(false);
+        }
+    }, [isAuthLoading, name]);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     const [newRecoveryCode, setNewRecoveryCode] = useState("");
@@ -115,7 +103,7 @@ export const RoomPage: React.FC = () => {
         error: socketError,
         isRoomClosed,
         countdownAction
-    } = useSocket(roomId, name, !isAuthLoading);
+    } = useSocket(roomId, name, user?.uid, !isAuthLoading);
 
     // Use backend-driven countdown state
     // When countdownAction is present, we are counting down.
@@ -137,27 +125,24 @@ export const RoomPage: React.FC = () => {
     const handleNameSubmit = async (newName: string) => {
         setIsDisplayNameModalOpen(false);
 
-        // If we don't have a user ID OR we had an auth error (stale session), login anonymously
-        // We rely on userData to know if we are truly logged in
-        const isStaleSession = isAuthError && (authError as any)?.response?.status === 401;
-        const needsLogin = !userData || isStaleSession;
-
-        if (needsLogin) {
-            try {
-                // Anonymous login (creates user session)
-                const { userId, recoveryCode } = await loginAnonymous();
-
-                if (userId) {
-                    userManager.setUserId(userId);
-                }
-
-                if (recoveryCode) {
-                    setNewRecoveryCode(recoveryCode); // Set state for immediate display
-                    setIsRecoveryModalOpen(true);
-                }
-            } catch (err) {
-                console.error("Failed to login anonymously:", err);
+        try {
+            if (!user) {
+                // Anonymous sign in
+                const cred = await signInAnonymously(auth);
+                await updateProfile(cred.user, { displayName: newName });
+                await cred.user.reload(); // Force update
+            } else {
+                // Update existing profile (change name)
+                await updateProfile(user, { displayName: newName });
+                await user.reload();
             }
+
+            // Note: useAuth hook should pick up change or we might need to force refresh
+            // But Socket will reconnect with new token if it changes (rare for name change)
+            // Actually name is passed to socket connect via ref, so updating local 'name' var via auth change is key.
+            // 'user' object update triggers re-render, 'name' derived from 'user.displayName' updates.
+        } catch (err) {
+            console.error("Failed to update name/login:", err);
         }
 
         // Update URL search params with the new name
@@ -179,7 +164,7 @@ export const RoomPage: React.FC = () => {
         setIsSettingsModalOpen(false);
     };
 
-    const myVote = roomState?.votes[userId] || null;
+    const myVote = (userId && roomState?.votes[userId]) || null;
 
     const handleVote = (value: VoteValue) => {
         // Toggle vote: if clicking same value, clear it (send null or empty string)
@@ -292,6 +277,7 @@ export const RoomPage: React.FC = () => {
                         onLogout={() => {
                             leaveRoom();
                         }}
+                        photoURL={user?.photoURL}
                     />
 
                     {/* Invite Button */}

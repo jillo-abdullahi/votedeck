@@ -1,17 +1,16 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { socket } from '../lib/socket';
-import { userManager } from '../lib/user';
 import type { RoomState, VoteValue } from '../types';
+import { auth } from '../lib/firebase';
 
-export const useSocket = (roomId: string | undefined, name: string | undefined, enabled: boolean = true) => {
+export const useSocket = (roomId: string | undefined, name: string | undefined, userId: string | undefined, enabled: boolean = true) => {
     const [roomState, setRoomState] = useState<RoomState | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isRoomClosed, setIsRoomClosed] = useState(false);
     const [countdownAction, setCountdownAction] = useState<{ duration: number } | null>(null);
 
-    const userId = userManager.getUserId();
-    // Token is now handled via HTTP-only cookies
+    // const userId = userManager.getUserId(); // Removed internal dependency
 
     // Track name in ref to avoid reconnecting when only name changes
     const nameRef = useRef(name);
@@ -22,23 +21,34 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
     const hasName = !!name;
 
     useEffect(() => {
-        // We only connect if we have a roomId and a name, and are enabled
-        if (!roomId || !name || !enabled) return;
+        if (!roomId || !name || !userId || !enabled) return;
 
-        // Connect socket
-        socket.connect();
+        const connect = async () => {
+            // Get latest token
+            const user = auth.currentUser;
+            if (user) {
+                const token = await user.getIdToken();
+                socket.auth = { token };
+            }
+
+            socket.disconnect(); // Ensure clean slate
+            socket.connect();
+        };
+
+        connect();
 
         const onConnect = () => {
             setIsConnected(true);
             setError(null);
-            // Join room once connected
-            // userId is still passed for legacy/mapping purposes, 
-            // but server also gets it from JWT
             socket.emit('JOIN_ROOM', { roomId, userId, name: nameRef.current });
         };
 
-        const onConnectError = (err: Error) => {
+        const onConnectError = (err: any) => {
             console.error('Socket connection error:', err.message);
+            console.dir(err); // Log full object
+            if (err.data) console.error('Error data:', err.data);
+            if (err.description) console.error('Error description:', err.description);
+            if (err.context) console.error('Error context:', err.context);
 
             // Check if error is related to authentication
             if (err.message.includes('Authentication error') || err.message.includes('Invalid token') || err.message.includes('jwt expired')) {
@@ -58,6 +68,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
         };
 
         const onRoomState = (state: RoomState) => {
+            console.log("[useSocket] Received ROOM_STATE", state);
             setRoomState(state);
             // If room becomes revealed, clear any active countdown
             if (state.revealed) {
@@ -75,6 +86,7 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
         };
 
         const onError = (err: { message: string }) => {
+            console.error("[useSocket] Socket Protocol Error:", err);
             setError(err.message);
         };
 

@@ -1,13 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { usePostAuthRestore } from "@/lib/api/generated";
-import { userManager } from "@/lib/user";
-import { Link } from "@tanstack/react-router";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { ModalHeader } from "@/components/ModalHeader";
-import { KeyRound } from "lucide-react";
-import { LoginIcon, type LoginIconHandle } from "@/components/icons/LoginIcon";
+import { LogIn } from "lucide-react";
+import { signInWithPopup, signInAnonymously } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -15,31 +13,40 @@ interface LoginModalProps {
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
-    const [code, setCode] = useState("");
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [guestLoading, setGuestLoading] = useState(false);
 
-    const loginIconRef = useRef<LoginIconHandle>(null);
+    const isLoading = googleLoading || guestLoading;
 
-    const { mutateAsync: restore } = usePostAuthRestore();
-
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleGoogleLogin = async () => {
         setError("");
-        setLoading(true);
+        setGoogleLoading(true);
 
         try {
-            const { userId, name } = await restore({ data: { recoveryCode: code.trim() } });
-
-            userManager.setUserId(userId!);
-            userManager.setUserName(name || "");
-
+            await signInWithPopup(auth, googleProvider);
             onClose();
-            window.location.reload();
+            // Auth listener will handle state update
         } catch (err: any) {
-            setError("Invalid sign-in key. Please check and try again.");
+            console.error("Login failed", err);
+            setError("Failed to sign in with Google. Please try again.");
         } finally {
-            setLoading(false);
+            setGoogleLoading(false);
+        }
+    };
+
+    const handleGuestLogin = async () => {
+        setError("");
+        setGuestLoading(true);
+
+        try {
+            await signInAnonymously(auth);
+            onClose();
+        } catch (err) {
+            console.error("Guest login failed", err);
+            setError("Failed to sign in as guest.");
+        } finally {
+            setGuestLoading(false);
         }
     };
 
@@ -64,64 +71,49 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                         className="relative bg-slate-900 border-2 border-slate-800/50 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="px-8 pt-6 pb-4">
+                        <div className="px-8 pt-8 pb-6">
                             <ModalHeader
                                 title="Welcome Back"
-                                subtitle="Enter your sign-in key to access your account"
-                                icon={<KeyRound className="w-10 h-10 text-blue-500" />}
+                                subtitle="Sign in to access your account"
+                                icon={<LogIn className="w-10 h-10 text-blue-500" />}
                                 onClose={onClose}
                             />
                         </div>
 
-                        <form onSubmit={handleLogin} className="px-8 pb-8 flex flex-col gap-6">
-                            <div className="space-y-2">
-                                <Input
-                                    placeholder="Sign-in key"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                    autoFocus
-                                />
-                                {error && <p className="text-red-400 text-sm text-center font-medium">{error}</p>}
-                            </div>
+                        <div className="px-8 pb-8 flex flex-col gap-4">
+                            {error && <p className="text-red-400 text-sm text-center font-medium">{error}</p>}
 
                             <Button
-                                type="submit"
+                                onClick={handleGoogleLogin}
                                 size={'lg'}
-                                className="w-full disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500"
-                                disabled={!code.trim() || loading}
-                                onMouseEnter={() => loginIconRef.current?.startAnimation()}
-                                onMouseLeave={() => loginIconRef.current?.stopAnimation()}
+                                className="w-full relative overflow-hidden group"
+                                disabled={isLoading}
                             >
-                                {loading ? (
-                                    "Verifying..."
-                                ) : (
-                                    <span className="flex items-center gap-2">
-                                        <LoginIcon ref={loginIconRef} className="w-5 h-5" /> Sign in
-                                    </span>
-                                )}
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-80 group-hover:opacity-100 transition-opacity" />
+                                <span className="relative flex items-center justify-center gap-2">
+                                    {googleLoading ? "Signing in..." : "Sign in with Google"}
+                                </span>
                             </Button>
 
-                            <div className="relative">
+                            <div className="relative my-2">
                                 <div className="absolute inset-0 flex items-center">
                                     <span className="w-full border-t border-slate-800/50" />
                                 </div>
                                 <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-slate-900 px-2 text-slate-400/60 font-semibold">First time here?</span>
+                                    <span className="bg-slate-900 px-2 text-slate-400/60 font-semibold">or</span>
                                 </div>
                             </div>
 
                             <Button
-                                type="button"
-                                size={'lg'}
                                 variant="outline"
+                                size={'lg'}
                                 className="w-full"
-                                asChild
+                                onClick={handleGuestLogin}
+                                disabled={isLoading}
                             >
-                                <Link to="/create" onClick={onClose}>
-                                    Start a new game
-                                </Link>
+                                {guestLoading ? "Signing in..." : "Play as Guest"}
                             </Button>
-                        </form>
+                        </div>
                     </motion.div>
                 </div>
             )
