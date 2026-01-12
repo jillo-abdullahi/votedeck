@@ -26,7 +26,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
         const cleanRoomId = roomId.trim();
 
         if (!cleanRoomId) {
-            setError("Please enter a Room ID");
+            setError("Please enter a Game ID");
             setLoading(false);
             return;
         }
@@ -41,9 +41,9 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
         } catch (err: any) {
             // Error handling remains same
             if (err.response?.status === 404) {
-                setError("Room not found. Please check the ID and try again.");
+                setError("Game not found. Please check the ID and try again.");
             } else {
-                setError("Failed to join room. Please try again.");
+                setError("Failed to join game. Please try again.");
             }
         } finally {
             setLoading(false);
@@ -74,7 +74,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
                         <div className="p-8 pb-4">
                             <ModalHeader
                                 title="Join Game"
-                                subtitle="Enter the Room ID to join an existing game"
+                                subtitle="Enter the Game ID to join an existing game"
                                 icon={<LogIn className="w-8 h-8 text-blue-500" />}
                                 onClose={onClose}
                             />
@@ -83,7 +83,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
                         <form onSubmit={handleJoin} className="px-8 pb-8 flex flex-col gap-6">
                             <div className="space-y-2">
                                 <Input
-                                    placeholder="ROOM ID"
+                                    placeholder="GAME ID"
                                     value={roomId}
                                     onChange={(e) => setRoomId(e.target.value)}
                                     autoFocus

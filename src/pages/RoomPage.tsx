@@ -211,7 +211,7 @@ export const RoomPage: React.FC = () => {
     if (isRoomClosed) {
         return (
             <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center justify-center p-6 text-center">
-                <div className="bg-slate-800/30 p-8 rounded-2xl border border-slate-700/30 shadow-3xl max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
+                <div className="bg-slate-800/30 p-8 rounded-2xl border border-slate-700/30 max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
                     <div className="w-16 h-16 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto mb-6">
                         <UserIcon size={32} />
                     </div>
@@ -281,17 +281,19 @@ export const RoomPage: React.FC = () => {
                     />
 
                     {/* Invite Button */}
-                    <Button
-                        variant="outline"
+                    <div className="hidden sm:block">
+                        <Button
+                            variant="outline"
+                            onClick={handleInvite}
+                            onMouseEnter={() => userPlusRef.current?.startAnimation()}
+                            onMouseLeave={() => userPlusRef.current?.stopAnimation()}
+                            className="bg-transparent border-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500 hover:text-blue-300 rounded-xl px-5 py-3 font-bold text-base h-auto"
+                        >
+                            <UserPlusIcon size={18} ref={userPlusRef} />
+                            <span className="ml-1">Invite players</span>
+                        </Button>
+                    </div>
 
-                        onClick={handleInvite}
-                        onMouseEnter={() => userPlusRef.current?.startAnimation()}
-                        onMouseLeave={() => userPlusRef.current?.stopAnimation()}
-                        className="bg-transparent border-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500 hover:text-blue-300 rounded-xl px-5 py-3 font-bold text-base h-auto"
-                    >
-                        <UserPlusIcon size={18} ref={userPlusRef} />
-                        <span className="ml-1">Invite players</span>
-                    </Button>
                 </div>
             </Header>
 
@@ -300,7 +302,7 @@ export const RoomPage: React.FC = () => {
                 <div className="w-full mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <RoomAvatar isAdmin={isAdmin} size="sm" className="shrink-0" />
-                        <h2 className="text-md font-semibold text-slate-200 max-w-md md:max-w-xl truncate">
+                        <h2 className="text-md font-semibold text-slate-200 max-w-[140px] sm:max-w-xs md:max-w-xl truncate">
                             {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
                         </h2>
 
@@ -387,21 +389,35 @@ export const RoomPage: React.FC = () => {
                                     const canReset = roomState.revealPolicy === 'everyone' || isAdmin;
                                     return (
                                         <>
-                                            <Button
-                                                onClick={handleReset}
-                                                disabled={!canReset}
-                                                size={'lg'}
-                                                className="group disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <RefreshCcw className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" />
-                                                Start New Vote
-                                            </Button>
-                                            {!canReset && (
-                                                <p className="text-slate-500 text-[10px] italic">
-                                                    Only host can start vote
-                                                </p>
-                                            )}
+                                            <div className="hidden sm:flex">
+                                                <Button
+                                                    onClick={handleReset}
+                                                    disabled={!canReset}
+                                                    size={'lg'}
+                                                    className="group disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <RefreshCcw className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" />
+                                                    Start New Vote
+                                                </Button>
+                                                {!canReset && (
+                                                    <p className="text-slate-500 text-[10px] italic">
+                                                        Only host can start vote
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="flex sm:hidden">
+                                                <Button
+                                                    onClick={handleReset}
+                                                    disabled={!canReset}
+                                                    size={'sm'}
+                                                    className="group disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                                                    Restart
+                                                </Button>
+                                            </div>
                                         </>
+
                                     );
                                 })()}
                             </motion.div>
@@ -421,9 +437,9 @@ export const RoomPage: React.FC = () => {
 
                                     if (!hasAnyVotes) {
                                         return (
-                                            <div className="flex items-center gap-3 text-blue-400 animate-pulse">
+                                            <div className="flex flex-col sm:flex-row items-center gap-3 text-blue-400 animate-pulse">
                                                 <SpadeIcon className="w-6 h-6" />
-                                                <span className="font-medium tracking-wide text-md">Pick your cards!</span>
+                                                <span className="font-medium tracking-wide text-md text-center sm:text-left">Pick your cards!</span>
                                             </div>
                                         );
                                     }

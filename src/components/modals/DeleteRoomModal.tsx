@@ -46,7 +46,7 @@ export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
 
             <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl shadow-2xl border border-slate-800/50 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6">
                 <ModalHeader
-                    title="Delete Room"
+                    title="Delete Game"
                     subtitle={`Permanently delete ${roomName}`}
                     icon={<Trash2 size={32} className='text-red-400' />}
                     onClose={onClose}
@@ -63,20 +63,19 @@ export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                                     There are currently <strong>{activeUsers} active players</strong> in this room (excluding you).
                                     Deleting it will immediately disconnect them and end their session.
                                 </>) : <>
-                                Are you sure you want to delete this room? <br /> Users will no longer be able to join using this room code.
+                                Are you sure you want to delete this game? <br /> Users will no longer be able to join this game.
                                 <strong> This action cannot be undone.</strong>
                             </>
                         }
                     />
 
 
-                    <div className="flex gap-3 w-full pt-2">
+                    <div className="flex flex-col-reverse sm:flex-row gap-3 w-full pt-2">
                         <Button
                             variant="ghost"
                             size="lg"
                             onClick={onClose}
                             disabled={isDeleting}
-                            className="flex-1"
                         >
                             Cancel
                         </Button>
@@ -85,9 +84,9 @@ export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                             size="lg"
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="flex-1"
+                            className="sm:flex-1"
                         >
-                            {isDeleting ? 'Deleting...' : 'Yes, Delete Room'}
+                            {isDeleting ? 'Deleting...' : 'Yes, Delete Game'}
                         </Button>
                     </div>
                 </div>

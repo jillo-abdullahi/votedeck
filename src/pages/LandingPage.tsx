@@ -57,6 +57,7 @@ export const LandingPage: React.FC = () => {
                 )}
                 <Button
                     asChild
+                    className="hidden sm:inline-flex"
                 >
                     <Link
                         to="/create"
@@ -67,7 +68,7 @@ export const LandingPage: React.FC = () => {
             </Header>
 
             {/* Hero Section */}
-            <main className="w-full p-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center"
+            <main className="w-full px-2 pt-10 md:p-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center"
             >
                 {/* Left Content */}
                 <motion.div
@@ -162,7 +163,7 @@ export const LandingPage: React.FC = () => {
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
-                            className="relative bg-slate-900 rounded-3xl border border-slate-800 p-8 transform transition-transform duration-500 hover:scale-[1.02]"
+                            className="relative bg-slate-900/50 backdrop-blur-sm rounded-3xl border border-slate-800 p-8 transform transition-transform duration-500 hover:scale-[1.02]"
                         >
                             {/* Mock Header */}
                             <div className="flex items-center justify-between mb-8 border-b border-slate-700 pb-3">
@@ -214,9 +215,9 @@ export const LandingPage: React.FC = () => {
                                 </div>
 
                                 {/* Footer Stats */}
-                                <div className="grid grid-cols-3 gap-3 w-full mt-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-2">
                                     {/* Average */}
-                                    <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 flex flex-col items-center gap-2">
+                                    <div className="rounded-xl p-3 bg-slate-800/40 border border-slate-700/50 flex flex-col items-center gap-2">
                                         <div className="flex items-center gap-1.5 text-blue-400 opacity-80 w-full justify-start">
                                             <Target size={10} />
                                             <span className="text-[8px] font-bold tracking-wider uppercase">Average</span>
@@ -225,7 +226,7 @@ export const LandingPage: React.FC = () => {
                                     </div>
 
                                     {/* Votes Breakdown */}
-                                    <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 flex flex-col gap-2">
+                                    <div className="rounded-xl p-3 bg-slate-800/40 border border-slate-700/50 flex flex-col gap-2">
                                         <div className="flex items-center gap-1.5 text-purple-400 opacity-80 mb-1">
                                             <Layers size={10} />
                                             <span className="text-[8px] font-bold tracking-wider uppercase">3 Votes</span>
@@ -245,13 +246,13 @@ export const LandingPage: React.FC = () => {
                                     </div>
 
                                     {/* Agreement */}
-                                    <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50 flex flex-col gap-2">
+                                    <div className="rounded-xl p-3 bg-slate-800/40 border border-slate-700/50 flex flex-col gap-2">
                                         <div className="flex items-center gap-1.5 text-green-400 opacity-80">
                                             <Users size={10} />
                                             <span className="text-[8px] font-bold tracking-wider uppercase">Agreement</span>
                                         </div>
                                         <div className="flex-1 flex items-end">
-                                            <div className="w-full h-6 rounded-md border border-yellow-500/30 bg-yellow-500/10 relative overflow-hidden flex items-center">
+                                            <div className="w-full h-6 rounded-sm border border-yellow-500/30 bg-yellow-500/10 relative overflow-hidden flex items-center">
                                                 <div className="absolute inset-y-0 left-0 bg-yellow-500/20 w-[67%]" />
                                                 <span className="relative z-10 text-[8px] font-bold text-yellow-500 w-full text-center">AGREED 67%</span>
                                             </div>

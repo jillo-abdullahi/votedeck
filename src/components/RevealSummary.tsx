@@ -19,7 +19,7 @@ interface SummaryBoxProps {
 }
 
 const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "" }) => (
-    <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
+    <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-3 sm:p-4 flex flex-col gap-2 sm:gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
         <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                 <div className="p-1 px-1.5 bg-slate-900/50 rounded-md border border-slate-700/50">
@@ -126,11 +126,11 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                         className="flex-[0.8]"
                     >
                         {stats.consensus ? (
-                            <div className="text-5xl font-black text-white">
+                            <div className="text-3xl sm:text-5xl font-black text-white">
                                 {stats.consensus}
                             </div>
                         ) : stats.average !== null ? (
-                            <div className="text-5xl font-black text-white">
+                            <div className="text-3xl sm:text-5xl font-black text-white">
                                 {stats.average}
                             </div>
                         ) : (
@@ -148,7 +148,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                             {stats.sortedCounts.map(([val, count]) => (
                                 <div
                                     key={val}
-                                    className="bg-slate-900/40 border border-slate-700/50 px-2.5 py-1 rounded-lg flex items-center gap-2 shadow-sm"
+                                    className="bg-slate-900/40 border border-slate-700/50 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg flex items-center gap-2 shadow-sm"
                                 >
                                     <span className="font-bold text-blue-400 text-md border-r border-slate-700/50 pr-2">{val}</span>
                                     <span className="text-[10px] font-bold text-slate-500 uppercase">{count} {count === 1 ? 'vote' : 'votes'}</span>
@@ -165,7 +165,7 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                     >
                         <div className="w-full flex items-center gap-4 py-2 px-1">
                             <div className="flex-1 flex flex-col gap-2">
-                                <div className={`relative h-12 w-full bg-slate-900/50 rounded-xl border overflow-hidden group ${colors.border}`}>
+                                <div className={`relative h-8 sm:h-12 w-full bg-slate-900/50 rounded-lg sm:rounded-xl border overflow-hidden group ${colors.border}`}>
                                     {/* Fill Bar */}
                                     {stats.agreement > 0 && (
                                         <motion.div

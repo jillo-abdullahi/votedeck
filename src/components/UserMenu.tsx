@@ -8,7 +8,10 @@ import { Link } from "@tanstack/react-router";
 import { LayoutGridIcon, type LayoutGridHandle } from "./icons/LayoutGridIcon";
 import { Button } from "@/components/ui/button";
 import { LogoutIcon, type LogoutIconHandle } from "./icons/LogoutIcon";
+import { JoinRoomModal } from "./modals/JoinRoomModal";
+import { UsersIcon, type UsersHandle } from "./icons/UsersIcon";
 import { auth } from "@/lib/firebase"; // Firebase Import
+import { PlusIcon, type PlusIconHandle } from "./icons/PlusIcon";
 
 interface UserMenuProps {
     name: string;
@@ -21,6 +24,7 @@ interface UserMenuProps {
 export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, onLogout, photoURL }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
     // We keep this for now to clear cookies if backend uses them, but wrapped in try/catch safely
     const { mutateAsync: logout } = usePostAuthLogout();
@@ -28,6 +32,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
 
     const layoutGridRef = useRef<LayoutGridHandle>(null);
     const logoutRef = useRef<LogoutIconHandle>(null);
+    const joinRef = useRef<UsersHandle>(null);
+    const plusRef = useRef<PlusIconHandle>(null);
 
     const handleNameSubmit = (newName: string) => {
         setIsNameModalOpen(false);
@@ -65,7 +71,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
     };
 
     return (
-        <div className="relative z-40">
+        <div className="relative z-50">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex cursor-pointer items-center gap-3 hover:opacity-80 transition-opacity group"
@@ -114,6 +120,18 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                         </div>
 
                         <div className="border-b border-slate-800/50">
+                            {/* Start New Game (Mobile Only) */}
+                            <Link
+                                to="/create"
+                                onMouseEnter={() => plusRef.current?.startAnimation()}
+                                onMouseLeave={() => plusRef.current?.stopAnimation()}
+                                onClick={() => setIsOpen(false)}
+                                className="sm:hidden w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white font-medium transition-colors"
+                            >
+                                <PlusIcon ref={plusRef} className="w-6 h-6 mr-5 text-slate-400" />
+                                <span className="text-[16px]">New Game</span>
+                            </Link>
+
                             <Link
                                 to="/my"
                                 onClick={() => setIsOpen(false)}
@@ -124,18 +142,36 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                                 <LayoutGridIcon ref={layoutGridRef} className="w-6 h-6 mr-5 text-slate-400" />
                                 <span className="text-[16px]">My Games</span>
                             </Link>
+
+                            <button
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    setIsJoinModalOpen(true);
+                                }}
+                                className="w-full cursor-pointer flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white font-medium transition-colors text-left"
+                                onMouseEnter={() => joinRef.current?.startAnimation()}
+                                onMouseLeave={() => joinRef.current?.stopAnimation()}
+                            >
+                                <UsersIcon ref={joinRef} className="w-6 h-6 mr-5 text-slate-400" size={24} />
+                                <span className="text-[16px]">Join a game</span>
+                            </button>
                         </div>
 
-                        <Button
-                            variant="ghost"
-                            onClick={handleLogout}
-                            onMouseEnter={() => logoutRef.current?.startAnimation()}
-                            onMouseLeave={() => logoutRef.current?.stopAnimation()}
-                            className="w-full cursor-pointer justify-start text-left px-4 py-3 text-red-400 bg-transparent hover:bg-slate-800 hover:text-red-300 font-medium h-auto rounded-none"
-                        >
-                            <LogoutIcon ref={logoutRef} className="w-6 h-6 mr-2" />
-                            <span className="text-[16px]">Sign out</span>
-                        </Button>
+                        <div className="p-2">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleLogout}
+                                onMouseEnter={() => logoutRef.current?.startAnimation()}
+                                onMouseLeave={() => logoutRef.current?.stopAnimation()}
+                                className="w-full rounded-md font-medium"
+                            >
+                                <LogoutIcon ref={logoutRef} className="w-4 h-4 mr-2" />
+                                <span className="text-[16px]">Sign out</span>
+                            </Button>
+
+                        </div>
+
                     </div>
                 </>
             )}
@@ -145,6 +181,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                 onClose={() => setIsNameModalOpen(false)}
                 onSubmit={handleNameSubmit}
                 initialValue={name || ""}
+            />
+
+            <JoinRoomModal
+                isOpen={isJoinModalOpen}
+                onClose={() => setIsJoinModalOpen(false)}
             />
         </div>
     );

@@ -181,15 +181,15 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                     <div className="flex items-center justify-start">
                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Countdown</label>
                                     </div>
-                                    <div className="flex items-center justify-between p-4 rounded-xl border-2 border-slate-700 bg-slate-900 border-opacity-50">
-                                        <div className="flex flex-col">
+                                    <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border-2 border-slate-700 bg-slate-900 border-opacity-50 gap-4">
+                                        <div className="flex flex-col flex-1 min-w-0">
                                             <span className="font-bold text-white text-sm">Reveal Countdown</span>
                                             <span className="text-xs text-slate-500 mt-1">Show a 3-second countdown before revealing votes</span>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => setEnableCountdown(!enableCountdown)}
-                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${enableCountdown ? "bg-blue-500" : "bg-slate-700"
+                                            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${enableCountdown ? "bg-blue-500" : "bg-slate-700"
                                                 }`}
                                         >
                                             <span
@@ -222,7 +222,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                                     </span>
                                                     {revealPolicy === policy.id && <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50" />}
                                                 </div>
-                                                <span className="text-xs text-slate-500 leading-relaxed">{policy.description}</span>
+                                                <span className="text-xs text-slate-500 leading-relaxed mt-1 block">{policy.description}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -232,11 +232,11 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                             </form>
                         </div>
 
-                        <div className="p-8 pt-4 flex gap-4">
-                            <Button variant="ghost" size="lg" onClick={onClose} className="flex-1">
+                        <div className="p-8 pt-4 flex gap-4 flex-col-reverse sm:flex-row">
+                            <Button variant="ghost" size="lg" onClick={onClose} className="sm:flex-1">
                                 Cancel
                             </Button>
-                            <Button type="submit" size="lg" onClick={handleSubmit} disabled={!name.trim()} className="flex-2">
+                            <Button type="submit" size="lg" onClick={handleSubmit} disabled={!name.trim()} className="sm:flex-2">
                                 Save Changes
                             </Button>
                         </div>

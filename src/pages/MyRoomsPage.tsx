@@ -1,17 +1,21 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
+import { motion } from "motion/react";
 import { PageLayout } from "@/components/PageLayout";
 import { Link } from "@tanstack/react-router";
 import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetRoomsMy, getGetRoomsMyQueryKey, type GetRoomsMy200, type GetRoomsMy200RoomsItem } from "@/lib/api/generated";
-import { Calendar, ArrowRight, SpadeIcon } from "lucide-react";
+import { Calendar, ArrowRight, SpadeIcon, Check } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
 import { RoomAvatar } from "@/components/RoomAvatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { Tooltip } from "@/components/ui/tooltip";
+import { ClipboardIcon, type ClipboardIconHandle } from "@/components/icons/ClipboardIcon";
+
 
 export const MyRoomsPage: React.FC = () => {
     const queryClient = useQueryClient();
@@ -22,6 +26,8 @@ export const MyRoomsPage: React.FC = () => {
 
     // State
     const [roomToDelete, setRoomToDelete] = useState<RoomWithMeta | null>(null);
+    const [isCopied, setIsCopied] = useState<boolean>(false);
+    const clipboardRef = useRef<ClipboardIconHandle>(null);
     const trashRef = useRef<Trash2IconHandle>(null);
 
     // Auth Data
@@ -51,35 +57,22 @@ export const MyRoomsPage: React.FC = () => {
     // Error handling
     const error = queryError ? "Failed to load your rooms. Please try again." : null;
 
-    useEffect(() => {
-        if (queryError) {
-            // global interceptor handles 401
-        }
-    }, [queryError]);
-
     return (
         <PageLayout>
             <Header>
                 {userName ? (
                     <UserMenu name={userName} photoURL={user?.photoURL} />
-                ) : (
-                    <Link
-                        to="/"
-                        className="text-slate-300 hover:text-white font-medium text-sm transition-colors"
-                    >
-                        Back to Home
-                    </Link>
-                )}
-                <Button asChild>
+                ) : null}
+                <Button asChild className="hidden md:block">
                     <Link to="/create">
                         Start new game
                     </Link>
                 </Button>
             </Header>
 
-            <main className="w-full p-12">
+            <main className="w-full px-2 pt-10 md:p-12">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-semibold">My Games</h1>
+                    <h1 className="text-xl sm:text-3xl font-semibold">My Games</h1>
                     {(roomsData?.total || 0) > 0 && <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
                         {roomsData?.total} {roomsData?.total === 1 ? "game" : "games"}
                     </span>}
@@ -94,7 +87,12 @@ export const MyRoomsPage: React.FC = () => {
                         {error}
                     </div>
                 ) : (roomsData?.rooms?.length || 0) === 0 ? (
-                    <div className="text-center py-20 bg-slate-800/30 rounded-3xl border-2 border-dashed border-slate-700">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="text-center py-20 px-4 bg-slate-800/30 rounded-3xl border-2 border-dashed border-slate-700"
+                    >
                         <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
                             <SpadeIcon size={32} />
                         </div>
@@ -115,7 +113,7 @@ export const MyRoomsPage: React.FC = () => {
                             </Link>
                         </Button>
 
-                    </div>
+                    </motion.div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {((roomsData?.rooms || []) as RoomWithMeta[]).map((room, index) => {
@@ -128,6 +126,15 @@ export const MyRoomsPage: React.FC = () => {
                             }) : '';
                             const hasActiveUsers = (room.activeUsers || 0) > 0;
 
+                            // Copy Handler
+                            const handleCopy = (e: React.MouseEvent, id: string) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(id);
+                                setIsCopied(true);
+                                setTimeout(() => setIsCopied(false), 2000);
+                            };
+
                             return (
                                 <Link
                                     key={room.id}
@@ -135,55 +142,79 @@ export const MyRoomsPage: React.FC = () => {
                                     params={{ roomId: room.id! }}
                                     search={{ name: userName || undefined }}
                                     style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
-                                    className="group block bg-slate-800/30 hover:bg-slate-700/30 ring-1 ring-slate-700/30 hover:ring-blue-500/50 rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl relative animate-in fade-in duration-500"
+                                    className="group flex flex-col justify-between bg-slate-800/30 hover:bg-slate-700/30 ring-1 ring-slate-700/30 hover:ring-blue-500/50 rounded-2xl p-4 transition-all hover:-translate-y-1 hover:shadow-xl relative animate-in fade-in duration-500"
                                 >
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="transition-transform group-hover:scale-105 duration-300">
-                                            <RoomAvatar isAdmin={isAdmin} size="md" />
+                                    {/* Top Section: Avatar + Info */}
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="shrink-0 transition-transform group-hover:scale-105 duration-300">
+                                            <RoomAvatar isAdmin={isAdmin} size="lg" />
                                         </div>
-                                        <div className="flex flex-col items-end gap-2">
+
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-lg font-bold text-white truncate group-hover:text-blue-400 transition-colors">
+                                                {room.name || "Untitled Game"}
+                                            </h3>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-xs text-slate-400">
+                                                    {room.id}
+                                                </span>
+                                                <Tooltip content={isCopied ? "Copied!" : "Copy Game ID"}>
+                                                    <button
+                                                        className="w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-slate-700/50 rounded-md transition-colors text-slate-400 hover:text-slate-200"
+                                                        onMouseEnter={() => clipboardRef.current?.startAnimation()}
+                                                        onMouseLeave={() => clipboardRef.current?.stopAnimation()}
+                                                        onClick={(e) => handleCopy(e, room.id!)}
+                                                    >
+                                                        {isCopied ? (
+                                                            <Check size={16} className="text-green-400" />
+                                                        ) : (
+                                                            <ClipboardIcon ref={clipboardRef} size={14} />
+                                                        )}
+                                                    </button>
+                                                </Tooltip>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Section: Meta + Actions */}
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-700/30 mt-auto">
+                                        <div className="flex items-center gap-3 text-xs text-slate-400">
                                             {isAdmin && (
-                                                <span className="text-xs font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 px-2 py-1 rounded">
+                                                <span className="font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded-[4px]">
                                                     Host
                                                 </span>
                                             )}
-                                        </div>
-                                    </div>
-
-                                    <h3 className="text-xl font-bold text-white mb-2 truncate group-hover:text-blue-400 transition-colors">
-                                        {room.name || "Untitled Game"}
-                                    </h3>
-
-                                    <div className="flex items-center gap-4 text-sm text-slate-400 mt-4">
-                                        <div className="flex items-center gap-2">
-                                            <Calendar size={14} />
-                                            <span>{date}</span>
-                                        </div>
-                                        {hasActiveUsers && (
-                                            <div className="flex items-center gap-1.5 text-green-400">
-                                                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                                                <span className="text-xs font-medium">{room.activeUsers} active</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <Calendar size={14} />
+                                                <span className="text-sm">{date}</span>
                                             </div>
-                                        )}
-                                    </div>
-
-                                    {isAdmin && (
-                                        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setRoomToDelete(room);
-                                                }}
-                                                onMouseEnter={() => trashRef.current?.startAnimation()}
-                                                onMouseLeave={() => trashRef.current?.stopAnimation()}
-                                                className="p-1 w-10 h-10 flex items-center justify-center cursor-pointer bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors"
-                                                title="Delete room"
-                                            >
-                                                <Trash2Icon ref={trashRef} size={20} />
-                                            </button>
                                         </div>
-                                    )}
+
+                                        <div className="flex items-center gap-2">
+                                            {hasActiveUsers && (
+                                                <div className="flex items-center gap-1.5 text-green-400 mr-2" title={`${room.activeUsers} active users`}>
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                                                    <span className="text-xs font-medium">{room.activeUsers}</span>
+                                                </div>
+                                            )}
+
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setRoomToDelete(room);
+                                                    }}
+                                                    onMouseEnter={() => trashRef.current?.startAnimation()}
+                                                    onMouseLeave={() => trashRef.current?.stopAnimation()}
+                                                    className="w-8 h-8 flex items-center justify-center cursor-pointer bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                                                    title="Delete room"
+                                                >
+                                                    <Trash2Icon ref={trashRef} size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </Link>
                             );
                         })}

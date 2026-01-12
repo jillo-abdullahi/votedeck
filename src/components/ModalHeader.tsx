@@ -45,7 +45,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
                     <h2 className="text-2xl font-semibold text-white tracking-tight">
                         {title}
                     </h2>
-                    <div className="text-slate-400 text-lg truncate max-w-sm">
+                    <div className="text-slate-400 text-lg truncate hidden sm:block max-w-sm">
                         {subtitle}
                     </div>
                 </div>

@@ -16,27 +16,47 @@ export const Controls: React.FC<ControlsProps> = ({
 }) => {
     const eyeRef = useRef<EyeIconHandle>(null);
     return (
-        <div className="flex flex-col items-center gap-4 p-6">
-            <Button
-                onClick={onReveal}
-                disabled={!canReveal}
-                size="lg"
-                onMouseEnter={() => eyeRef.current?.startAnimation()}
-                onMouseLeave={() => eyeRef.current?.stopAnimation()}
-                className={`
+        <>
+            <div className="hidden sm:flex flex-col items-center gap-4 p-6">
+                <Button
+                    onClick={onReveal}
+                    disabled={!canReveal}
+                    size="lg"
+                    onMouseEnter={() => eyeRef.current?.startAnimation()}
+                    onMouseLeave={() => eyeRef.current?.stopAnimation()}
+                    className={`
           ${canReveal
-                        ? ""
-                        : "bg-slate-800 text-slate-600 cursor-not-allowed"
-                    }
+                            ? ""
+                            : "bg-slate-800 text-slate-600 cursor-not-allowed"
+                        }
         `}
-            >
-                <EyeIcon ref={eyeRef} />
-                Reveal Votes
-            </Button>
+                >
+                    <EyeIcon ref={eyeRef} className="w-6 h-6" />
+                    Reveal Votes
+                </Button>
 
-            {!canReveal && disabledReason && (
-                <InfoText text={disabledReason} />
-            )}
-        </div>
+                {!canReveal && disabledReason && (
+                    <InfoText text={disabledReason} />
+                )}
+            </div>
+            <div className="flex sm:hidden flex-col items-center gap-4 p-6">
+                <Button
+                    onClick={onReveal}
+                    disabled={!canReveal}
+                    size="sm"
+                    onMouseEnter={() => eyeRef.current?.startAnimation()}
+                    onMouseLeave={() => eyeRef.current?.stopAnimation()}
+                    className={`
+          ${canReveal
+                            ? ""
+                            : "bg-slate-800 text-slate-600 cursor-not-allowed"
+                        }
+        `}
+                >
+                    <EyeIcon ref={eyeRef} className="w-4 h-4" />
+                    Reveal
+                </Button>
+            </div>
+        </>
     );
 };

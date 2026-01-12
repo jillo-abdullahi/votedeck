@@ -12,7 +12,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed }) 
 
     return (
         <div className="flex flex-col items-center gap-1">
-            <div className="relative w-16 h-20" style={{ perspective: '1000px' }}>
+            <div className="relative w-10 h-12 sm:w-16 sm:h-20" style={{ perspective: '1000px' }}>
                 <div
                     className="relative w-full h-full transition-all duration-700"
                     style={{
@@ -23,7 +23,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed }) 
                     {/* Card Back (voted state) */}
                     <div
                         className={`
-                            absolute inset-0 flex items-center justify-center rounded-xl border transition-all duration-300
+                            absolute inset-0 flex items-center justify-center rounded-lg sm:rounded-xl border transition-all duration-300
                             ${hasVoted
                                 ? 'border-slate-600'
                                 : 'bg-slate-800 border-slate-700'
