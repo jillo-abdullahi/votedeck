@@ -35,6 +35,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { NotFoundView } from "@/components/NotFoundView";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/context/ToastContext";
 import { userManager } from "@/lib/user";
 
 export const RoomPage: React.FC = () => {
@@ -102,6 +103,17 @@ export const RoomPage: React.FC = () => {
         countdownAction
     } = useSocket(roomId, name, user?.uid, !isAuthLoading);
 
+    // Toast socket errors
+    const { error: toastError } = useToast();
+    React.useEffect(() => {
+        if (socketError) {
+            // Ignore "Room not found" as it's handled by UI redirection/view
+            if (socketError !== "Room not found") {
+                toastError(socketError);
+            }
+        }
+    }, [socketError, toastError]);
+
     // Use backend-driven countdown state
     // When countdownAction is present, we are counting down.
     // When it is null (cleared by revealed state or timeout), we are done.
@@ -143,6 +155,7 @@ export const RoomPage: React.FC = () => {
             // 'user' object update triggers re-render, 'name' derived from 'user.displayName' updates.
         } catch (err) {
             console.error("Failed to update name/login:", err);
+            toastError("Failed to update name");
         }
 
         // Update URL search params with the new name

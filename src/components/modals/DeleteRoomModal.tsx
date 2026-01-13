@@ -4,6 +4,7 @@ import { Trash2 } from 'lucide-react';
 import { useDeleteRoomsId } from '@/lib/api/generated';
 import { ModalHeader } from '@/components/ModalHeader';
 import { ModalAlert } from '@/components/ModalAlert';
+import { useToast } from "@/context/ToastContext";
 
 interface DeleteRoomModalProps {
     isOpen: boolean;
@@ -14,6 +15,8 @@ interface DeleteRoomModalProps {
     activeUsers: number;
 }
 
+
+
 export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     isOpen,
     onClose,
@@ -23,17 +26,19 @@ export const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     activeUsers
 }) => {
     const { mutateAsync: deleteRoom, isPending: isDeleting } = useDeleteRoomsId();
+    const { error, success } = useToast();
 
     if (!isOpen) return null;
 
     const handleDelete = async () => {
         try {
             await deleteRoom({ id: roomId });
+            success("Game deleted successfully");
             onDeleted();
             onClose();
-        } catch (error) {
-            console.error('Failed to delete room:', error);
-            alert('Failed to delete room. Please try again.');
+        } catch (err) {
+            console.error('Failed to delete room:', err);
+            error('Failed to delete room. Please try again.');
         }
     };
 

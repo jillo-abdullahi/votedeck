@@ -4,6 +4,7 @@ import { ModalHeader } from "@/components/ModalHeader";
 import { Settings, ChevronDown, Check } from "lucide-react";
 import type { VotingSystemId, RevealPolicy } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/context/ToastContext";
 
 interface RoomSettingsModalProps {
     isOpen: boolean;
@@ -36,6 +37,8 @@ const REVEAL_POLICIES = [
     { id: "admin", label: "Only Me", description: "Only you can reveal votes and start new rounds." },
 ];
 
+
+
 export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
     isOpen,
     onClose,
@@ -49,6 +52,8 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
     const [enableCountdown, setEnableCountdown] = useState<boolean>(initialSettings.enableCountdown ?? true);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const { success, error } = useToast();
+
     useEffect(() => {
         if (isOpen) {
             setName(initialSettings.name);
@@ -61,7 +66,13 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (name.trim()) {
-            onSubmit({ name, votingSystem, revealPolicy, enableCountdown });
+            try {
+                onSubmit({ name, votingSystem, revealPolicy, enableCountdown });
+                success("Settings updated successfully");
+            } catch (err) {
+                console.error("Failed to update settings:", err);
+                error("Failed to update settings");
+            }
         }
     };
 
