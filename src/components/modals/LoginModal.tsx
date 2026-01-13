@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { ModalHeader } from "@/components/ModalHeader";
 import { LogIn } from "lucide-react";
+import { AiFillGoogleCircle } from "react-icons/ai";
 import { signInWithPopup, signInAnonymously } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 
@@ -89,10 +90,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                                 className="w-full relative overflow-hidden group"
                                 disabled={isLoading}
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-80 group-hover:opacity-100 transition-opacity" />
-                                <span className="relative flex items-center justify-center gap-2">
-                                    {googleLoading ? "Signing in..." : "Sign in with Google"}
-                                </span>
+
+                                <div className="flex items-center justtify-center gap-2">
+                                    <AiFillGoogleCircle className="w-6 h-6" />
+                                    <span className="relative flex items-center justify-center gap-2">
+                                        {googleLoading ? "Signing in..." : "Sign in with Google"}
+                                    </span>
+                                </div>
+
                             </Button>
 
                             <div className="relative my-2">

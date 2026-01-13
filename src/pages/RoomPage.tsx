@@ -34,8 +34,6 @@ import { UserMenu } from "@/components/UserMenu";
 
 import { NotFoundView } from "@/components/NotFoundView";
 
-import { signInAnonymously, updateProfile } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
 import { userManager } from "@/lib/user";
 
@@ -49,8 +47,7 @@ export const RoomPage: React.FC = () => {
     const navigate = useNavigate();
 
 
-    // Auth State
-    const { user, loading: isAuthLoading } = useAuth();
+    const { user, loading: isAuthLoading, updateUserProfile, signInAnonymous } = useAuth();
 
     // Use auth name or search param or fallback
     // Priority: Firebase Name -> URL Search Name -> "Guest" (conceptually)
@@ -128,13 +125,16 @@ export const RoomPage: React.FC = () => {
         try {
             if (!user) {
                 // Anonymous sign in
-                const cred = await signInAnonymously(auth);
-                await updateProfile(cred.user, { displayName: newName });
-                await cred.user.reload(); // Force update
+                await signInAnonymous();
+                // After sign in, user might not be set immediately in scope, but context logic handles it.
+                // However, we need to update profile. 
+                // Since signInAnonymous sets state in context, we might race.
+                // Better to rely on auth.currentUser here or await context update?
+                // Actually auth.currentUser is reliable after await.
+                await updateUserProfile({ displayName: newName });
             } else {
                 // Update existing profile (change name)
-                await updateProfile(user, { displayName: newName });
-                await user.reload();
+                await updateUserProfile({ displayName: newName });
             }
 
             // Note: useAuth hook should pick up change or we might need to force refresh

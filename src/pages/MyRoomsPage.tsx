@@ -19,7 +19,14 @@ import { ClipboardIcon, type ClipboardIconHandle } from "@/components/icons/Clip
 
 export const MyRoomsPage: React.FC = () => {
     const queryClient = useQueryClient();
-    const { data: roomsData, isLoading: loading, error: queryError } = useGetRoomsMy();
+    // Auth Data
+    const { user, loading: authLoading } = useAuth();
+
+    const { data: roomsData, isLoading: loading, error: queryError } = useGetRoomsMy(undefined, {
+        query: {
+            enabled: !authLoading && !!user
+        }
+    });
 
     // Define extended type for local usage
     type RoomWithMeta = GetRoomsMy200RoomsItem & { activeUsers?: number };
@@ -30,8 +37,6 @@ export const MyRoomsPage: React.FC = () => {
     const clipboardRef = useRef<ClipboardIconHandle>(null);
     const trashRef = useRef<Trash2IconHandle>(null);
 
-    // Auth Data
-    const { user } = useAuth();
     const userName = user?.displayName || user?.email?.split('@')[0];
 
     // Listen for real-time updates and update Query Cache

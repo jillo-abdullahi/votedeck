@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { LogoutIcon, type LogoutIconHandle } from "./icons/LogoutIcon";
 import { JoinRoomModal } from "./modals/JoinRoomModal";
 import { UsersIcon, type UsersHandle } from "./icons/UsersIcon";
-import { auth } from "@/lib/firebase"; // Firebase Import
 import { PlusIcon, type PlusIconHandle } from "./icons/PlusIcon";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserMenuProps {
     name: string;
@@ -26,8 +26,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
     const [isNameModalOpen, setIsNameModalOpen] = useState(false);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
+    const { updateUserProfile, signOut, user } = useAuth();
+
     // We keep this for now to clear cookies if backend uses them, but wrapped in try/catch safely
-    const { mutateAsync: logout } = usePostAuthLogout();
+    const { mutateAsync: logoutBackend } = usePostAuthLogout();
 
 
     const layoutGridRef = useRef<LayoutGridHandle>(null);
@@ -35,9 +37,21 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
     const joinRef = useRef<UsersHandle>(null);
     const plusRef = useRef<PlusIconHandle>(null);
 
-    const handleNameSubmit = (newName: string) => {
+    const handleNameSubmit = async (newName: string) => {
         setIsNameModalOpen(false);
+
+        // Optimistic update for local storage
         userManager.setUserName(newName);
+
+        // Update Firebase Profile if logged in
+        if (user) {
+            try {
+                await updateUserProfile({ displayName: newName });
+            } catch (error) {
+                console.error("Failed to update user profile:", error);
+            }
+        }
+
         if (onNameChange) {
             onNameChange(newName);
         }
@@ -46,11 +60,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
     const handleLogout = async () => {
         try {
             // Firebase Sign Out (Primary)
-            await auth.signOut();
+            await signOut();
 
             // Backend Sign Out (Cleanup)
             try {
-                await logout();
+                await logoutBackend();
             } catch (err) {
                 // Ignore backend logout errors if token is already gone or invalid
                 console.warn("Backend logout warning", err);

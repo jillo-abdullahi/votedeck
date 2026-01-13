@@ -46,7 +46,10 @@ export const LandingPage: React.FC = () => {
         <PageLayout className="bg-transparent">
             <Header>
                 {isLoggedIn ? (
-                    <UserMenu name={userName} photoURL={user?.photoURL} />
+                    <UserMenu
+                        name={userName}
+                        photoURL={user?.photoURL}
+                    />
                 ) : (
                     <button
                         onClick={() => setIsLoginModalOpen(true)}
