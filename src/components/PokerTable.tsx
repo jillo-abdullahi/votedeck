@@ -27,10 +27,11 @@ export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, 
             };
         }
 
-        // For larger groups, distribute around the table
-        // Aim for roughly 30% top/bottom, 20% sides
-        const sideCount = Math.floor(count * 0.2) || 1;
+        // For larger groups, enforce 1 on left and 1 on right
+        const sideCount = 1;
         const remaining = count - (sideCount * 2);
+
+        // Split remaining between top and bottom
         const topCount = Math.ceil(remaining / 2);
 
         let cursor = 0;
@@ -53,62 +54,74 @@ export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, 
         };
     }, [users]);
 
+    // Calculate dynamic size based on total user count
+    const cardSize = useMemo<'md' | 'sm' | 'xs'>(() => {
+        const count = users.length;
+        if (count > 16) return 'xs';
+        if (count > 10) return 'sm';
+        return 'md';
+    }, [users.length]);
+
     return (
         <div className="flex flex-col items-center w-full max-w-6xl mx-auto gap-4 p-1">
 
             {/* Top Row */}
-            <div className="flex justify-center gap-4 w-full min-h-[60px]">
+            <div className="flex justify-center flex-wrap gap-3 w-full min-h-[60px]">
                 {top.map(user => (
                     <PlayerCard
                         key={user.id}
                         user={user}
                         vote={votes[user.id] || null}
                         revealed={revealed}
+                        size={cardSize}
                     />
                 ))}
             </div>
 
-            <div className="flex items-center justify-center w-full gap-4">
+            <div className="flex items-center justify-center w-full gap-3">
                 {/* Left Column */}
-                <div className="flex flex-col justify-center gap-4 min-w-[60px]">
+                <div className="flex flex-col justify-center gap-4 min-w-[40px]">
                     {left.map(user => (
                         <PlayerCard
                             key={user.id}
                             user={user}
                             vote={votes[user.id] || null}
                             revealed={revealed}
+                            size={cardSize}
                         />
                     ))}
                 </div>
 
                 {/* The Table (Active Area) */}
-                <div className="flex-1 rounded-[2rem] bg-slate-800/50 border-2 border-slate-700 relative h-[140px] flex items-center justify-center p-4 shadow-xl overflow-hidden">
+                <div className="flex-1 rounded-[2rem] bg-slate-800/50 border-2 border-slate-700 relative h-[140px] flex items-center justify-center p-4 shadow-xl overflow-hidden min-w-[300px] max-w-3xl">
                     <div className="absolute inset-0 rounded-[1.8rem] border border-slate-600/30 pointer-events-none" />
                     {children}
                     {overlay}
                 </div>
 
                 {/* Right Column */}
-                <div className="flex flex-col justify-center gap-4 min-w-[60px]">
+                <div className="flex flex-col justify-center gap-4 min-w-[40px]">
                     {right.map(user => (
                         <PlayerCard
                             key={user.id}
                             user={user}
                             vote={votes[user.id] || null}
                             revealed={revealed}
+                            size={cardSize}
                         />
                     ))}
                 </div>
             </div>
 
             {/* Bottom Row */}
-            <div className="flex justify-center gap-4 w-full min-h-[60px]">
+            <div className="flex justify-center flex-wrap gap-3 w-full min-h-[60px]">
                 {bottom.map(user => (
                     <PlayerCard
                         key={user.id}
                         user={user}
                         vote={votes[user.id] || null}
                         revealed={revealed}
+                        size={cardSize}
                     />
                 ))}
             </div>

@@ -5,14 +5,37 @@ interface PlayerCardProps {
     user: User;
     vote: VoteValue | null;
     revealed: boolean;
+    size?: 'md' | 'sm' | 'xs';
 }
 
-export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed }) => {
+const SIZE_CLASSES = {
+    md: {
+        card: "w-10 h-12 sm:w-16 sm:h-20",
+        voteText: "text-lg",
+        nameText: "text-sm max-w-[80px]",
+        rounded: "rounded-lg sm:rounded-xl"
+    },
+    sm: {
+        card: "w-8 h-10 sm:w-14 sm:h-16",
+        voteText: "text-base",
+        nameText: "text-xs max-w-[70px]",
+        rounded: "rounded-md sm:rounded-lg"
+    },
+    xs: {
+        card: "w-7 h-9 sm:w-10 sm:h-12",
+        voteText: "text-sm",
+        nameText: "text-[10px] max-w-[60px]",
+        rounded: "rounded-sm sm:rounded-md"
+    }
+};
+
+export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed, size = 'md' }) => {
     const hasVoted = user.hasVoted;
+    const styles = SIZE_CLASSES[size];
 
     return (
         <div className="flex flex-col items-center gap-1">
-            <div className="relative w-10 h-12 sm:w-16 sm:h-20" style={{ perspective: '1000px' }}>
+            <div className={`relative ${styles.card}`} style={{ perspective: '1000px' }}>
                 <div
                     className="relative w-full h-full transition-all duration-700"
                     style={{
@@ -23,7 +46,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed }) 
                     {/* Card Back (voted state) */}
                     <div
                         className={`
-                            absolute inset-0 flex items-center justify-center rounded-lg sm:rounded-xl border transition-all duration-300
+                            absolute inset-0 flex items-center justify-center ${styles.rounded} border transition-all duration-300
                             ${hasVoted
                                 ? 'border-slate-600'
                                 : 'bg-slate-800 border-slate-700'
@@ -57,20 +80,20 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed }) 
                     {/* Card Front (revealed state) */}
                     {hasVoted && (
                         <div
-                            className="absolute inset-0 flex items-center justify-center rounded-xl border bg-white border-white"
+                            className={`absolute inset-0 flex items-center justify-center ${styles.rounded} border bg-white border-white`}
                             style={{
                                 backfaceVisibility: 'hidden',
                                 transform: 'rotateY(180deg)',
                             }}
                         >
-                            <span className="text-lg font-bold text-slate-900">{vote}</span>
+                            <span className={`${styles.voteText} font-bold text-slate-900`}>{vote}</span>
                         </div>
                     )}
                 </div>
             </div>
 
             <div className="flex flex-col items-center">
-                <span className={`text-sm font-medium truncate max-w-[80px] text-center ${hasVoted ? 'text-white' : 'text-slate-500'}`}>
+                <span className={`${styles.nameText} font-medium truncate text-center ${hasVoted ? 'text-white' : 'text-slate-500'}`}>
                     {user.name}
                 </span>
             </div>
