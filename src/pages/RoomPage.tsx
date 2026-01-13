@@ -24,6 +24,7 @@ import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
 import { RoomSettingsModal } from "@/components/modals/RoomSettingsModal";
 import { RecoveryCodeModal } from "@/components/modals/RecoveryCodeModal";
+import { ErrorModal } from "@/components/modals/ErrorModal";
 import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
 import { CountdownOverlay } from "@/components/CountdownOverlay";
@@ -103,12 +104,23 @@ export const RoomPage: React.FC = () => {
         countdownAction
     } = useSocket(roomId, name, user?.uid, !isAuthLoading);
 
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+    const [blockingError, setBlockingError] = useState("");
+
     // Toast socket errors
     const { error: toastError } = useToast();
     React.useEffect(() => {
         if (socketError) {
             // Ignore "Room not found" as it's handled by UI redirection/view
-            if (socketError !== "Room not found") {
+            if (socketError === "Room not found") return;
+
+            // Check for Blocking Errors
+            // Note: "Room is full" is handled by a full-page view, so we don't need the modal for it.
+            if (socketError.includes("limit")) {
+                setBlockingError(socketError);
+                setIsErrorModalOpen(true);
+            } else if (!socketError.includes("Room is full")) {
+                // Non-blocking errors (connection blips etc) - excluding "Room is full" to avoid double toast/modal
                 toastError(socketError);
             }
         }
@@ -231,6 +243,37 @@ export const RoomPage: React.FC = () => {
                     <h2 className="text-2xl font-bold text-white mb-4">Room Closed</h2>
                     <p className="text-slate-400 mb-8">
                         The host has closed this room. You can return to the home page or create a new game.
+                    </p>
+                    <div className="flex flex-col gap-3">
+                        <Button
+                            size="lg"
+                            variant="ghost"
+                            onClick={() => navigate({ to: "/" })}
+                        >
+                            Back to Home
+                        </Button>
+                        <Button
+                            size="lg"
+                            onClick={() => navigate({ to: "/create" })}
+                        >
+                            Start New Game
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (socketError?.includes("Room is full")) {
+        return (
+            <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center justify-center p-6 text-center">
+                <div className="bg-slate-800/30 p-8 rounded-2xl border border-slate-700/30 max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-16 h-16 bg-yellow-500/10 text-yellow-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <UserIcon size={32} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-4">Room is Full</h2>
+                    <p className="text-slate-400 mb-8">
+                        This room has reached its maximum capacity. You can return to the home page or create a new game.
                     </p>
                     <div className="flex flex-col gap-3">
                         <Button
@@ -499,7 +542,7 @@ export const RoomPage: React.FC = () => {
                                 transition={{ duration: 0.2 }}
                                 className="flex justify-center overflow-hidden"
                             >
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                                <span className="text-xs font-bold text-slate-300 uppercase tracking-[0.2em]">
                                     Choose your card here
                                 </span>
                             </motion.div>
@@ -557,6 +600,15 @@ export const RoomPage: React.FC = () => {
                 isOpen={isRecoveryModalOpen}
                 onClose={() => setIsRecoveryModalOpen(false)}
                 recoveryCode={newRecoveryCode}
+            />
+            <ErrorModal
+                isOpen={isErrorModalOpen}
+                onClose={() => {
+                    setIsErrorModalOpen(false);
+                    navigate({ to: "/" });
+                }}
+                title="Cannot Join Room"
+                message={blockingError}
             />
         </PageLayout>
     );

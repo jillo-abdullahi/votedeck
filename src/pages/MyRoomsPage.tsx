@@ -6,7 +6,7 @@ import { Header } from "../components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetRoomsMy, getGetRoomsMyQueryKey, type GetRoomsMy200, type GetRoomsMy200RoomsItem } from "@/lib/api/generated";
-import { Calendar, ArrowRight, SpadeIcon, Check } from "lucide-react";
+import { Calendar, ArrowRight, SpadeIcon, Check, AlertCircle } from "lucide-react";
 import { Trash2Icon, type Trash2IconHandle } from "@/components/icons/Trash2Icon";
 import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
@@ -75,13 +75,30 @@ export const MyRoomsPage: React.FC = () => {
                 </Button>
             </Header>
 
-            <main className="w-full px-2 pt-10 md:p-12">
+            <main className="w-full px-2 py-10 md:p-12">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-xl sm:text-3xl font-semibold">My Games</h1>
                     {(roomsData?.total || 0) > 0 && <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
                         {roomsData?.total} {roomsData?.total === 1 ? "game" : "games"}
                     </span>}
                 </div>
+
+                {/* Game Limit Banner */}
+                {(roomsData?.total || 0) >= 10 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-center gap-4 text-yellow-200"
+                    >
+                        <AlertCircle size={32} className="text-yellow-500 shrink-0" />
+                        <div className="border-l border-yellow-500/10 pl-4">
+                            <h4 className="font-bold text-yellow-400">Game Limit Reached</h4>
+                            <p className="text-sm text-yellow-200/80">
+                                You have reached the maximum limit of 10 active games. Please delete some games to create a new one.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
 
                 {loading ? (
                     <div className="flex justify-center py-20">

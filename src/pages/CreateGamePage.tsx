@@ -14,6 +14,7 @@ import { ChevronDownIcon, UserIcon, Layers, Loader2, SpadeIcon } from "lucide-re
 import { UserMenu } from "@/components/UserMenu";
 import { motion } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
+import { ErrorModal } from "@/components/modals/ErrorModal";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -60,6 +61,8 @@ export const CreateGamePage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Use Firebase Auth hook
   const { user } = useAuth();
@@ -124,8 +127,18 @@ export const CreateGamePage: React.FC = () => {
         params: { roomId: roomId! },
         search: { name: displayName },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create room:", error);
+
+      let msg = "An unexpected error occurred.";
+      if (error?.response?.data?.error) {
+        msg = error.response.data.error;
+      } else if (error?.status === 403) {
+        msg = "You have reached the limit of active games. Please delete some existing games to create a new one.";
+      }
+
+      setErrorMessage(msg);
+      setIsErrorModalOpen(true);
     } finally {
       setIsCreating(false);
     }
@@ -292,6 +305,12 @@ export const CreateGamePage: React.FC = () => {
           </form>
         </motion.div>
       </main>
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+        title="Cannot Create Game"
+        message={errorMessage}
+      />
     </PageLayout>
   );
 };
