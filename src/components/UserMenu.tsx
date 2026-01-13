@@ -12,6 +12,7 @@ import { JoinRoomModal } from "./modals/JoinRoomModal";
 import { UsersIcon, type UsersHandle } from "./icons/UsersIcon";
 import { PlusIcon, type PlusIconHandle } from "./icons/PlusIcon";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/context/ToastContext";
 
 interface UserMenuProps {
     name: string;
@@ -37,6 +38,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
     const joinRef = useRef<UsersHandle>(null);
     const plusRef = useRef<PlusIconHandle>(null);
 
+    const { success, error } = useToast();
+
     const handleNameSubmit = async (newName: string) => {
         setIsNameModalOpen(false);
 
@@ -47,8 +50,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
         if (user) {
             try {
                 await updateUserProfile({ displayName: newName });
-            } catch (error) {
-                console.error("Failed to update user profile:", error);
+                success("Name updated successfully");
+            } catch (err) {
+                console.error("Failed to update user profile:", err);
+                error("Failed to update name");
             }
         }
 

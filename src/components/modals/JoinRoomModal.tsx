@@ -5,7 +5,7 @@ import { getRoomsId } from "@/lib/api/generated";
 import { useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ModalHeader } from "@/components/ModalHeader";
-import { LogIn } from "lucide-react";
+import { UsersIcon } from "lucide-react";
 
 interface JoinRoomModalProps {
     isOpen: boolean;
@@ -75,7 +75,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({ isOpen, onClose })
                             <ModalHeader
                                 title="Join Game"
                                 subtitle="Enter the Game ID to join an existing game"
-                                icon={<LogIn className="w-8 h-8 text-blue-500" />}
+                                icon={<UsersIcon className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />}
                                 onClose={onClose}
                             />
                         </div>
