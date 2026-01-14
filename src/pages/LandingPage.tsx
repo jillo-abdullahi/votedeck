@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Settings, LogOut, RefreshCcw, Target, Layers, Users } from "lucide-react";
+import { Settings, LogOut, RefreshCcw, Target, Layers, Users, TrendingUp } from "lucide-react";
 import React, { useState } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { Link } from "@tanstack/react-router";
@@ -219,13 +219,26 @@ export const LandingPage: React.FC = () => {
 
                                 {/* Footer Stats */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-2">
-                                    {/* Average */}
-                                    <div className="rounded-xl p-3 bg-slate-800/40 border border-slate-700/50 flex flex-col items-center gap-2">
-                                        <div className="flex items-center gap-1.5 text-blue-400 opacity-80 w-full justify-start">
-                                            <Target size={10} />
-                                            <span className="text-[8px] font-bold tracking-wider uppercase">Average</span>
+                                    {/* Overview: Average & Popular */}
+                                    <div className="rounded-xl bg-slate-800/40 border border-slate-700/50 flex flex-col justify-center divide-y divide-slate-700/50 overflow-hidden">
+                                        <div className="flex items-center justify-between px-3 py-2">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="p-0.5 bg-blue-500/10 rounded">
+                                                    <Target size={10} className="text-blue-400" />
+                                                </div>
+                                                <span className="text-[8px] font-bold tracking-wider uppercase text-slate-400">Average</span>
+                                            </div>
+                                            <span className="text-xs font-black text-slate-100">6</span>
                                         </div>
-                                        <span className="text-3xl font-bold text-white">6</span>
+                                        <div className="flex items-center justify-between px-3 py-2">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="p-0.5 bg-purple-500/10 rounded">
+                                                    <TrendingUp size={10} className="text-purple-400" />
+                                                </div>
+                                                <span className="text-[8px] font-bold tracking-wider uppercase text-slate-400">Popular</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-100">8</span>
+                                        </div>
                                     </div>
 
                                     {/* Votes Breakdown */}

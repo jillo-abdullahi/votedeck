@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Target, BarChart3 } from 'lucide-react';
+import { Users, Target, BarChart3, TrendingUp } from 'lucide-react';
 import type { VotingSystemId } from '../types';
-import { calculateAgreement, calculateTshirtConsensus } from '../lib/utils';
+import { calculateAgreement, calculateTshirtConsensus, getMostPopularVote } from '../lib/utils';
 
 interface RevealSummaryProps {
     votes: Record<string, string | null>;
@@ -16,20 +16,23 @@ interface SummaryBoxProps {
     children: React.ReactNode;
     headerExtra?: React.ReactNode;
     className?: string;
+    hideHeader?: boolean;
 }
 
-const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "" }) => (
+const SummaryBox: React.FC<SummaryBoxProps> = ({ title, icon, children, headerExtra, className = "", hideHeader = false }) => (
     <div className={`min-w-0 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-3 sm:p-4 flex flex-col gap-2 sm:gap-4 relative overflow-hidden group hover:border-slate-600/50 transition-colors ${className}`}>
-        <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-                <div className="p-1 px-1.5 bg-slate-900/50 rounded-md border border-slate-700/50">
-                    {icon}
+        {!hideHeader && (
+            <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                    <div className="p-1 px-1.5 bg-slate-800/80 rounded-sm">
+                        {icon}
+                    </div>
+                    {title}
                 </div>
-                {title}
+                {headerExtra}
             </div>
-            {headerExtra}
-        </div>
-        <div className="flex-1 flex items-center justify-center">
+        )}
+        <div className={`flex-1 flex ${hideHeader ? 'flex-col justify-center' : 'items-center justify-center'}`}>
             {children}
         </div>
     </div>
@@ -68,11 +71,15 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
         // 3. Agreement Level
         const agreement = calculateAgreement(Object.values(counts), allCastedVotes.length);
 
+        // 4. Most Popular
+        const mostPopular = getMostPopularVote(activeVotes);
+
         return {
             average: average !== null ? (average % 1 === 0 ? average.toString() : Math.round(average)) : null,
             consensus,
             sortedCounts,
             agreement,
+            mostPopular,
             totalVoters: allCastedVotes.length
         };
     }, [votes, votingSystem]);
@@ -119,23 +126,44 @@ export const RevealSummary: React.FC<RevealSummaryProps> = ({ votes, votingSyste
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     className="w-full flex flex-col md:flex-row items-stretch justify-center gap-4 px-4 h-full"
                 >
-                    {/* Average/Consensus Box - Takes less space */}
+                    {/* Average & Consensus Box */}
                     <SummaryBox
-                        title={votingSystem === 'tshirts' ? "Consensus" : "Average"}
+                        title="Overview"
+                        hideHeader={true}
                         icon={<Target className="w-3 h-3 text-blue-500" />}
-                        className="flex-[0.8]"
+                        className="flex-[0.8] !p-0 overflow-hidden" // Remove padding for cleaner internal layout
                     >
-                        {stats.consensus ? (
-                            <div className="text-3xl sm:text-5xl font-black text-white">
-                                {stats.consensus}
+                        <div className="w-full flex flex-col divide-y divide-slate-700/50">
+                            {/* Primary Metric (Average/Consensus) */}
+                            <div className="flex items-center justify-between p-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-1.5 bg-blue-500/10 rounded-md">
+                                        <Target className="w-3.5 h-3.5 text-blue-400" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                        {votingSystem === 'tshirts' ? "Consensus" : "Average"}
+                                    </span>
+                                </div>
+                                <div className="text-2xl font-black text-slate-100 flex items-center">
+                                    {stats.consensus || stats.average || <span className="text-slate-500 text-sm">N/A</span>}
+                                </div>
                             </div>
-                        ) : stats.average !== null ? (
-                            <div className="text-3xl sm:text-5xl font-black text-white">
-                                {stats.average}
+
+                            {/* Secondary Metric (Most Popular) */}
+                            <div className="flex items-center justify-between p-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-1.5 rounded-md bg-purple-500/10">
+                                        <TrendingUp className="w-3.5 h-3.5 text-purple-400" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                        Popular
+                                    </span>
+                                </div>
+                                <div className="text-2xl font-bold text-slate-100 flex items-center">
+                                    {stats.mostPopular || <span className="text-slate-500 text-sm">N/A</span>}
+                                </div>
                             </div>
-                        ) : (
-                            <div className="text-3xl font-bold text-slate-600">N/A</div>
-                        )}
+                        </div>
                     </SummaryBox>
 
                     {/* Distribution Box - Takes more space */}
