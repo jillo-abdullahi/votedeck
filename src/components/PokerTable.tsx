@@ -62,11 +62,27 @@ export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, 
         return 'md';
     }, [users.length]);
 
+    // Calculate dynamic table max-width based on user count
+    const maxWidthClass = useMemo(() => {
+        const count = users.length;
+        if (count > 20) return 'max-w-4xl'; // Max expansion for 25 players
+        if (count > 10) return 'max-w-2xl';
+        return 'max-w-xl'; // Tighter for fewer players
+    }, [users.length]);
+
+    // Calculate dynamic spacing for top/bottom rows
+    const gapClass = useMemo(() => {
+        const count = users.length;
+        if (count <= 4) return 'gap-8';
+        if (count <= 10) return 'gap-4';
+        return 'gap-3';
+    }, [users.length]);
+
     return (
         <div className="flex flex-col items-center w-full max-w-6xl mx-auto gap-4 p-1">
 
             {/* Top Row */}
-            <div className="flex justify-center flex-wrap gap-3 w-full min-h-[60px]">
+            <div className={`flex justify-center flex-wrap w-full min-h-[60px] transition-all duration-300 ${gapClass}`}>
                 {top.map(user => (
                     <PlayerCard
                         key={user.id}
@@ -93,7 +109,7 @@ export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, 
                 </div>
 
                 {/* The Table (Active Area) */}
-                <div className="flex-1 rounded-[2rem] bg-slate-800/50 border-2 border-slate-700 relative h-[140px] flex items-center justify-center p-4 shadow-xl overflow-hidden min-w-[300px] max-w-3xl">
+                <div className={`flex-1 rounded-[2rem] bg-slate-800/50 border-2 border-slate-700 relative h-[140px] flex items-center justify-center p-4 shadow-xl overflow-hidden min-w-[300px] transition-all duration-300 ease-in-out ${maxWidthClass}`}>
                     <div className="absolute inset-0 rounded-[1.8rem] border border-slate-600/30 pointer-events-none" />
                     {children}
                     {overlay}
@@ -114,7 +130,7 @@ export const PokerTable: React.FC<PokerTableProps> = ({ users, votes, revealed, 
             </div>
 
             {/* Bottom Row */}
-            <div className="flex justify-center flex-wrap gap-3 w-full min-h-[60px]">
+            <div className={`flex justify-center flex-wrap w-full min-h-[60px] transition-all duration-300 ${gapClass}`}>
                 {bottom.map(user => (
                     <PlayerCard
                         key={user.id}

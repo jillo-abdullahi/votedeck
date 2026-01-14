@@ -51,11 +51,11 @@ export const InviteModal: React.FC<InviteModalProps> = ({
             />
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl shadow-2xl border border-slate-800/50 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6 overflow-hidden">
+            <div className="relative w-full max-w-xl bg-slate-900 rounded-3xl shadow-2xl border border-slate-800/50 p-8 animate-in zoom-in-95 duration-300 flex flex-col gap-6 overflow-hidden">
                 {/* Header */}
                 <ModalHeader
-                    title={showQr ? "Scan QR Code" : "Invite players"}
-                    subtitle={showQr ? "Point your camera to join instantly" : "Invite your friends to join the game"}
+                    title={showQr ? "Scan QR Code" : "Invite your friends"}
+                    subtitle={showQr ? "Point your camera to join instantly" : "You can invite up to 25 players to join the game"}
                     icon={showQr ? <QrCodeIconLucide className="w-12 h-12 text-blue-500" /> : <UserPlusIcon className="w-12 h-12 text-blue-500" />}
                     onClose={handleClose}
                 />

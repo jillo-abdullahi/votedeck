@@ -18,7 +18,7 @@ import {
     type LogoutIconHandle,
 } from "@/components/icons/LogoutIcon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Check, SpadeIcon, RefreshCcw, UserIcon } from "lucide-react";
+import { Check, SpadeIcon, RefreshCcw, UserIcon, UsersIcon } from "lucide-react";
 
 import { InviteModal } from "@/components/modals/InviteModal";
 import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
@@ -383,6 +383,13 @@ export const RoomPage: React.FC = () => {
                                 </button>
                             </Tooltip>
                         </div>
+
+                        <div className="h-4 w-px bg-slate-700 hidden sm:block" />
+
+                        <div className="flex items-center gap-1.5 text-slate-400" title="Players in room">
+                            <UsersIcon size={14} />
+                            <span className="text-xs font-medium">{roomState.users.length} / 25</span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -410,7 +417,7 @@ export const RoomPage: React.FC = () => {
                                 onMouseLeave={() => logoutRef.current?.stopAnimation()}
                                 className="text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-full w-8 h-8 flex items-center justify-center"
                             >
-                                <LogoutIcon ref={logoutRef} size={16} />
+                                <LogoutIcon ref={logoutRef} size={16} className="ml-0.5" />
                             </Button>
                         </Tooltip>
                     </div>
