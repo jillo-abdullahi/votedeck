@@ -25,6 +25,7 @@ import { DisplayNameModal } from "@/components/modals/DisplayNameModal";
 import { RoomSettingsModal } from "@/components/modals/RoomSettingsModal";
 import { RecoveryCodeModal } from "@/components/modals/RecoveryCodeModal";
 import { ErrorModal } from "@/components/modals/ErrorModal";
+import { LeaveRoomModal } from "@/components/modals/LeaveRoomModal";
 import { useSocket } from "@/hooks/useSocket";
 import { RevealSummary } from "@/components/RevealSummary";
 import { CountdownOverlay } from "@/components/CountdownOverlay";
@@ -131,9 +132,15 @@ export const RoomPage: React.FC = () => {
     // When it is null (cleared by revealed state or timeout), we are done.
     const isCountingDown = !!countdownAction;
 
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+
     const isAdmin = roomState?.adminId === userId;
 
     const handleExitGame = () => {
+        setIsLeaveModalOpen(true);
+    };
+
+    const confirmLeaveGame = () => {
         // Just leave the room context, do not logout
         leaveRoom();
         navigate({ to: "/" });
@@ -616,6 +623,11 @@ export const RoomPage: React.FC = () => {
                 }}
                 title="Cannot Join Room"
                 message={blockingError}
+            />
+            <LeaveRoomModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setIsLeaveModalOpen(false)}
+                onConfirm={confirmLeaveGame}
             />
         </PageLayout>
     );

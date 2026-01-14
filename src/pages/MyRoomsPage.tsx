@@ -59,6 +59,22 @@ export const MyRoomsPage: React.FC = () => {
         }
     });
 
+    const [filter, setFilter] = useState<'all' | 'owned' | 'joined'>('all');
+
+    // Derived state
+    const rooms = (roomsData?.rooms || []) as RoomWithMeta[];
+    const ownedRooms = rooms.filter(room => user?.uid === room.adminId);
+    const joinedRooms = rooms.filter(room => user?.uid !== room.adminId);
+
+    // Filtered list for display
+    const displayedRooms = filter === 'all'
+        ? rooms
+        : filter === 'owned'
+            ? ownedRooms
+            : joinedRooms;
+
+    const ownedRoomsCount = ownedRooms.length;
+
     // Error handling
     const error = queryError ? "Failed to load your rooms. Please try again." : null;
 
@@ -76,15 +92,38 @@ export const MyRoomsPage: React.FC = () => {
             </Header>
 
             <main className="w-full px-2 py-10 md:p-12">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-xl sm:text-3xl font-semibold">My Games</h1>
-                    {(roomsData?.total || 0) > 0 && <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
-                        {roomsData?.total} {roomsData?.total === 1 ? "game" : "games"}
-                    </span>}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-xl sm:text-3xl font-semibold">My Games</h1>
+                        {(roomsData?.total || 0) > 0 && (
+                            <span className="text-slate-400 bg-slate-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {roomsData?.total}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Filter Controls */}
+                    <div className="flex bg-slate-800/50 p-1 gap-1 rounded-lg self-start md:self-auto">
+                        {(['all', 'owned', 'joined'] as const).map((f) => (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`
+                                    px-4 py-1.5 cursor-pointer rounded-md text-sm font-medium transition-all
+                                    ${filter === f
+                                        ? 'bg-slate-700 text-white shadow-sm'
+                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                                    }
+                                `}
+                            >
+                                {f === 'all' ? 'All' : f === 'owned' ? 'My Rooms' : 'Joined'}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Game Limit Banner */}
-                {(roomsData?.total || 0) >= 10 && (
+                {/* Game Limit Banner - Only show if OWNED games >= 10 */}
+                {ownedRoomsCount >= 10 && filter !== 'joined' && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -94,7 +133,7 @@ export const MyRoomsPage: React.FC = () => {
                         <div className="border-l border-yellow-500/10 pl-4">
                             <h4 className="font-bold text-yellow-400">Game Limit Reached</h4>
                             <p className="text-sm text-yellow-200/80">
-                                You have reached the maximum limit of 10 active games. Please delete some games to create a new one.
+                                You have reached the maximum limit of 10 created games. Please delete some games to create a new one.
                             </p>
                         </div>
                     </motion.div>
@@ -108,7 +147,7 @@ export const MyRoomsPage: React.FC = () => {
                     <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-xl text-center">
                         {error}
                     </div>
-                ) : (roomsData?.rooms?.length || 0) === 0 ? (
+                ) : displayedRooms.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -122,8 +161,12 @@ export const MyRoomsPage: React.FC = () => {
                             No games found
                         </h3>
                         <p className="text-slate-400 mb-8 max-w-sm mx-auto">
-                            You haven't created or joined any games yet. Start a new game to
-                            get going!
+                            {filter === 'all'
+                                ? "You haven't created or joined any games yet."
+                                : filter === 'owned'
+                                    ? "You haven't created any games yet."
+                                    : "You haven't joined any games yet."
+                            }
                         </p>
                         <Button asChild size="lg">
                             <Link
@@ -138,7 +181,7 @@ export const MyRoomsPage: React.FC = () => {
                     </motion.div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {((roomsData?.rooms || []) as RoomWithMeta[]).map((room, index) => {
+                        {displayedRooms.map((room, index) => {
                             const isAdmin = user?.uid === room.adminId;
                             // Fix date parsing if createdAt is optional
                             const date = room.createdAt ? new Date(room.createdAt).toLocaleDateString(undefined, {
