@@ -24,9 +24,9 @@ export function calculateAgreement(
   return Math.round((maxVotes / totalVoters) * 100);
 }
 
-export type TshirtSize = "XS" | "S" | "M" | "L" | "XL";
+export type TshirtSize = "XS" | "S" | "M" | "L" | "XL" | "XXL";
 
-const TSHIRT_ORDER: TshirtSize[] = ["XS", "S", "M", "L", "XL"];
+const TSHIRT_ORDER: TshirtSize[] = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export function calculateTshirtConsensus(votes: string[]): {
   consensus: TshirtSize | null;
@@ -47,6 +47,7 @@ export function calculateTshirtConsensus(votes: string[]): {
         M: 0,
         L: 0,
         XL: 0,
+        XXL: 0,
       },
       totalValidVotes: 0,
     };
