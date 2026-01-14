@@ -44,8 +44,6 @@ export const Controls: React.FC<ControlsProps> = ({
                     onClick={onReveal}
                     disabled={!canReveal}
                     size="sm"
-                    onMouseEnter={() => eyeRef.current?.startAnimation()}
-                    onMouseLeave={() => eyeRef.current?.stopAnimation()}
                     className={`
           ${canReveal
                             ? ""
@@ -53,7 +51,7 @@ export const Controls: React.FC<ControlsProps> = ({
                         }
         `}
                 >
-                    <EyeIcon ref={eyeRef} className="w-4 h-4" />
+                    <EyeIcon className="w-4 h-4" />
                     Reveal
                 </Button>
             </div>
