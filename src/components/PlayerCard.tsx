@@ -13,19 +13,22 @@ const SIZE_CLASSES = {
         card: "w-10 h-12 sm:w-16 sm:h-20",
         voteText: "text-lg",
         nameText: "text-sm max-w-[80px]",
-        rounded: "rounded-lg sm:rounded-xl"
+        rounded: "rounded-lg sm:rounded-xl",
+        width: "w-[80px]"
     },
     sm: {
         card: "w-8 h-10 sm:w-14 sm:h-16",
         voteText: "text-base",
         nameText: "text-xs max-w-[70px]",
-        rounded: "rounded-md sm:rounded-lg"
+        rounded: "rounded-md sm:rounded-lg",
+        width: "w-[70px]"
     },
     xs: {
         card: "w-7 h-9 sm:w-10 sm:h-12",
         voteText: "text-sm",
         nameText: "text-[10px] max-w-[60px]",
-        rounded: "rounded-sm sm:rounded-md"
+        rounded: "rounded-sm sm:rounded-md",
+        width: "w-[60px]"
     }
 };
 
@@ -34,7 +37,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed, si
     const styles = SIZE_CLASSES[size];
 
     return (
-        <div className="flex flex-col items-center gap-1">
+        <div className={`flex flex-col items-center gap-1 ${styles.width}`}>
             <div className={`relative ${styles.card}`} style={{ perspective: '1000px' }}>
                 <div
                     className="relative w-full h-full transition-all duration-700"
