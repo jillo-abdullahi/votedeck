@@ -12,6 +12,7 @@ import { DeleteRoomModal } from "@/components/modals/DeleteRoomModal";
 import { useMyRoomsSocket } from "@/hooks/useMyRoomsSocket";
 import { RoomAvatar } from "@/components/RoomAvatar";
 import { Button } from "@/components/ui/button";
+import { JoinRoomModal } from "@/components/modals/JoinRoomModal";
 import { useAuth } from "@/hooks/useAuth";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ClipboardIcon, type ClipboardIconHandle } from "@/components/icons/ClipboardIcon";
@@ -34,6 +35,7 @@ export const MyRoomsPage: React.FC = () => {
     // State
     const [roomToDelete, setRoomToDelete] = useState<RoomWithMeta | null>(null);
     const [isCopied, setIsCopied] = useState<boolean>(false);
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const clipboardRef = useRef<ClipboardIconHandle>(null);
     const trashRef = useRef<Trash2IconHandle>(null);
 
@@ -116,7 +118,7 @@ export const MyRoomsPage: React.FC = () => {
                                     }
                                 `}
                             >
-                                {f === 'all' ? 'All' : f === 'owned' ? 'My Rooms' : 'Joined'}
+                                {f === 'all' ? 'All' : f === 'owned' ? 'Owned' : 'Joined'}
                             </button>
                         ))}
                     </div>
@@ -165,18 +167,24 @@ export const MyRoomsPage: React.FC = () => {
                                 ? "You haven't created or joined any games yet."
                                 : filter === 'owned'
                                     ? "You haven't created any games yet."
-                                    : "You haven't joined any games yet."
+                                    : "Games you joined but don't own will appear here."
                             }
                         </p>
-                        <Button asChild size="lg">
-                            <Link
-                                to="/create"
-                                className="inline-flex items-center gap-2"
-                            >
-                                Start new game
+                        {filter === 'joined' ? <Button size="lg" onClick={() => setIsJoinModalOpen(true)}>
+                            <div className="inline-flex items-center gap-2">
+                                Join a game
                                 <ArrowRight size={18} />
-                            </Link>
-                        </Button>
+                            </div>
+                        </Button> :
+                            <Button asChild size="lg">
+                                <Link
+                                    to="/create"
+                                    className="inline-flex items-center gap-2"
+                                >
+                                    Create a game
+                                    <ArrowRight size={18} />
+                                </Link>
+                            </Button>}
 
                     </motion.div>
                 ) : (
@@ -297,6 +305,10 @@ export const MyRoomsPage: React.FC = () => {
                 roomId={roomToDelete?.id || ''}
                 roomName={roomToDelete?.name || ''}
                 activeUsers={roomToDelete?.activeUsers || 0}
+            />
+            <JoinRoomModal
+                isOpen={isJoinModalOpen}
+                onClose={() => setIsJoinModalOpen(false)}
             />
         </PageLayout>
     );
