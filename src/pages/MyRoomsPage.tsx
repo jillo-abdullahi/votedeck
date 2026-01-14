@@ -29,7 +29,7 @@ export const MyRoomsPage: React.FC = () => {
     });
 
     // Define extended type for local usage
-    type RoomWithMeta = GetRoomsMy200RoomsItem & { activeUsers?: number };
+    type RoomWithMeta = GetRoomsMy200RoomsItem & { activeUsers?: number; adminId?: string };
 
     // State
     const [roomToDelete, setRoomToDelete] = useState<RoomWithMeta | null>(null);
@@ -139,7 +139,7 @@ export const MyRoomsPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {((roomsData?.rooms || []) as RoomWithMeta[]).map((room, index) => {
-                            const isAdmin = true; // For "My Rooms", user is always admin implied
+                            const isAdmin = user?.uid === room.adminId;
                             // Fix date parsing if createdAt is optional
                             const date = room.createdAt ? new Date(room.createdAt).toLocaleDateString(undefined, {
                                 year: 'numeric',
