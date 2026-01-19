@@ -322,18 +322,18 @@ export const CreateGamePage: React.FC = () => {
                             key={policy.id}
                             type="button"
                             onClick={() => setRevealPolicy(policy.id)}
-                            className={`p-4 cursor-pointer rounded-xl border-2 transition-all flex flex-row items-center gap-4 text-left
+                            className={`p-4 cursor-pointer rounded-xl border-2 transition-all flex flex-row items-start sm:items-center gap-4 text-left
                               ${revealPolicy === policy.id
                                 ? 'bg-blue-600/10 border-blue-500 text-slate-100'
                                 : 'bg-slate-800/30 border-slate-700 text-slate-400 hover:border-slate-600 hover:bg-slate-800/50'
                               }`}
                           >
                             {policy.id === 'everyone' ? (
-                              <LayoutTemplate size={32} className={`shrink-0 ${revealPolicy === 'everyone' ? "text-blue-400" : "text-slate-500"}`} />
+                              <LayoutTemplate size={32} className={`shrink-0 hidden sm:block ${revealPolicy === 'everyone' ? "text-blue-400" : "text-slate-500"}`} />
                             ) : (
-                              <Shield size={32} className={`shrink-0 ${revealPolicy === 'admin' ? "text-blue-400" : "text-slate-500"}`} />
+                              <Shield size={32} className={`shrink-0 hidden sm:block ${revealPolicy === 'admin' ? "text-blue-400" : "text-slate-500"}`} />
                             )}
-                            <div className="flex flex-col border-l border-slate-700 pl-4">
+                            <div className="flex flex-col sm:border-l border-slate-700 sm:pl-4">
                               <span className="font-medium text-lg text-slate-200">{policy.label}</span>
                               <span className="text-xs opacity-70 leading-relaxed">{policy.description}</span>
                             </div>
