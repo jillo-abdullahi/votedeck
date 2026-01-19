@@ -366,7 +366,7 @@ export const RoomPage: React.FC = () => {
                 <div className="w-full mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <RoomAvatar isAdmin={isAdmin} size="sm" className="shrink-0" />
-                        <h2 className="text-md font-semibold text-slate-200 max-w-[140px] sm:max-w-xs md:max-w-xl truncate">
+                        <h2 className="text-md font-semibold text-slate-200 max-w-[80px] sm:max-w-xs md:max-w-xl truncate">
                             {roomState.name.charAt(0).toUpperCase() + roomState.name.slice(1)}
                         </h2>
 

@@ -60,9 +60,9 @@ export const VotingDeck: React.FC<VotingDeckProps> = ({
                                 onClick={() => !isDisabled && onVote(value)}
                                 disabled={isDisabled}
                                 className={`
-              relative flex items-center justify-center cursor-pointer sm:w-14 sm:h-20 w-10 h-14 rounded-lg border-2 sm:text-xl text-lg font-bold transition-all duration-200
+              relative flex items-center justify-center cursor-pointer sm:w-14 sm:h-20 w-12 h-14 rounded-lg border-2 sm:text-xl text-lg font-bold transition-all duration-200
               ${isSelected
-                                        ? "bg-blue-600/80 border-blue-500 text-white -translate-y-3"
+                                        ? "bg-blue-600/80 border-blue-500 text-white sm:-translate-y-3 -translate-y-1"
                                         : isDisabled
                                             ? "bg-slate-800/50 border-slate-800 text-slate-600 cursor-not-allowed"
                                             : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750 hover:-translate-y-1 hover:border-slate-500 hover:text-white"
