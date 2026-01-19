@@ -461,7 +461,7 @@ export const RoomPage: React.FC = () => {
                                     const currentAdmin = roomState.users.find(u => u.id === roomState.adminId);
                                     return (
                                         <>
-                                            <div className="hidden sm:flex gap-2 flex-col items-center">
+                                            <div className="flex gap-2 flex-col items-center">
                                                 <Button
                                                     onClick={handleReset}
                                                     disabled={!canReset}
@@ -469,7 +469,8 @@ export const RoomPage: React.FC = () => {
                                                     className="group disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     <RefreshCcw className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" />
-                                                    Start New Vote
+                                                    <span className="hidden sm:inline">Start New Vote</span>
+                                                    <span className="sm:hidden">Restart</span>
                                                 </Button>
                                                 {!canReset && (
                                                     <InfoText text={
@@ -482,17 +483,6 @@ export const RoomPage: React.FC = () => {
                                                         </>
                                                     } />
                                                 )}
-                                            </div>
-                                            <div className="flex sm:hidden">
-                                                <Button
-                                                    onClick={handleReset}
-                                                    disabled={!canReset}
-                                                    size={'sm'}
-                                                    className="group disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-                                                    Restart
-                                                </Button>
                                             </div>
                                         </>
 
