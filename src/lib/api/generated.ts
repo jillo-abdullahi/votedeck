@@ -83,6 +83,8 @@ export type PostRoomsBody = {
   votingSystem: PostRoomsBodyVotingSystem;
   adminId?: string;
   adminName?: string;
+  revealPolicy?: 'everyone' | 'admin';
+  enableCountdown?: boolean;
 };
 
 export type PostRooms201 = {
@@ -97,8 +99,8 @@ export type PostRooms4xx = {
 };
 
 export type GetRoomsMyParams = {
-limit?: number;
-offset?: number;
+  limit?: number;
+  offset?: number;
 };
 
 export type GetRoomsMy200RoomsItem = {
@@ -148,237 +150,244 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * @summary Create anonymous session
  */
 export const postAuthAnonymous = (
-    
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<PostAuthAnonymous200>(
-      {url: `/auth/anonymous`, method: 'POST', signal
+
+
+  return customInstance<PostAuthAnonymous200>(
+    {
+      url: `/auth/anonymous`, method: 'POST', signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 export const getPostAuthAnonymousMutationOptions = <TError = ErrorType<PostAuthAnonymous4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthAnonymous>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postAuthAnonymous>>, TError,void, TContext> => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthAnonymous>>, TError, void, TContext>, request?: SecondParameter<typeof customInstance> }
+  ): UseMutationOptions<Awaited<ReturnType<typeof postAuthAnonymous>>, TError, void, TContext> => {
 
-const mutationKey = ['postAuthAnonymous'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['postAuthAnonymous'];
+  const { mutation: mutationOptions, request: requestOptions } = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey, }, request: undefined };
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthAnonymous>>, void> = () => {
-          
-
-          return  postAuthAnonymous(requestOptions)
-        }
-
-        
 
 
-  return  { mutationFn, ...mutationOptions }}
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthAnonymous>>, void> = () => {
 
-    export type PostAuthAnonymousMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthAnonymous>>>
-    
-    export type PostAuthAnonymousMutationError = ErrorType<PostAuthAnonymous4xx>
 
-    /**
- * @summary Create anonymous session
- */
+    return postAuthAnonymous(requestOptions)
+  }
+
+
+
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type PostAuthAnonymousMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthAnonymous>>>
+
+export type PostAuthAnonymousMutationError = ErrorType<PostAuthAnonymous4xx>
+
+/**
+* @summary Create anonymous session
+*/
 export const usePostAuthAnonymous = <TError = ErrorType<PostAuthAnonymous4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthAnonymous>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postAuthAnonymous>>,
-        TError,
-        void,
-        TContext
-      > => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthAnonymous>>, TError, void, TContext>, request?: SecondParameter<typeof customInstance> }
+    , queryClient?: QueryClient): UseMutationResult<
+      Awaited<ReturnType<typeof postAuthAnonymous>>,
+      TError,
+      void,
+      TContext
+    > => {
 
-      const mutationOptions = getPostAuthAnonymousMutationOptions(options);
+  const mutationOptions = getPostAuthAnonymousMutationOptions(options);
 
-      return useMutation(mutationOptions, queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+}
+
 /**
  * Restores a user session using a recovery code.
  * @summary Restore session
  */
 export const postAuthRestore = (
-    postAuthRestoreBody: PostAuthRestoreBody,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+  postAuthRestoreBody: PostAuthRestoreBody,
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<PostAuthRestore200>(
-      {url: `/auth/restore`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+
+
+  return customInstance<PostAuthRestore200>(
+    {
+      url: `/auth/restore`, method: 'POST',
+      headers: { 'Content-Type': 'application/json', },
       data: postAuthRestoreBody, signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 export const getPostAuthRestoreMutationOptions = <TError = ErrorType<PostAuthRestore4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthRestore>>, TError,{data: PostAuthRestoreBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postAuthRestore>>, TError,{data: PostAuthRestoreBody}, TContext> => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthRestore>>, TError, { data: PostAuthRestoreBody }, TContext>, request?: SecondParameter<typeof customInstance> }
+  ): UseMutationOptions<Awaited<ReturnType<typeof postAuthRestore>>, TError, { data: PostAuthRestoreBody }, TContext> => {
 
-const mutationKey = ['postAuthRestore'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['postAuthRestore'];
+  const { mutation: mutationOptions, request: requestOptions } = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey, }, request: undefined };
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthRestore>>, {data: PostAuthRestoreBody}> = (props) => {
-          const {data} = props ?? {};
-
-          return  postAuthRestore(data,requestOptions)
-        }
-
-        
 
 
-  return  { mutationFn, ...mutationOptions }}
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthRestore>>, { data: PostAuthRestoreBody }> = (props) => {
+    const { data } = props ?? {};
 
-    export type PostAuthRestoreMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthRestore>>>
-    export type PostAuthRestoreMutationBody = PostAuthRestoreBody
-    export type PostAuthRestoreMutationError = ErrorType<PostAuthRestore4xx>
+    return postAuthRestore(data, requestOptions)
+  }
 
-    /**
- * @summary Restore session
- */
+
+
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type PostAuthRestoreMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthRestore>>>
+export type PostAuthRestoreMutationBody = PostAuthRestoreBody
+export type PostAuthRestoreMutationError = ErrorType<PostAuthRestore4xx>
+
+/**
+* @summary Restore session
+*/
 export const usePostAuthRestore = <TError = ErrorType<PostAuthRestore4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthRestore>>, TError,{data: PostAuthRestoreBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postAuthRestore>>,
-        TError,
-        {data: PostAuthRestoreBody},
-        TContext
-      > => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthRestore>>, TError, { data: PostAuthRestoreBody }, TContext>, request?: SecondParameter<typeof customInstance> }
+    , queryClient?: QueryClient): UseMutationResult<
+      Awaited<ReturnType<typeof postAuthRestore>>,
+      TError,
+      { data: PostAuthRestoreBody },
+      TContext
+    > => {
 
-      const mutationOptions = getPostAuthRestoreMutationOptions(options);
+  const mutationOptions = getPostAuthRestoreMutationOptions(options);
 
-      return useMutation(mutationOptions, queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+}
+
 /**
  * Clears the access token cookie.
  * @summary Logout
  */
 export const postAuthLogout = (
-    
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<PostAuthLogout200>(
-      {url: `/auth/logout`, method: 'POST', signal
+
+
+  return customInstance<PostAuthLogout200>(
+    {
+      url: `/auth/logout`, method: 'POST', signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 export const getPostAuthLogoutMutationOptions = <TError = ErrorType<PostAuthLogout4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError,void, TContext> => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext>, request?: SecondParameter<typeof customInstance> }
+  ): UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext> => {
 
-const mutationKey = ['postAuthLogout'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['postAuthLogout'];
+  const { mutation: mutationOptions, request: requestOptions } = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey, }, request: undefined };
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogout>>, void> = () => {
-          
-
-          return  postAuthLogout(requestOptions)
-        }
-
-        
 
 
-  return  { mutationFn, ...mutationOptions }}
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogout>>, void> = () => {
 
-    export type PostAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogout>>>
-    
-    export type PostAuthLogoutMutationError = ErrorType<PostAuthLogout4xx>
 
-    /**
- * @summary Logout
- */
+    return postAuthLogout(requestOptions)
+  }
+
+
+
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type PostAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogout>>>
+
+export type PostAuthLogoutMutationError = ErrorType<PostAuthLogout4xx>
+
+/**
+* @summary Logout
+*/
 export const usePostAuthLogout = <TError = ErrorType<PostAuthLogout4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postAuthLogout>>,
-        TError,
-        void,
-        TContext
-      > => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext>, request?: SecondParameter<typeof customInstance> }
+    , queryClient?: QueryClient): UseMutationResult<
+      Awaited<ReturnType<typeof postAuthLogout>>,
+      TError,
+      void,
+      TContext
+    > => {
 
-      const mutationOptions = getPostAuthLogoutMutationOptions(options);
+  const mutationOptions = getPostAuthLogoutMutationOptions(options);
 
-      return useMutation(mutationOptions, queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+}
+
 /**
  * Returns the currently authenticated user based on the access token cookie.
  * @summary Get current user
  */
 export const getAuthMe = (
-    
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<GetAuthMe200>(
-      {url: `/auth/me`, method: 'GET', signal
+
+
+  return customInstance<GetAuthMe200>(
+    {
+      url: `/auth/me`, method: 'GET', signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 
 export const getGetAuthMeQueryKey = () => {
-    return [
+  return [
     `/auth/me`
-    ] as const;
-    }
+  ] as const;
+}
 
-    
-export const getGetAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<GetAuthMe4xx>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+
+export const getGetAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<GetAuthMe4xx>>(options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthMeQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetAuthMeQueryKey();
 
-  
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe(requestOptions, signal);
 
-      
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe(requestOptions, signal);
 
-      
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetAuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthMe>>>
@@ -386,43 +395,47 @@ export type GetAuthMeQueryError = ErrorType<GetAuthMe4xx>
 
 
 export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<GetAuthMe4xx>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAuthMe>>,
-          TError,
-          Awaited<ReturnType<typeof getAuthMe>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAuthMe>>,
+        TError,
+        Awaited<ReturnType<typeof getAuthMe>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<GetAuthMe4xx>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAuthMe>>,
-          TError,
-          Awaited<ReturnType<typeof getAuthMe>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> & Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAuthMe>>,
+        TError,
+        Awaited<ReturnType<typeof getAuthMe>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<GetAuthMe4xx>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get current user
  */
 
 export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<GetAuthMe4xx>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAuthMeQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
@@ -435,110 +448,113 @@ export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TErr
  * @summary Create a room
  */
 export const postRooms = (
-    postRoomsBody: PostRoomsBody,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+  postRoomsBody: PostRoomsBody,
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<PostRooms201>(
-      {url: `/rooms`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+
+
+  return customInstance<PostRooms201>(
+    {
+      url: `/rooms`, method: 'POST',
+      headers: { 'Content-Type': 'application/json', },
       data: postRoomsBody, signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 export const getPostRoomsMutationOptions = <TError = ErrorType<PostRooms4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRooms>>, TError,{data: PostRoomsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postRooms>>, TError,{data: PostRoomsBody}, TContext> => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postRooms>>, TError, { data: PostRoomsBody }, TContext>, request?: SecondParameter<typeof customInstance> }
+  ): UseMutationOptions<Awaited<ReturnType<typeof postRooms>>, TError, { data: PostRoomsBody }, TContext> => {
 
-const mutationKey = ['postRooms'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['postRooms'];
+  const { mutation: mutationOptions, request: requestOptions } = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey, }, request: undefined };
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRooms>>, {data: PostRoomsBody}> = (props) => {
-          const {data} = props ?? {};
-
-          return  postRooms(data,requestOptions)
-        }
-
-        
 
 
-  return  { mutationFn, ...mutationOptions }}
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRooms>>, { data: PostRoomsBody }> = (props) => {
+    const { data } = props ?? {};
 
-    export type PostRoomsMutationResult = NonNullable<Awaited<ReturnType<typeof postRooms>>>
-    export type PostRoomsMutationBody = PostRoomsBody
-    export type PostRoomsMutationError = ErrorType<PostRooms4xx>
+    return postRooms(data, requestOptions)
+  }
 
-    /**
- * @summary Create a room
- */
+
+
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type PostRoomsMutationResult = NonNullable<Awaited<ReturnType<typeof postRooms>>>
+export type PostRoomsMutationBody = PostRoomsBody
+export type PostRoomsMutationError = ErrorType<PostRooms4xx>
+
+/**
+* @summary Create a room
+*/
 export const usePostRooms = <TError = ErrorType<PostRooms4xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRooms>>, TError,{data: PostRoomsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postRooms>>,
-        TError,
-        {data: PostRoomsBody},
-        TContext
-      > => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof postRooms>>, TError, { data: PostRoomsBody }, TContext>, request?: SecondParameter<typeof customInstance> }
+    , queryClient?: QueryClient): UseMutationResult<
+      Awaited<ReturnType<typeof postRooms>>,
+      TError,
+      { data: PostRoomsBody },
+      TContext
+    > => {
 
-      const mutationOptions = getPostRoomsMutationOptions(options);
+  const mutationOptions = getPostRoomsMutationOptions(options);
 
-      return useMutation(mutationOptions, queryClient);
-    }
-    
+  return useMutation(mutationOptions, queryClient);
+}
+
 /**
  * Returns a list of rooms owned by the authenticated user.
  * @summary Get my rooms
  */
 export const getRoomsMy = (
-    params?: GetRoomsMyParams,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+  params?: GetRoomsMyParams,
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<GetRoomsMy200>(
-      {url: `/rooms/my`, method: 'GET',
-        params, signal
+
+
+  return customInstance<GetRoomsMy200>(
+    {
+      url: `/rooms/my`, method: 'GET',
+      params, signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 
 export const getGetRoomsMyQueryKey = (params?: GetRoomsMyParams,) => {
-    return [
-    `/rooms/my`, ...(params ? [params]: [])
-    ] as const;
-    }
+  return [
+    `/rooms/my`, ...(params ? [params] : [])
+  ] as const;
+}
 
-    
-export const getGetRoomsMyQueryOptions = <TData = Awaited<ReturnType<typeof getRoomsMy>>, TError = ErrorType<GetRoomsMy4xx>>(params?: GetRoomsMyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+
+export const getGetRoomsMyQueryOptions = <TData = Awaited<ReturnType<typeof getRoomsMy>>, TError = ErrorType<GetRoomsMy4xx>>(params?: GetRoomsMyParams, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRoomsMyQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getGetRoomsMyQueryKey(params);
 
-  
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoomsMy>>> = ({ signal }) => getRoomsMy(params, requestOptions, signal);
 
-      
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoomsMy>>> = ({ signal }) => getRoomsMy(params, requestOptions, signal);
 
-      
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetRoomsMyQueryResult = NonNullable<Awaited<ReturnType<typeof getRoomsMy>>>
@@ -546,43 +562,47 @@ export type GetRoomsMyQueryError = ErrorType<GetRoomsMy4xx>
 
 
 export function useGetRoomsMy<TData = Awaited<ReturnType<typeof getRoomsMy>>, TError = ErrorType<GetRoomsMy4xx>>(
- params: undefined |  GetRoomsMyParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRoomsMy>>,
-          TError,
-          Awaited<ReturnType<typeof getRoomsMy>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  params: undefined | GetRoomsMyParams, options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>> & Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getRoomsMy>>,
+        TError,
+        Awaited<ReturnType<typeof getRoomsMy>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRoomsMy<TData = Awaited<ReturnType<typeof getRoomsMy>>, TError = ErrorType<GetRoomsMy4xx>>(
- params?: GetRoomsMyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRoomsMy>>,
-          TError,
-          Awaited<ReturnType<typeof getRoomsMy>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  params?: GetRoomsMyParams, options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>> & Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getRoomsMy>>,
+        TError,
+        Awaited<ReturnType<typeof getRoomsMy>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRoomsMy<TData = Awaited<ReturnType<typeof getRoomsMy>>, TError = ErrorType<GetRoomsMy4xx>>(
- params?: GetRoomsMyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  params?: GetRoomsMyParams, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get my rooms
  */
 
 export function useGetRoomsMy<TData = Awaited<ReturnType<typeof getRoomsMy>>, TError = ErrorType<GetRoomsMy4xx>>(
- params?: GetRoomsMyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  params?: GetRoomsMyParams, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsMy>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetRoomsMyQueryOptions(params,options)
+  const queryOptions = getGetRoomsMyQueryOptions(params, options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
@@ -595,43 +615,44 @@ export function useGetRoomsMy<TData = Awaited<ReturnType<typeof getRoomsMy>>, TE
  * @summary Get room details
  */
 export const getRoomsId = (
-    id: string,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+  id: string,
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
-      
-      
-      return customInstance<GetRoomsId200>(
-      {url: `/rooms/${id}`, method: 'GET', signal
+
+
+  return customInstance<GetRoomsId200>(
+    {
+      url: `/rooms/${id}`, method: 'GET', signal
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 
 export const getGetRoomsIdQueryKey = (id?: string,) => {
-    return [
+  return [
     `/rooms/${id}`
-    ] as const;
-    }
+  ] as const;
+}
 
-    
-export const getGetRoomsIdQueryOptions = <TData = Awaited<ReturnType<typeof getRoomsId>>, TError = ErrorType<GetRoomsId4xx>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+
+export const getGetRoomsIdQueryOptions = <TData = Awaited<ReturnType<typeof getRoomsId>>, TError = ErrorType<GetRoomsId4xx>>(id: string, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRoomsIdQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetRoomsIdQueryKey(id);
 
-  
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoomsId>>> = ({ signal }) => getRoomsId(id, requestOptions, signal);
 
-      
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoomsId>>> = ({ signal }) => getRoomsId(id, requestOptions, signal);
 
-      
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+
+
+  return { queryKey, queryFn, enabled: !!(id), ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetRoomsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getRoomsId>>>
@@ -639,43 +660,47 @@ export type GetRoomsIdQueryError = ErrorType<GetRoomsId4xx>
 
 
 export function useGetRoomsId<TData = Awaited<ReturnType<typeof getRoomsId>>, TError = ErrorType<GetRoomsId4xx>>(
- id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRoomsId>>,
-          TError,
-          Awaited<ReturnType<typeof getRoomsId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  id: string, options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>> & Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getRoomsId>>,
+        TError,
+        Awaited<ReturnType<typeof getRoomsId>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRoomsId<TData = Awaited<ReturnType<typeof getRoomsId>>, TError = ErrorType<GetRoomsId4xx>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRoomsId>>,
-          TError,
-          Awaited<ReturnType<typeof getRoomsId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  id: string, options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>> & Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getRoomsId>>,
+        TError,
+        Awaited<ReturnType<typeof getRoomsId>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRoomsId<TData = Awaited<ReturnType<typeof getRoomsId>>, TError = ErrorType<GetRoomsId4xx>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  id: string, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get room details
  */
 
 export function useGetRoomsId<TData = Awaited<ReturnType<typeof getRoomsId>>, TError = ErrorType<GetRoomsId4xx>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  id: string, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoomsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetRoomsIdQueryOptions(id,options)
+  const queryOptions = getGetRoomsIdQueryOptions(id, options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey ;
+  query.queryKey = queryOptions.queryKey;
 
   return query;
 }
@@ -688,60 +713,62 @@ export function useGetRoomsId<TData = Awaited<ReturnType<typeof getRoomsId>>, TE
  * @summary Delete room
  */
 export const deleteRoomsId = (
-    id: string,
- options?: SecondParameter<typeof customInstance>,) => {
-      
-      
-      return customInstance<DeleteRoomsId200>(
-      {url: `/rooms/${id}`, method: 'DELETE'
+  id: string,
+  options?: SecondParameter<typeof customInstance>,) => {
+
+
+  return customInstance<DeleteRoomsId200>(
+    {
+      url: `/rooms/${id}`, method: 'DELETE'
     },
-      options);
-    }
-  
+    options);
+}
+
 
 
 export const getDeleteRoomsIdMutationOptions = <TError = ErrorType<DeleteRoomsId4xx | DeleteRoomsId5xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRoomsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteRoomsId>>, TError,{id: string}, TContext> => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteRoomsId>>, TError, { id: string }, TContext>, request?: SecondParameter<typeof customInstance> }
+  ): UseMutationOptions<Awaited<ReturnType<typeof deleteRoomsId>>, TError, { id: string }, TContext> => {
 
-const mutationKey = ['deleteRoomsId'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['deleteRoomsId'];
+  const { mutation: mutationOptions, request: requestOptions } = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey, }, request: undefined };
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRoomsId>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteRoomsId(id,requestOptions)
-        }
-
-        
 
 
-  return  { mutationFn, ...mutationOptions }}
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRoomsId>>, { id: string }> = (props) => {
+    const { id } = props ?? {};
 
-    export type DeleteRoomsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRoomsId>>>
-    
-    export type DeleteRoomsIdMutationError = ErrorType<DeleteRoomsId4xx | DeleteRoomsId5xx>
+    return deleteRoomsId(id, requestOptions)
+  }
 
-    /**
- * @summary Delete room
- */
+
+
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type DeleteRoomsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRoomsId>>>
+
+export type DeleteRoomsIdMutationError = ErrorType<DeleteRoomsId4xx | DeleteRoomsId5xx>
+
+/**
+* @summary Delete room
+*/
 export const useDeleteRoomsId = <TError = ErrorType<DeleteRoomsId4xx | DeleteRoomsId5xx>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRoomsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteRoomsId>>,
-        TError,
-        {id: string},
-        TContext
-      > => {
+  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteRoomsId>>, TError, { id: string }, TContext>, request?: SecondParameter<typeof customInstance> }
+    , queryClient?: QueryClient): UseMutationResult<
+      Awaited<ReturnType<typeof deleteRoomsId>>,
+      TError,
+      { id: string },
+      TContext
+    > => {
 
-      const mutationOptions = getDeleteRoomsIdMutationOptions(options);
+  const mutationOptions = getDeleteRoomsIdMutationOptions(options);
 
-      return useMutation(mutationOptions, queryClient);
-    }
+  return useMutation(mutationOptions, queryClient);
+}

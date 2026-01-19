@@ -112,9 +112,9 @@ export const UserMenu: React.FC<UserMenuProps> = ({ name, onNameChange, role, on
                         className="fixed inset-0 z-40"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
+                    <div className="absolute right-0 top-full mt-2 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5">
                         <div className="p-4 border-b border-slate-800 flex items-center gap-4">
-                            <div className="relative group/avatar cursor-pointer">
+                            <div className="relative group/avatar cursor-pointer flex items-center justify-center">
                                 <UserAvatar name={name || "Guest"} size={role ? 48 : 32} src={photoURL} />
                             </div>
                             <div className="flex-1 flex flex-col justify-center items-start">

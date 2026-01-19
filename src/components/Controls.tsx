@@ -6,7 +6,7 @@ import { InfoText } from "./InfoText";
 interface ControlsProps {
     onReveal: () => void;
     canReveal: boolean;
-    disabledReason?: string;
+    disabledReason?: string | React.ReactNode;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
@@ -17,7 +17,7 @@ export const Controls: React.FC<ControlsProps> = ({
     const eyeRef = useRef<EyeIconHandle>(null);
     return (
         <>
-            <div className="hidden sm:flex flex-col items-center gap-4 p-6">
+            <div className="hidden sm:flex flex-col items-center gap-2 p-6">
                 <Button
                     onClick={onReveal}
                     disabled={!canReveal}
@@ -39,7 +39,7 @@ export const Controls: React.FC<ControlsProps> = ({
                     <InfoText text={disabledReason} />
                 )}
             </div>
-            <div className="flex sm:hidden flex-col items-center gap-4 p-6">
+            <div className="flex sm:hidden flex-col items-center gap-2 p-6">
                 <Button
                     onClick={onReveal}
                     disabled={!canReveal}
@@ -54,6 +54,9 @@ export const Controls: React.FC<ControlsProps> = ({
                     <EyeIcon className="w-4 h-4" />
                     Reveal
                 </Button>
+                {!canReveal && disabledReason && (
+                    <InfoText text={disabledReason} />
+                )}
             </div>
         </>
     );

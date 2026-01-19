@@ -39,6 +39,7 @@ import { NotFoundView } from "@/components/NotFoundView";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
 import { userManager } from "@/lib/user";
+import { InfoText } from "@/components/InfoText";
 
 export const RoomPage: React.FC = () => {
     const { roomId } = useParams({ from: "/room/$roomId" });
@@ -457,9 +458,10 @@ export const RoomPage: React.FC = () => {
                             >
                                 {(() => {
                                     const canReset = roomState.revealPolicy === 'everyone' || isAdmin;
+                                    const currentAdmin = roomState.users.find(u => u.id === roomState.adminId);
                                     return (
                                         <>
-                                            <div className="hidden sm:flex">
+                                            <div className="hidden sm:flex gap-2 flex-col items-center">
                                                 <Button
                                                     onClick={handleReset}
                                                     disabled={!canReset}
@@ -470,9 +472,15 @@ export const RoomPage: React.FC = () => {
                                                     Start New Vote
                                                 </Button>
                                                 {!canReset && (
-                                                    <p className="text-slate-500 text-[10px] italic">
-                                                        Only host can start vote
-                                                    </p>
+                                                    <InfoText text={
+                                                        <>
+                                                            <span>Only the host, </span>
+                                                            <span className="inline-block truncate max-w-[80px] align-bottom font-semibold" title={currentAdmin?.name}>
+                                                                {currentAdmin?.name}
+                                                            </span>
+                                                            <span>, can start new vote.</span>
+                                                        </>
+                                                    } />
                                                 )}
                                             </div>
                                             <div className="flex sm:hidden">
@@ -514,9 +522,15 @@ export const RoomPage: React.FC = () => {
                                         );
                                     }
 
-                                    let disabledReason = "";
+                                    let disabledReason: React.ReactNode = "";
                                     if (!canIReveal) {
-                                        disabledReason = `Only ${currentAdmin?.name || 'the host'} can reveal votes.`;
+                                        disabledReason = <>
+                                            <span>Only the host, </span>
+                                            <span className="inline-block truncate max-w-[80px] align-bottom font-semibold" title={currentAdmin?.name}>
+                                                {currentAdmin?.name}
+                                            </span>
+                                            <span>, can reveal votes.</span>
+                                        </>;
                                     }
 
                                     return (

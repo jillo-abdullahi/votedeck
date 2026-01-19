@@ -10,11 +10,13 @@ import { MoveRightIcon, type MoveRightIconHandle } from "@/components/icons/Move
 import { usePostRooms } from "../lib/api/generated";
 import type { VotingSystemId } from "../types";
 import { userManager } from "../lib/user";
-import { ChevronDownIcon, UserIcon, Layers, Loader2, SpadeIcon } from "lucide-react";
+import { ChevronDownIcon, UserIcon, Layers, Loader2, SpadeIcon, Settings2, Eye, LayoutTemplate, Timer, Shield } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 import { motion } from "motion/react";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorModal } from "@/components/modals/ErrorModal";
+import { REVEAL_POLICIES, COUNTDOWN_SETTINGS } from "@/lib/constants";
+import type { RevealPolicy } from "@/types";
 
 // Voting systems options
 const VOTING_SYSTEMS = [
@@ -60,6 +62,9 @@ export const CreateGamePage: React.FC = () => {
   const [votingSystem, setVotingSystem] = useState(VOTING_SYSTEMS[0].id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [revealPolicy, setRevealPolicy] = useState<RevealPolicy>('everyone');
+  const [enableCountdown, setEnableCountdown] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -110,7 +115,9 @@ export const CreateGamePage: React.FC = () => {
         data: {
           name: gameName,
           votingSystem: votingSystem as VotingSystemId,
-          adminName: displayName
+          adminName: displayName,
+          revealPolicy,
+          enableCountdown
         }
       });
 
@@ -281,6 +288,90 @@ export const CreateGamePage: React.FC = () => {
                   )}
                 </div>
               </motion.div>
+
+
+              {/* Advanced Settings Toggle */}
+              <motion.div variants={itemVariants} className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors text-lg cursor-pointer font-medium"
+                >
+                  <Settings2 size={16} />
+                  {showAdvanced ? "Hide Advanced Settings" : "Show Advanced Settings"}
+                  <ChevronDownIcon size={14} className={`transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Collapsible Section */}
+                <motion.div
+                  initial={false}
+                  animate={{ height: showAdvanced ? "auto" : 0, opacity: showAdvanced ? 1 : 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-6 space-y-6">
+                    {/* Reveal Policy */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-bold text-slate-400 ml-1 uppercase tracking-wider flex items-center gap-2">
+                        <Eye size={16} className="text-blue-500/70" />
+                        Reveal Policy
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        {REVEAL_POLICIES.map((policy) => (
+                          <button
+                            key={policy.id}
+                            type="button"
+                            onClick={() => setRevealPolicy(policy.id)}
+                            className={`p-4 cursor-pointer rounded-xl border-2 transition-all flex flex-row items-center gap-4 text-left
+                              ${revealPolicy === policy.id
+                                ? 'bg-blue-600/10 border-blue-500 text-slate-100'
+                                : 'bg-slate-800/30 border-slate-700 text-slate-400 hover:border-slate-600 hover:bg-slate-800/50'
+                              }`}
+                          >
+                            {policy.id === 'everyone' ? (
+                              <LayoutTemplate size={32} className={`shrink-0 ${revealPolicy === 'everyone' ? "text-blue-400" : "text-slate-500"}`} />
+                            ) : (
+                              <Shield size={32} className={`shrink-0 ${revealPolicy === 'admin' ? "text-blue-400" : "text-slate-500"}`} />
+                            )}
+                            <div className="flex flex-col border-l border-slate-700 pl-4">
+                              <span className="font-medium text-lg text-slate-200">{policy.label}</span>
+                              <span className="text-xs opacity-70 leading-relaxed">{policy.description}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Countdown Toggle */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-bold text-slate-400 ml-1 uppercase tracking-wider flex items-center gap-2">
+                        <Timer size={16} className="text-blue-500/70" />
+                        Countdown
+                      </label>
+                      <div className="bg-slate-800/30 border-2 border-slate-700 rounded-xl p-4 flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-slate-100 font-medium">{COUNTDOWN_SETTINGS.label}</span>
+                          <span className="text-slate-400 text-xs">{COUNTDOWN_SETTINGS.description}</span>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={enableCountdown}
+                          onClick={() => setEnableCountdown(!enableCountdown)}
+                          className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${enableCountdown ? 'bg-blue-500' : 'bg-slate-700'
+                            }`}
+                        >
+                          <span
+                            className={`pointer-events-none block h-6 w-6 rounded-full bg-white shadow-lg ring-0 transition-transform ${enableCountdown ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+
             </div>
 
             {/* CTA Button - Relocated closer to inputs */}
@@ -311,6 +402,6 @@ export const CreateGamePage: React.FC = () => {
         title="Cannot Create Game"
         message={errorMessage}
       />
-    </PageLayout>
+    </PageLayout >
   );
 };

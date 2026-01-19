@@ -16,7 +16,7 @@ export const UserAvatar: React.FC<{ name: string, size?: number, src?: string | 
         <img
             src={avatarDataUri}
             alt={`${name}'s avatar`}
-            className="rounded-full"
+            className="rounded-full shrink-0"
             style={{ width: size, height: size, objectFit: 'cover' }}
         />
     );

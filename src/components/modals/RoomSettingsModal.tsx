@@ -5,6 +5,7 @@ import { Settings, ChevronDown, Check } from "lucide-react";
 import type { VotingSystemId, RevealPolicy } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/context/ToastContext";
+import { REVEAL_POLICIES, COUNTDOWN_SETTINGS } from "@/lib/constants";
 
 interface RoomSettingsModalProps {
     isOpen: boolean;
@@ -32,10 +33,7 @@ const VOTING_SYSTEMS = [
     { id: "powers_2", label: "Powers of 2 (0, 1, 2, 4, 8, 16, 32, 64, ?, ☕)" },
 ];
 
-const REVEAL_POLICIES = [
-    { id: "everyone", label: "Everyone", description: "Anyone in the game can reveal votes and start new rounds." },
-    { id: "admin", label: "Only Me", description: "Only you can reveal votes and start new rounds." },
-];
+
 
 
 
@@ -194,13 +192,13 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                     </div>
                                     <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl border-2 border-slate-700 bg-slate-900 border-opacity-50 gap-4">
                                         <div className="flex flex-col flex-1 min-w-0">
-                                            <span className="font-bold text-white text-sm">Reveal Countdown</span>
-                                            <span className="text-xs text-slate-500 mt-1">Show a 3-second countdown before revealing votes</span>
+                                            <span className="font-bold text-white text-sm">{COUNTDOWN_SETTINGS.label}</span>
+                                            <span className="text-xs text-slate-500 mt-1">{COUNTDOWN_SETTINGS.description}</span>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => setEnableCountdown(!enableCountdown)}
-                                            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${enableCountdown ? "bg-blue-500" : "bg-slate-700"
+                                            className={`relative cursor-pointer inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${enableCountdown ? "bg-blue-500" : "bg-slate-700"
                                                 }`}
                                         >
                                             <span
@@ -233,7 +231,7 @@ export const RoomSettingsModal: React.FC<RoomSettingsModalProps> = ({
                                                     </span>
                                                     {revealPolicy === policy.id && <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50" />}
                                                 </div>
-                                                <span className="text-xs text-slate-500 leading-relaxed mt-1 block">{policy.description}</span>
+                                                <span className="text-xs text-slate-500 leading-relaxed block">{policy.description}</span>
                                             </button>
                                         ))}
                                     </div>
