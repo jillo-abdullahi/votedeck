@@ -84,7 +84,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed, si
                     >
                         {(!revealed || !hasVoted) && (
                             <div
-                                className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-full border-1 border-slate-200 z-10 ${isOffline ? 'bg-slate-300' : 'bg-green-500 animate-pulse'}`}
+                                className={`absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full border-1 border-slate-200 z-10 ${isOffline ? 'bg-slate-300' : 'bg-green-500 animate-pulse'}`}
                                 title={isOffline ? "Offline" : "Online"}
                             />
                         )}
