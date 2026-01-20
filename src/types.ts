@@ -5,6 +5,7 @@ export type User = {
   id: string;
   name: string;
   hasVoted: boolean;
+  online: boolean;
 };
 
 export type VoteValue = string;

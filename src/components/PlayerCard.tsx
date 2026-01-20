@@ -14,30 +14,34 @@ const SIZE_CLASSES = {
         voteText: "text-lg",
         nameText: "text-sm max-w-[80px]",
         rounded: "rounded-lg sm:rounded-xl",
-        width: "w-[80px]"
+        width: "w-[80px]",
+        iconSize: 16
     },
     sm: {
         card: "w-8 h-10 sm:w-14 sm:h-16",
         voteText: "text-base",
         nameText: "text-xs max-w-[70px]",
         rounded: "rounded-md sm:rounded-lg",
-        width: "w-[70px]"
+        width: "w-[70px]",
+        iconSize: 14
     },
     xs: {
         card: "w-7 h-9 sm:w-10 sm:h-12",
         voteText: "text-sm",
         nameText: "text-[10px] max-w-[60px]",
         rounded: "rounded-sm sm:rounded-md",
-        width: "w-[60px]"
+        width: "w-[60px]",
+        iconSize: 12
     }
 };
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed, size = 'md' }) => {
     const hasVoted = user.hasVoted;
+    const isOffline = user.online === false; // Explicit check in case it's undefined in some legacy state
     const styles = SIZE_CLASSES[size];
 
     return (
-        <div className={`flex flex-col items-center gap-1 ${styles.width}`}>
+        <div className={`flex flex-col items-center gap-1 ${styles.width} ${isOffline ? 'opacity-40' : ''}`}>
             <div className={`relative ${styles.card}`} style={{ perspective: '1000px' }}>
                 <div
                     className="relative w-full h-full transition-all duration-700"
@@ -78,6 +82,12 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed, si
                             } : {})
                         }}
                     >
+                        {(!revealed || !hasVoted) && (
+                            <div
+                                className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-full border-1 border-slate-200 z-10 ${isOffline ? 'bg-slate-300' : 'bg-green-500 animate-pulse'}`}
+                                title={isOffline ? "Offline" : "Online"}
+                            />
+                        )}
                     </div>
 
                     {/* Card Front (revealed state) */}
@@ -96,7 +106,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ user, vote, revealed, si
             </div>
 
             <div className="flex flex-col items-center">
-                <span className={`${styles.nameText} font-medium truncate text-center ${hasVoted ? 'text-white' : 'text-slate-500'}`}>
+                <span className={`${styles.nameText} font-medium truncate text-center ${hasVoted ? 'text-white' : 'text-slate-400'}`}>
                     {user.name}
                 </span>
             </div>

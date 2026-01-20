@@ -105,8 +105,9 @@ export const useSocket = (roomId: string | undefined, name: string | undefined, 
 
         return () => {
             if (socket.connected) {
-                // Modified to pass payload only if really needed, but sticking to simple emit for now as per previous verified state
-                socket.emit('LEAVE_ROOM');
+                // Just disconnect on unmount/refresh to mark as offline but keep in room
+                // Explicit leave is handled by leaveRoom() function
+                socket.disconnect();
             }
             socket.off('connect', onConnect);
             socket.off('connect_error', onConnectError);
